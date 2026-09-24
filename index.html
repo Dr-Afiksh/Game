@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ארץ האותיות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@500;700;900&display=swap">
+<style>
+:root{
+  --ink:#1F2A44; --ink-soft:#56627F;
+  --sky:#BDE6F7; --sky-hi:#E3F5FC;
+  --paper:#FFFDF7;
+  --sun:#FFC93C; --grass:#5DBB63; --grass-deep:#3E9A48;
+  --berry:#F0567A; --plum:#7B5CD6; --sea:#2FA7D6;
+  --good:#3E9A48; --bad:#F0567A;
+  --font:"Noto Sans Hebrew","Arial Hebrew","Arial",system-ui,sans-serif;
+  --emoji:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+  --r:20px;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--sky);color:var(--ink);font-family:var(--font);
+  -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:4px solid var(--sea);outline-offset:3px}
+
+#app{min-height:100%;display:flex;flex-direction:column;padding-inline:16px;padding-block:14px 24px;
+  position:relative;overflow-x:hidden;
+  background:linear-gradient(to bottom,var(--sky-hi),var(--sky) 60%)}
+/* sun and hill scenery */
+#app::before{content:"";position:fixed;width:170px;height:170px;border-radius:50%;
+  background:var(--sun);top:-60px;left:-50px;box-shadow:0 0 0 18px rgba(255,201,60,.25);z-index:0}
+#app::after{content:"";position:fixed;left:-15%;right:-15%;bottom:-6vh;height:22vh;min-height:110px;
+  background:var(--grass);border-radius:50% 50% 0 0 / 100% 100% 0 0;z-index:0;
+  box-shadow:inset 0 10px 0 var(--grass-deep)}
+
+.screen{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;gap:18px;
+  width:100%;max-width:880px;margin-inline:auto}
+
+/* chunky toy block look */
+.block{background:var(--paper);border:3px solid var(--ink);border-radius:var(--r);
+  box-shadow:0 6px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+button.block:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+
+/* ---------- home ---------- */
+.logo-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:18px}
+.abc{display:flex;gap:10px;direction:rtl}
+.abc span{width:62px;height:62px;display:grid;place-items:center;font-size:40px;font-weight:900;
+  border:3px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 var(--ink);color:var(--paper)}
+.abc span:nth-child(1){background:var(--berry);transform:rotate(-8deg)}
+.abc span:nth-child(2){background:var(--sea);transform:rotate(4deg) translateY(-6px)}
+.abc span:nth-child(3){background:var(--grass-deep);transform:rotate(-3deg)}
+h1{margin:0;font-size:clamp(40px,9vw,68px);font-weight:900;line-height:1.25;text-align:center;
+  text-wrap:balance;letter-spacing:.5px}
+.turn{margin:0;text-align:center;font-size:24px;font-weight:700;color:var(--ink-soft)}
+.players{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px}
+.player{display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px 12px 18px}
+.player .face{font-family:var(--emoji);font-size:clamp(64px,16vw,96px);line-height:1.1}
+.player .pname{font-size:clamp(28px,6vw,40px);font-weight:900}
+.player .pstars{font-size:20px;font-weight:700;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.player[data-p="gan"]{background:#FFF1C7}
+.player[data-p="kita"]{background:#E7E0FB}
+.home-foot{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.pill{padding:10px 18px;font-size:18px;font-weight:700;border-radius:999px}
+.note{margin:0 auto;max-width:520px;text-align:center;font-size:16px;color:var(--ink-soft);
+  background:var(--paper);border:2px dashed var(--ink-soft);border-radius:14px;padding:10px 14px}
+
+/* ---------- top bars ---------- */
+.bar{display:flex;align-items:center;gap:12px}
+.bar .grow{flex:1;min-width:0}
+.icon-btn{width:58px;height:58px;display:grid;place-items:center;font-size:28px;font-family:var(--emoji);flex:none}
+.who{font-size:26px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.starcount{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:24px;font-weight:900;
+  font-variant-numeric:tabular-nums;background:var(--sun);border-radius:999px;flex:none}
+.starcount.bump{animation:bump .5s}
+@keyframes bump{40%{transform:scale(1.25) rotate(-6deg)}}
+
+/* ---------- menu ---------- */
+.menu-title{margin:4px 0 0;font-size:30px;font-weight:900;text-align:center}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px}
+.game-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 10px 16px;text-align:center}
+.game-card .gicon{width:96px;height:96px;display:grid;place-items:center;border-radius:18px;
+  border:3px solid var(--ink);font-size:48px;font-weight:900;color:var(--paper);line-height:1}
+.game-card .gicon.emo{font-family:var(--emoji);color:var(--ink)}
+.game-card .gname{font-size:24px;font-weight:900;line-height:1.3}
+.lvl{display:flex;gap:5px}
+.lvl i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:var(--paper)}
+.lvl i.on{background:var(--sun)}
+
+/* ---------- game ---------- */
+.dots{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
+.dots i{width:16px;height:16px;border-radius:50%;border:3px solid var(--ink);background:var(--paper)}
+.dots i.done{background:var(--sun)}
+.dots i.now{background:var(--sky-hi);transform:scale(1.2)}
+.prompt{min-height:36px;margin:0;text-align:center;font-size:clamp(22px,5vw,30px);font-weight:700;text-wrap:balance}
+.stage{display:flex;flex-direction:column;align-items:center;gap:14px}
+.pic{font-family:var(--emoji);font-size:clamp(96px,26vw,170px);line-height:1.1;padding:10px 26px;
+  background:var(--paper);border:3px solid var(--ink);border-radius:28px;box-shadow:0 6px 0 var(--ink)}
+button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+.bigword{font-size:clamp(56px,15vw,110px);font-weight:900;line-height:1.35;padding:6px 30px;
+  background:var(--paper);border:3px solid var(--ink);border-radius:28px;box-shadow:0 6px 0 var(--ink)}
+.hint{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
+.hint b{font-size:56px;line-height:1.2;padding:0 16px;background:var(--paper);border:3px solid var(--ink);border-radius:14px}
+
+.choices{display:grid;gap:16px;grid-template-columns:repeat(3,1fr);margin-top:auto}
+.choices.n4{grid-template-columns:repeat(4,1fr)}
+.choices.words{grid-template-columns:1fr}
+@media (min-width:640px){.choices.words{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:520px){.choices.n4{grid-template-columns:repeat(2,1fr)}}
+.choice{min-height:120px;display:grid;place-items:center;padding:8px;font-weight:900;line-height:1.3;
+  font-size:clamp(56px,14vw,100px)}
+.choice.emo{font-family:var(--emoji);font-weight:400}
+.choice.word{font-size:clamp(38px,8vw,56px);min-height:96px}
+.choice.num{font-variant-numeric:tabular-nums}
+.choice.right{background:#C9F0C4;border-color:var(--good);box-shadow:0 6px 0 var(--good);animation:pop .45s}
+.choice.wrong,.tile.wrong{animation:shake .4s}
+.choice:disabled.wrong{opacity:.35}
+@keyframes pop{50%{transform:scale(1.1)}}
+@keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+
+/* counting */
+.count-field{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:640px;
+  padding:14px;background:var(--paper);border:3px solid var(--ink);border-radius:28px;box-shadow:0 6px 0 var(--ink)}
+.cnt{position:relative;width:76px;height:76px;font-size:54px;font-family:var(--emoji);border:0;background:none;padding:0}
+.cnt b{position:absolute;top:-4px;right:-4px;min-width:30px;height:30px;border-radius:15px;display:grid;place-items:center;
+  background:var(--berry);color:var(--paper);font-family:var(--font);font-size:18px;border:2px solid var(--ink)}
+.cnt.on{transform:scale(.9)}
+
+/* build a word */
+.slots{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.slot{width:clamp(70px,17vw,100px);height:clamp(84px,20vw,116px);display:grid;place-items:center;
+  border:3px dashed var(--ink-soft);border-radius:18px;font-size:clamp(44px,11vw,66px);font-weight:900;background:rgba(255,253,247,.5)}
+.slot.full{border-style:solid;border-color:var(--ink);background:#C9F0C4;animation:pop .3s}
+.tiles{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:auto}
+.tile{width:clamp(80px,19vw,112px);height:clamp(92px,22vw,124px);font-size:clamp(46px,11vw,70px);font-weight:900;line-height:1.3;
+  background:#FFF1C7}
+.tile.used{visibility:hidden}
+.tile.glow{animation:glow 1s infinite}
+@keyframes glow{50%{background:var(--sun)}}
+
+/* done + album */
+.done{align-items:center;justify-content:center;text-align:center}
+.done .big{font-size:clamp(90px,24vw,150px);font-family:var(--emoji);line-height:1.1;animation:spin 1.2s ease-out}
+@keyframes spin{from{transform:scale(.2) rotate(-180deg)}}
+.done h2{margin:0;font-size:clamp(36px,8vw,54px);font-weight:900}
+.done .gain{font-size:28px;font-weight:700}
+.newstick{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 22px;background:#FFF1C7}
+.newstick .row{font-family:var(--emoji);font-size:64px;display:flex;gap:8px}
+.actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.actions button{padding:14px 26px;font-size:24px;font-weight:900}
+.actions .go{background:var(--grass);color:var(--paper)}
+
+.album{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:12px;padding:16px}
+.album span{aspect-ratio:1;max-width:100%;display:grid;place-items:center;font-size:52px;font-family:var(--emoji);
+  border-radius:16px;background:var(--sky-hi);border:2px solid var(--ink)}
+.album span.locked{font-family:var(--font);font-size:34px;font-weight:900;color:var(--ink-soft);background:#E4E8EF;border-style:dashed}
+.album-next{text-align:center;font-size:20px;font-weight:700;margin:0}
+
+/* confetti */
+.confetti{position:fixed;left:50%;top:40%;width:14px;height:14px;border-radius:3px;z-index:50;pointer-events:none;
+  animation:fly .95s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div id="app" dir="rtl" lang="he">
+
+  <section id="home" class="screen">
+    <div class="logo-wrap">
+      <div class="abc" aria-hidden="true"><span>א</span><span>ב</span><span>ג</span></div>
+      <h1>אֶרֶץ הָאוֹתִיּוֹת</h1>
+      <p class="turn">לְמִי הַתּוֹר?</p>
+    </div>
+    <div class="players">
+      <button class="player block" data-p="gan" id="p-gan">
+        <span class="face">🐣</span><span class="pname">גַּן</span><span class="pstars"></span>
+      </button>
+      <button class="player block" data-p="kita" id="p-kita">
+        <span class="face">🦉</span><span class="pname">כִּתָּה א׳</span><span class="pstars"></span>
+      </button>
+    </div>
+    <div class="home-foot">
+      <button class="block pill" id="soundBtn"></button>
+    </div>
+    <p class="note" id="voiceNote" hidden>לא נמצא קול עברי במכשיר, אז המשחק ירוץ בלי הקראה. בטלפון או בטאבלט אפשר להוסיף קול עברי בהגדרות הדיבור (טקסט לדיבור).</p>
+  </section>
+
+  <section id="menu" class="screen" hidden>
+    <div class="bar">
+      <button class="block icon-btn" id="menuBack" aria-label="חזרה">🏠</button>
+      <div class="grow who" id="menuWho"></div>
+      <button class="block icon-btn" id="albumBtn" aria-label="אלבום מדבקות">📒</button>
+      <div class="starcount block" id="menuStars"></div>
+    </div>
+    <h2 class="menu-title">בְּמָה מְשַׂחֲקִים?</h2>
+    <div class="games" id="gamesGrid"></div>
+  </section>
+
+  <section id="game" class="screen" hidden>
+    <div class="bar">
+      <button class="block icon-btn" id="gameBack" aria-label="לתפריט">✖️</button>
+      <div class="grow dots" id="dots"></div>
+      <button class="block icon-btn" id="sayAgain" aria-label="להשמיע שוב">🔊</button>
+      <div class="starcount block" id="gameStars"></div>
+    </div>
+    <p class="prompt" id="prompt"></p>
+    <div class="stage" id="stage"></div>
+    <div class="choices" id="choices"></div>
+  </section>
+
+  <section id="done" class="screen done" hidden>
+    <div class="big">🏆</div>
+    <h2>כָּל הַכָּבוֹד!</h2>
+    <div class="gain" id="doneGain"></div>
+    <div class="newstick block" id="doneStickers" hidden>
+      <div>מַדְבֵּקָה חֲדָשָׁה בָּאַלְבּוֹם!</div>
+      <div class="row" id="doneStickRow"></div>
+    </div>
+    <div class="actions">
+      <button class="block go" id="againBtn">עוֹד סִבּוּב</button>
+      <button class="block" id="toMenuBtn">לַמִּשְׂחָקִים</button>
+    </div>
+  </section>
+
+  <section id="albumScr" class="screen" hidden>
+    <div class="bar">
+      <button class="block icon-btn" id="albumBack" aria-label="חזרה">↩️</button>
+      <div class="grow who" id="albumWho"></div>
+      <div class="starcount block" id="albumStars"></div>
+    </div>
+    <p class="album-next" id="albumNext"></p>
+    <div class="album block" id="albumGrid"></div>
+  </section>
+
+</div>
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const rand = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const sample = (a, n) => shuffle(a).slice(0, n);
+
+/* ---------- content ---------- */
+const LETTERS = [
+  ['א','אָלֶף'],['ב','בֵּית'],['ג','גִּימֶל'],['ד','דָּלֶת'],['ה','הֵא'],['ו','וָו'],['ז','זַיִן'],
+  ['ח','חֵית'],['ט','טֵית'],['י','יוֹד'],['כ','כַּף'],['ל','לָמֶד'],['מ','מֵם'],['נ','נוּן'],
+  ['ס','סָמֶךְ'],['ע','עַיִן'],['פ','פֵּא'],['צ','צָדִי'],['ק','קוֹף'],['ר','רֵישׁ'],['ש','שִׁין'],['ת','תָּו']
+];
+const LETTER_NAME = Object.fromEntries(LETTERS);
+// letters that look alike: used for harder "find the letter" rounds
+const LOOKALIKE = [['ב','כ','פ'],['ד','ר','ו'],['ה','ח','ת'],['ו','ז','נ'],['ע','צ','ש'],['ג','נ'],['ט','מ'],['ס','ט']];
+// letters that sound alike: never offered together as "first letter" choices
+const SOUNDALIKE = [['א','ע','ה'],['ט','ת'],['כ','ק','ח'],['ס','ש'],['ב','ו']];
+
+const WORDS = [
+  ['דָּג','🐟'],['סוּס','🐴'],['חָתוּל','🐱'],['כֶּלֶב','🐶'],['בַּיִת','🏠'],['שֶׁמֶשׁ','☀️'],['יָרֵחַ','🌙'],
+  ['עֵץ','🌳'],['פֶּרַח','🌸'],['תַּפּוּחַ','🍎'],['בָּנָנָה','🍌'],['גְּלִידָה','🍦'],['עוּגָה','🎂'],['כַּדּוּר','⚽'],
+  ['סֵפֶר','📖'],['מְכוֹנִית','🚗'],['אוֹטוֹבּוּס','🚌'],['רַכֶּבֶת','🚂'],['מָטוֹס','✈️'],['סִירָה','⛵'],
+  ['פִּיל','🐘'],['אַרְיֵה','🦁'],['קוֹף','🐒'],['דֻּבִּי','🧸'],['צָב','🐢'],['נָחָשׁ','🐍'],['פַּרְפַּר','🦋'],
+  ['דְּבוֹרָה','🐝'],['תַּרְנְגוֹל','🐓'],['בֵּיצָה','🥚'],['גֶּזֶר','🥕'],['אֲבַטִּיחַ','🍉'],['לֵב','❤️'],
+  ['כּוֹכָב','⭐'],['עָנָן','☁️'],['מַטְרִיָּה','☂️'],['שָׁעוֹן','⏰'],['מַפְתֵּחַ','🔑'],['יָד','✋'],['רֶגֶל','🦵'],
+  ['עַיִן','👁️'],['אַף','👃'],['אֹזֶן','👂'],['פֶּה','👄'],['תּוּת','🍓'],['עֲנָבִים','🍇'],['לִימוֹן','🍋'],
+  ['חָלָב','🥛'],['לֶחֶם','🍞'],['יָם','🌊'],['הַר','⛰️'],['פָּרָה','🐄'],['כִּבְשָׂה','🐑'],['חֲזִיר','🐷'],
+  ['אַרְנָב','🐰'],['עַכְבָּר','🐭'],['צְפַרְדֵּעַ','🐸'],['יֶלֶד','👦'],['יַלְדָּה','👧'],['נְמָלָה','🐜'],
+  ['תִּירָס','🌽'],['פִּיצָה','🍕'],['מַתָּנָה','🎁'],['בָּלוֹן','🎈'],['גָּמָל','🐫'],['זֶבְּרָה','🦓'],
+  ['דְּגָל','🚩'],['מִטָּה','🛏️'],['כִּסֵּא','🪑'],['נֵר','🕯️'],['יוֹנָה','🕊️'],['תַּנִּין','🐊'],
+  ['שׁוֹקוֹלָד','🍫'],['גִּיטָרָה','🎸'],['תֹּף','🥁']
+].map(([w, e]) => ({ w, e, chunks: chunkify(w), len: (w.match(/[א-ת]/g) || []).length, first: w[0] }));
+
+// Split a pointed word into readable pieces: a letter with its marks, and a
+// vowel-vav (וּ / וֹ) glued to the letter before it, so סוּס -> סוּ + ס.
+function chunkify(w) {
+  const out = [];
+  for (const c of w.match(/[א-ת][֑-ׇ]*/g) || []) {
+    const prev = out[out.length - 1];
+    if (/^ו[ֹֺּ]$/.test(c) && prev && !/[ְ-ׇֻ]/.test(prev)) out[out.length - 1] = prev + c;
+    else out.push(c);
+  }
+  return out;
+}
+function vowelClass(c) {
+  if (/[ֹֺ]/.test(c)) return 'o';
+  if (/.וּ/.test(c) || /ֻ/.test(c)) return 'u';
+  if (/[ֲַָ]/.test(c)) return 'a';
+  if (/[ֱֵֶ]/.test(c)) return 'e';
+  if (/ִ/.test(c)) return 'i';
+  return '';
+}
+function baseOf(c) { // letter + dagesh / shin dot, without the vowel
+  const m = c.match(/^[א-ת][֑-ׇ]*/)[0];
+  return m[0] + m.slice(1).replace(/[^ּׁׂ]/g, '');
+}
+const VOWEL = { a: 'ָ', e: 'ֵ', i: 'ִ', o: 'וֹ', u: 'וּ' };
+
+const NUMS = ['', 'אַחַת', 'שְׁתַּיִם', 'שָׁלוֹשׁ', 'אַרְבַּע', 'חָמֵשׁ', 'שֵׁשׁ', 'שֶׁבַע', 'שְׁמוֹנֶה', 'תֵּשַׁע', 'עֶשֶׂר'];
+const COUNT_ITEMS = ['🍎','🐟','⭐','🎈','🐞','🍓','🚗','🦆','🌸','🐢','🍪','⚽'];
+const PRAISE = ['כָּל הַכָּבוֹד!', 'מְצֻיָּן!', 'יוֹפִי!', 'נֶהֱדָר!', 'אַלּוּף הָעוֹלָם!', 'וָואוּ!'];
+const STICKERS = ['🐶','🐱','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🦄','🐝','🦋','🐢',
+  '🐙','🦀','🐠','🐬','🐳','🦒','🦓','🐘','🦔','🦉','🦕','🦖','🐉','🌈','🚀','🏰','🎡','👑'];
+const STARS_PER_STICKER = 5;
+const ROUND = 8;
+
+const PLAYERS = {
+  gan:  { name: 'גַּן', face: '🐣', games: ['letters', 'count', 'firstLetter'] },
+  kita: { name: 'כִּתָּה א׳', face: '🦉', games: ['sound', 'read', 'pick', 'build'] }
+};
+const GAMES = {
+  letters:     { name: 'אֵיפֹה הָאוֹת?',      icon: 'א',   bg: 'var(--berry)' },
+  count:       { name: 'כַּמָּה יֵשׁ?',        icon: '3',   bg: 'var(--sea)' },
+  firstLetter: { name: 'אוֹת רִאשׁוֹנָה',      icon: '🐶',  bg: 'var(--sun)', emo: true },
+  sound:       { name: 'הַצְּלִיל הָרִאשׁוֹן', icon: 'בָּ',  bg: 'var(--berry)' },
+  read:        { name: 'קוֹרְאִים וּבוֹחֲרִים', icon: 'דָּג', bg: 'var(--sea)' },
+  pick:        { name: 'מָה בַּתְּמוּנָה?',    icon: '🍎',  bg: 'var(--sun)', emo: true },
+  build:       { name: 'בּוֹנִים מִלָּה',       icon: 'סוּ', bg: 'var(--grass-deep)' }
+};
+
+/* ---------- saved progress ---------- */
+const KEY = 'eretz-haotiyot-v1';
+let DB = { gan: { stars: 0, levels: {} }, kita: { stars: 0, levels: {} }, sound: true };
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.gan && s.kita) DB = Object.assign(DB, s); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) {} };
+
+/* ---------- sound ---------- */
+let heVoice = null;
+const canSpeak = 'speechSynthesis' in window;
+function loadVoices() {
+  if (!canSpeak) return;
+  heVoice = speechSynthesis.getVoices().find(v => /^(he|iw)/i.test(v.lang)) || null;
+}
+if (canSpeak) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+setTimeout(() => { $('#voiceNote').hidden = !!heVoice; }, 1500);
+
+function speak(text, queue) {
+  if (!DB.sound || !canSpeak || !text) return;
+  try {
+    if (!queue) speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'he-IL'; if (heVoice) u.voice = heVoice;
+    u.rate = 0.85; u.pitch = 1.1;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+let ac = null;
+function sfx(kind) {
+  if (!DB.sound) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const notes = kind === 'good' ? [660, 880, 1175] : kind === 'pop' ? [620] : [240, 190];
+    notes.forEach((f, i) => {
+      const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + i * 0.09;
+      o.type = kind === 'bad' ? 'triangle' : 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.22, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + 0.3);
+    });
+  } catch (e) {}
+}
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors = ['#FFC93C', '#F0567A', '#5DBB63', '#2FA7D6', '#7B5CD6'];
+  for (let i = 0; i < 26; i++) {
+    const d = document.createElement('i');
+    d.className = 'confetti';
+    const a = Math.random() * Math.PI * 2, r = 120 + Math.random() * 220;
+    d.style.cssText = `background:${rand(colors)};--dx:${Math.cos(a) * r}px;--dy:${Math.sin(a) * r}px;--rot:${Math.random() * 720}deg`;
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 1000);
+  }
+}
+
+/* ---------- screens ---------- */
+const S = { p: null, g: null };
+function show(id) {
+  for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
+  window.scrollTo(0, 0);
+}
+function starsText(p) { return '⭐ ' + DB[p].stars; }
+
+function renderHome() {
+  for (const p of ['gan', 'kita']) $('#p-' + p + ' .pstars').textContent = starsText(p);
+  $('#soundBtn').textContent = DB.sound ? '🔊 קוֹל פּוֹעֵל' : '🔇 בְּלִי קוֹל';
+  show('home');
+}
+function renderMenu() {
+  const pl = PLAYERS[S.p];
+  $('#menuWho').textContent = pl.face + ' ' + pl.name;
+  $('#menuStars').textContent = starsText(S.p);
+  const grid = $('#gamesGrid'); grid.innerHTML = '';
+  for (const g of pl.games) {
+    const m = GAMES[g], lvl = DB[S.p].levels[g] || 1;
+    const b = document.createElement('button');
+    b.className = 'block game-card';
+    b.innerHTML = `<span class="gicon ${m.emo ? 'emo' : ''}" style="background:${m.bg}">${m.icon}</span>
+      <span class="gname">${m.name}</span>
+      <span class="lvl" aria-label="שלב ${lvl}">${[1, 2, 3].map(i => `<i class="${i <= lvl ? 'on' : ''}"></i>`).join('')}</span>`;
+    b.onclick = () => startGame(g);
+    grid.appendChild(b);
+  }
+  show('menu');
+}
+function renderAlbum() {
+  const pl = PLAYERS[S.p], stars = DB[S.p].stars;
+  const have = Math.min(STICKERS.length, Math.floor(stars / STARS_PER_STICKER));
+  $('#albumWho').textContent = 'הָאַלְבּוֹם שֶׁל ' + pl.name;
+  $('#albumStars').textContent = starsText(S.p);
+  $('#albumNext').textContent = have >= STICKERS.length ? 'הָאַלְבּוֹם מָלֵא! 🎉'
+    : `עוֹד ${STARS_PER_STICKER - stars % STARS_PER_STICKER} ⭐ לַמַּדְבֵּקָה הַבָּאָה`;
+  $('#albumGrid').innerHTML = STICKERS.map((s, i) => i < have ? `<span>${s}</span>` : `<span class="locked">?</span>`).join('');
+  show('albumScr');
+}
+
+/* ---------- game flow ---------- */
+function level() { return DB[S.p].levels[S.g] || 1; }
+function startGame(g) {
+  S.g = g; S.q = 0; S.firstTries = 0; S.gained = 0; S.newStickers = []; S.recent = [];
+  show('game');
+  nextQ();
+}
+function nextQ() {
+  if (S.q >= ROUND) return finish();
+  S.firstTry = true; S.locked = false; S.misses = 0;
+  $('#dots').innerHTML = Array.from({ length: ROUND }, (_, i) => `<i class="${i < S.q ? 'done' : i === S.q ? 'now' : ''}"></i>`).join('');
+  $('#gameStars').textContent = starsText(S.p);
+  $('#stage').innerHTML = ''; $('#choices').innerHTML = ''; $('#choices').className = 'choices';
+  S.cur = MAKERS[S.g]();
+  $('#prompt').textContent = S.cur.prompt;
+  speak(S.cur.say, true);
+}
+function finish() {
+  const lv = level();
+  if (S.firstTries >= ROUND - 1 && lv < 3) DB[S.p].levels[S.g] = lv + 1;
+  else if (S.firstTries <= 3 && lv > 1) DB[S.p].levels[S.g] = lv - 1;
+  save();
+  $('#doneGain').textContent = `+${S.gained} ⭐`;
+  $('#doneStickers').hidden = !S.newStickers.length;
+  $('#doneStickRow').textContent = S.newStickers.join(' ');
+  show('done');
+  sfx('good'); confetti();
+  speak('כָּל הַכָּבוֹד! ' + (S.newStickers.length ? 'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!' : ''));
+}
+function win() {
+  S.locked = true;
+  if (S.firstTry) S.firstTries++;
+  const d = DB[S.p];
+  d.stars++; S.gained++;
+  if (d.stars % STARS_PER_STICKER === 0 && d.stars / STARS_PER_STICKER <= STICKERS.length)
+    S.newStickers.push(STICKERS[d.stars / STARS_PER_STICKER - 1]);
+  save();
+  const sc = $('#gameStars'); sc.textContent = starsText(S.p);
+  sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump');
+  sfx('good'); confetti();
+  speak(rand(PRAISE) + ' ' + (S.cur.after || ''));
+  S.q++;
+  setTimeout(nextQ, 2200);
+}
+function miss(el) {
+  S.firstTry = false; S.misses++;
+  el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
+  sfx('bad');
+  speak('עוֹד נִסָּיוֹן');
+}
+
+/* choice buttons */
+function choices(opts, kind) {
+  const box = $('#choices');
+  box.className = 'choices' + (opts.length === 4 ? ' n4' : '') + (kind === 'word' ? ' words' : '');
+  box.innerHTML = '';
+  for (const o of shuffle(opts)) {
+    const b = document.createElement('button');
+    b.className = 'block choice ' + (kind || '');
+    b.textContent = o.label;
+    b.onclick = () => {
+      if (S.locked) return;
+      if (o.ok) { b.classList.add('right'); win(); }
+      else { miss(b); b.disabled = true; }
+    };
+    box.appendChild(b);
+  }
+}
+function picture(word, tappable) {
+  const el = document.createElement(tappable ? 'button' : 'div');
+  el.className = 'pic';
+  el.textContent = word.e;
+  if (tappable) { el.setAttribute('aria-label', 'להשמיע את המילה'); el.onclick = () => speak(word.w); }
+  $('#stage').appendChild(el);
+}
+// pick a word the player has not seen in the last few questions
+function pickWord(pool) {
+  const fresh = pool.filter(w => !S.recent.includes(w.w));
+  const w = rand(fresh.length ? fresh : pool);
+  S.recent = [w.w, ...S.recent].slice(0, 6);
+  return w;
+}
+const soundsAlike = (a, b) => SOUNDALIKE.some(g => g.includes(a) && g.includes(b));
+const wordPool = maxLen => WORDS.filter(w => w.len <= maxLen);
+
+const MAKERS = {
+  letters() {
+    const lv = level(), n = lv === 1 ? 3 : 4;
+    const [ch, name] = rand(LETTERS.filter(l => !S.recent.includes(l[0])));
+    S.recent = [ch, ...S.recent].slice(0, 5);
+    let others;
+    if (lv === 3) {
+      const near = [...new Set(LOOKALIKE.filter(g => g.includes(ch)).flat())].filter(x => x !== ch);
+      others = sample(near, n - 1);
+      if (others.length < n - 1) others = others.concat(sample(LETTERS.map(l => l[0]).filter(x => x !== ch && !others.includes(x)), n - 1 - others.length));
+    } else others = sample(LETTERS.map(l => l[0]).filter(x => x !== ch), n - 1);
+    if (!heVoice) {
+      const h = document.createElement('div'); h.className = 'hint';
+      h.innerHTML = `מוֹצְאִים אֶת: <b>${ch}</b>`;
+      $('#stage').appendChild(h);
+    }
+    choices([{ label: ch, ok: true }, ...others.map(x => ({ label: x }))]);
+    return { prompt: `אֵיפֹה הָאוֹת ${name}?`, say: `אֵיפֹה הָאוֹת ${name}?`, after: name };
+  },
+
+  count() {
+    const lv = level(), max = [5, 8, 10][lv - 1];
+    let n; do { n = 1 + Math.floor(Math.random() * max); } while (n === S.lastN);
+    S.lastN = n;
+    const item = rand(COUNT_ITEMS);
+    const field = document.createElement('div'); field.className = 'count-field';
+    let counted = 0;
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement('button'); b.className = 'cnt'; b.textContent = item;
+      b.onclick = () => {
+        if (b.classList.contains('on')) return;
+        counted++; b.classList.add('on');
+        const tag = document.createElement('b'); tag.textContent = counted; b.appendChild(tag);
+        sfx('pop'); speak(NUMS[counted]);
+      };
+      field.appendChild(b);
+    }
+    $('#stage').appendChild(field);
+    const others = new Set();
+    while (others.size < 2) {
+      const x = n + rand([-2, -1, 1, 2]);
+      if (x >= 1 && x <= 10) others.add(x);
+    }
+    choices([{ label: String(n), ok: true }, ...[...others].map(x => ({ label: String(x) }))], 'num');
+    return { prompt: 'כַּמָּה יֵשׁ? נוֹגְעִים וְסוֹפְרִים', say: 'כַּמָּה יֵשׁ? אֶפְשָׁר לִגְעַת וְלִסְפֹּר', after: NUMS[n] };
+  },
+
+  firstLetter() {
+    const lv = level(), n = lv === 1 ? 3 : 4;
+    const w = pickWord(wordPool(lv === 1 ? 4 : 99));
+    picture(w, true);
+    if (!heVoice) {
+      const t = document.createElement('div'); t.className = 'hint'; t.innerHTML = `<b>${w.w}</b>`;
+      $('#stage').appendChild(t);
+    }
+    const others = sample(LETTERS.map(l => l[0]).filter(x => x !== w.first && !soundsAlike(x, w.first)), n - 1);
+    choices([{ label: w.first, ok: true }, ...others.map(x => ({ label: x }))]);
+    return {
+      prompt: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+      say: `בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה ${w.w}?`,
+      after: `${w.w} מַתְחִילָה בָּאוֹת ${LETTER_NAME[w.first]}`
+    };
+  },
+
+  sound() {
+    const lv = level();
+    const pool = wordPool([3, 5, 99][lv - 1]).filter(w => vowelClass(w.chunks[0]));
+    const w = pickWord(pool);
+    picture(w, true);
+    const first = w.chunks[0], base = baseOf(first), v = vowelClass(first);
+    const opts = new Set([first]);
+    // same letter, another vowel
+    for (const ov of shuffle(Object.keys(VOWEL).filter(x => x !== v))) {
+      if (opts.size >= 2) break;
+      opts.add(base + VOWEL[ov]);
+    }
+    // another letter, same vowel
+    const pool2 = ['מ', 'ל', 'נ', 'ר', 'ד', 'ג', 'ז', 'י', 'ס', 'ה', 'שׁ', 'ק', 'צ']
+      .filter(x => x[0] !== base[0] && !soundsAlike(x[0], base[0]));
+    while (opts.size < (lv === 3 ? 4 : 3)) opts.add(rand(pool2) + VOWEL[opts.size === 2 ? v : rand(Object.keys(VOWEL))]);
+    choices([...opts].map(o => ({ label: o, ok: o === first })));
+    return { prompt: 'מָה הַצְּלִיל הָרִאשׁוֹן?', say: `מָה הַצְּלִיל הָרִאשׁוֹן בַּמִּלָּה ${w.w}?`, after: w.w };
+  },
+
+  read() {
+    const lv = level();
+    const w = pickWord(wordPool([3, 4, 99][lv - 1]));
+    const big = document.createElement('div'); big.className = 'bigword'; big.textContent = w.w;
+    $('#stage').appendChild(big);
+    const others = sample(WORDS.filter(x => x.e !== w.e), lv === 3 ? 3 : 2);
+    choices([{ label: w.e, ok: true }, ...others.map(x => ({ label: x.e }))], 'emo');
+    return { prompt: 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?', say: 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?', after: w.w };
+  },
+
+  pick() {
+    const lv = level();
+    const w = pickWord(wordPool([3, 4, 99][lv - 1]));
+    picture(w, false);
+    let pool = WORDS.filter(x => x.w !== w.w);
+    if (lv >= 2) { // harder: distractors that start with the same letter
+      const same = pool.filter(x => x.first === w.first);
+      pool = same.length >= 2 ? same : pool.filter(x => Math.abs(x.len - w.len) <= 1);
+    }
+    const others = sample(pool, 2);
+    choices([{ label: w.w, ok: true }, ...others.map(x => ({ label: x.w }))], 'word');
+    return { prompt: 'אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?', say: 'אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?', after: w.w };
+  },
+
+  build() {
+    const lv = level();
+    const pool = WORDS.filter(w => w.chunks.length >= 2 && w.chunks.length <= [2, 3, 4][lv - 1]);
+    const w = pickWord(pool);
+    picture(w, true);
+    const slots = document.createElement('div'); slots.className = 'slots';
+    const slotEls = w.chunks.map(() => { const s = document.createElement('div'); s.className = 'slot'; slots.appendChild(s); return s; });
+    $('#stage').appendChild(slots);
+    let order; do { order = shuffle(w.chunks); } while (order.join() === w.chunks.join() && new Set(w.chunks).size > 1);
+    const box = $('#choices'); box.className = 'tiles'; box.innerHTML = '';
+    let pos = 0;
+    const tiles = order.map(c => {
+      const b = document.createElement('button'); b.className = 'block tile'; b.textContent = c;
+      b.onclick = () => {
+        if (S.locked) return;
+        if (c === w.chunks[pos]) {
+          b.classList.add('used'); b.classList.remove('glow');
+          slotEls[pos].textContent = c; slotEls[pos].classList.add('full');
+          pos++; sfx('pop');
+          if (pos === w.chunks.length) win();
+        } else {
+          miss(b);
+          if (S.misses >= 2) { const t = tiles.find(t => !t.classList.contains('used') && t.textContent === w.chunks[pos]); t && t.classList.add('glow'); }
+        }
+      };
+      box.appendChild(b); return b;
+    });
+    return { prompt: 'בּוֹנִים אֶת הַמִּלָּה', say: `בּוֹאוּ נִבְנֶה אֶת הַמִּלָּה ${w.w}`, after: w.w };
+  }
+};
+
+/* ---------- wiring ---------- */
+for (const p of ['gan', 'kita']) $('#p-' + p).onclick = () => {
+  S.p = p; sfx('pop'); speak(PLAYERS[p].name); renderMenu();
+};
+$('#soundBtn').onclick = () => { DB.sound = !DB.sound; save(); if (!DB.sound && canSpeak) speechSynthesis.cancel(); renderHome(); };
+$('#menuBack').onclick = renderHome;
+$('#albumBtn').onclick = renderAlbum;
+$('#albumBack').onclick = renderMenu;
+$('#gameBack').onclick = () => { if (canSpeak) speechSynthesis.cancel(); renderMenu(); };
+$('#sayAgain').onclick = () => S.cur && speak(S.cur.say);
+$('#againBtn').onclick = () => startGame(S.g);
+$('#toMenuBtn').onclick = renderMenu;
+renderHome();
+})();
+</script>
+</body>
+</html>
