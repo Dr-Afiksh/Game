@@ -70,6 +70,11 @@ Progress is saved in the browser (localStorage), separately for each child.
 ## Voice
 
 The game uses the device's own Hebrew text-to-speech (`he-IL`).
+Phone voices read everyday Hebrew (full spelling, no nikud) best, so the game
+sends each phrase without nikud. The `SAY_AS` table in `index.html` covers
+phrases whose plain form would be misspelled or ambiguous (דובי, כיסא, מיטה…),
+and keeps a little nikud where it prevents a misreading (the letter בֵּית, not
+"bayit"). To fix a word, add or edit its line there.
 
 It can also play pre-recorded clips instead, if `voice/voice.js` exists. That file is
 not included right now: the Microsoft and Google voices tried so far (samples in

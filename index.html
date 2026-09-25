@@ -466,6 +466,45 @@ function stopVoice() {
   playing = []; queueEnd = 0;
   if (canSpeak) speechSynthesis.cancel();
 }
+/* How the phone voice should read each phrase. Phone voices read everyday
+   Hebrew (full spelling, no nikud) best, so by default the nikud is dropped.
+   This table covers phrases where that plain form is misspelled (כתיב חסר)
+   or ambiguous; a few keep some nikud on purpose (בֵּית, not "bayit").
+   Key = the phrase exactly as the game says it, value = what the voice gets. */
+const SAY_AS = {
+  // letter names
+  'אָלֶף': 'אָלֶף', 'בֵּית': 'בֵּית', 'הֵא': 'הֵא', 'וָו': 'וָו', 'לָמֶד': 'לָמֶד', 'כַּף': 'כַּף',
+  'פֵּא': 'פֵּא', 'צָדִי': 'צָדִי', 'תָּו': 'תָּו', 'סָמֶךְ': 'סָמֶך', 'זַיִן': 'זַיִן', 'אֵיפֹה הָאוֹת זַיִן?': 'איפה האות זַיִן?',
+  'אֵיפֹה הָאוֹת אָלֶף?': 'איפה האות אָלֶף?', 'אֵיפֹה הָאוֹת בֵּית?': 'איפה האות בֵּית?',
+  'אֵיפֹה הָאוֹת הֵא?': 'איפה האות הֵא?', 'אֵיפֹה הָאוֹת וָו?': 'איפה האות וָו?',
+  'אֵיפֹה הָאוֹת לָמֶד?': 'איפה האות לָמֶד?', 'אֵיפֹה הָאוֹת כַּף?': 'איפה האות כַּף?',
+  'אֵיפֹה הָאוֹת פֵּא?': 'איפה האות פֵּא?', 'אֵיפֹה הָאוֹת צָדִי?': 'איפה האות צָדִי?',
+  'אֵיפֹה הָאוֹת תָּו?': 'איפה האות תָּו?',
+  // game talk
+  'כִּתָּה אָלֶף': 'כיתה אָלֶף', 'מְצֻיָּן!': 'מצוין!', 'עוֹד נִסָּיוֹן': 'עוד ניסיון',
+  'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!': 'קיבלתם מדבקה חדשה!', 'וָואוּ!': 'וואו!',
+  'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה': 'באיזו אות מתחילה המילה',
+  'מָה הַצְּלִיל הָרִאשׁוֹן בַּמִּלָּה': 'מה הצליל הראשון במילה',
+  'בּוֹאוּ נִבְנֶה אֶת הַמִּלָּה': 'בואו נבנה את המילה',
+  'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?': 'איזו תמונה מתאימה למילה?',
+  'אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?': 'איזו מילה מתאימה לתמונה?',
+  // numbers
+  'שְׁתַּיִם': 'שתיים', 'עֶשֶׂר': 'עֶשֶׂר', 'שְׁתֵּים עֶשְׂרֵה': 'שתים עשרה', 'חֲמִשִּׁים': 'חמישים', 'שִׁשִּׁים': 'שישים',
+  // counting objects
+  'חִפּוּשִׁיּוֹת': 'חיפושיות', 'בַּרְוָזִים': 'ברווזים',
+  'כַּמָּה חִפּוּשִׁיּוֹת יֵשׁ?': 'כמה חיפושיות יש?', 'כַּמָּה בַּרְוָזִים יֵשׁ?': 'כמה ברווזים יש?',
+  'כַּמָּה חִפּוּשִׁיּוֹת יֵשׁ בְּיַחַד?': 'כמה חיפושיות יש ביחד?', 'כַּמָּה בַּרְוָזִים יֵשׁ בְּיַחַד?': 'כמה ברווזים יש ביחד?',
+  'כַּמָּה חִפּוּשִׁיּוֹת נִשְׁאֲרוּ?': 'כמה חיפושיות נשארו?', 'כַּמָּה בַּרְוָזִים נִשְׁאֲרוּ?': 'כמה ברווזים נשארו?',
+  // words whose plain spelling is different or ambiguous
+  'דֻּבִּי': 'דובי', 'כִּסֵּא': 'כיסא', 'מִטָּה': 'מיטה', 'תֹּף': 'תוף', 'אֹזֶן': 'אוזן', 'פֶּה': 'פֶּה',
+  'דֻּבְדְּבָן': 'דובדבן', 'מִשְׁקָפַיִם': 'משקפיים', 'אוֹפַנַּיִם': 'אופניים', 'מִסְפָּרַיִם': 'מספריים',
+  'עִפָּרוֹן': 'עיפרון', 'לִוְיָתָן': 'לוויתן', 'עוּגִיָּה': 'עוגייה', 'פִּטְרִיָּה': 'פטרייה',
+  'מַטְרִיָּה': 'מטרייה', 'חִפּוּשִׁית': 'חיפושית', 'טֶלֶוִיזְיָה': 'טלוויזיה', 'חָלָב': 'חָלָב',
+  'סֵפֶר': 'סֵפֶר', 'כִּבְשָׂה': 'כבשה'
+};
+const sayAs = p => SAY_AS[p] || p.replace(/[֑-ׇ]/g, '');
+window.SAY_AS = SAY_AS;
+
 function speakTTS(text, queue) {
   if (!canSpeak) return;
   try {
@@ -482,7 +521,7 @@ async function speak(parts, queue) {
   if (!queue) stopVoice();
   const missing = CLIPS ? parts.filter(p => !CLIPS[p]) : parts;
   if (CLIPS) missing.forEach(p => missingClips.add(p));
-  if (missing.length) return speakTTS(parts.join(' '), queue);
+  if (missing.length) return speakTTS(parts.map(sayAs).join(' '), queue);
   const token = playToken;
   try {
     const bufs = await Promise.all(parts.map(clipBuffer));
@@ -496,7 +535,7 @@ async function speak(parts, queue) {
       t += buf.duration + 0.06;
     }
     queueEnd = t + 0.15;
-  } catch (e) { speakTTS(parts.join(' '), queue); }
+  } catch (e) { speakTTS(parts.map(sayAs).join(' '), queue); }
 }
 function sfx(kind) {
   if (!DB.sound) return;
