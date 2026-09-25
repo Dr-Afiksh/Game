@@ -18,7 +18,24 @@ It runs in any browser, works well on a tablet, and needs no install or server.
 - **בּוֹנִים מִלָּה** Builds the word from syllable tiles. After two wrong taps the right tile starts to glow.
 
 Each round has 8 questions. Every correct answer earns a star, and every 5 stars unlocks a sticker in the child's album.
-Each game has 3 levels. A round with 7 or more first-try answers moves up a level, and a round with 3 or fewer moves down.
+
+## Levels
+
+Each game has 5 levels, and the level adjusts while the child plays:
+3 correct first-try answers in a row move up a level (with a "⬆️ שָׁלָב!" banner),
+and 2 answers in a row that needed retries move down one level quietly.
+
+| Level | בּוֹנִים מִלָּה (build a word) | Reading games (words shown) |
+|---|---|---|
+| 1 | 3-letter words | 2–3 letters |
+| 2 | 4-letter words | 3–4 letters |
+| 3 | 5-letter words | 4–5 letters |
+| 4 | 5–6 letters + 1 extra tile that doesn't belong | 5–6 letters, 4 choices |
+| 5 | 6+ letters + 2 extra tiles | 6+ letters, 4 choices |
+
+The other games scale too: more choices, letters that look alike (ב/כ/פ), counting up to 10,
+and in מָה בַּתְּמוּנָה? all choices start with the same letter.
+The current level shows above the question and on each game card in the menu.
 Progress is saved in the browser (localStorage), separately for each child.
 
 ## Voice

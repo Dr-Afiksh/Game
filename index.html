@@ -109,7 +109,7 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 .choices{display:grid;gap:16px;grid-template-columns:repeat(3,1fr);margin-top:auto}
 .choices.n4{grid-template-columns:repeat(4,1fr)}
 .choices.words{grid-template-columns:1fr}
-@media (min-width:640px){.choices.words{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:640px){.choices.words{grid-template-columns:repeat(3,1fr)}.choices.words.w4{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:520px){.choices.n4{grid-template-columns:repeat(2,1fr)}}
 .choice{min-height:120px;display:grid;place-items:center;padding:8px;font-weight:900;line-height:1.3;
   font-size:clamp(56px,14vw,100px)}
@@ -139,6 +139,18 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 .tile{width:clamp(80px,19vw,112px);height:clamp(92px,22vw,124px);font-size:clamp(46px,11vw,70px);font-weight:900;line-height:1.3;
   background:#FFF1C7}
 .tile.used{visibility:hidden}
+.tiles.many{gap:10px}
+.tiles.many .tile{width:clamp(66px,15vw,96px);height:clamp(78px,18vw,108px);font-size:clamp(38px,9vw,58px)}
+.slots.many{gap:6px}
+.slots.many .slot{width:clamp(44px,11vw,84px);height:clamp(60px,14vw,100px);font-size:clamp(30px,7.5vw,56px);border-radius:12px}
+.lvlchip{align-self:center;display:flex;align-items:center;gap:8px;padding:4px 14px;font-size:18px;font-weight:700;
+  background:var(--paper);border:2px solid var(--ink);border-radius:999px;margin-block:-6px}
+.lvlchip .lvl i{width:12px;height:12px}
+.lvlup{position:fixed;top:38%;left:50%;z-index:60;transform:translate(-50%,-50%);padding:18px 34px;white-space:nowrap;
+  font-size:clamp(36px,9vw,60px);font-weight:900;background:var(--sun);border:4px solid var(--ink);border-radius:26px;
+  box-shadow:0 8px 0 var(--ink);pointer-events:none}
+.lvlup.show{animation:lvlpop 1.9s ease-out forwards}
+@keyframes lvlpop{0%{transform:translate(-50%,-50%) scale(.3)}15%{transform:translate(-50%,-50%) scale(1.1)}25%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
 .tile.glow{animation:glow 1s infinite}
 @keyframes glow{50%{background:var(--sun)}}
 
@@ -210,7 +222,9 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
       <button class="block icon-btn" id="sayAgain" aria-label="להשמיע שוב">🔊</button>
       <div class="starcount block" id="gameStars"></div>
     </div>
+    <div class="lvlchip" id="gameLvl"></div>
     <p class="prompt" id="prompt"></p>
+    <div class="lvlup" id="lvlUp" hidden></div>
     <div class="stage" id="stage"></div>
     <div class="choices" id="choices"></div>
   </section>
@@ -272,7 +286,13 @@ const WORDS = [
   ['אַרְנָב','🐰'],['עַכְבָּר','🐭'],['צְפַרְדֵּעַ','🐸'],['יֶלֶד','👦'],['יַלְדָּה','👧'],['נְמָלָה','🐜'],
   ['תִּירָס','🌽'],['פִּיצָה','🍕'],['מַתָּנָה','🎁'],['בָּלוֹן','🎈'],['גָּמָל','🐫'],['זֶבְּרָה','🦓'],
   ['דְּגָל','🚩'],['מִטָּה','🛏️'],['כִּסֵּא','🪑'],['נֵר','🕯️'],['יוֹנָה','🕊️'],['תַּנִּין','🐊'],
-  ['שׁוֹקוֹלָד','🍫'],['גִּיטָרָה','🎸'],['תֹּף','🥁']
+  ['שׁוֹקוֹלָד','🍫'],['גִּיטָרָה','🎸'],['תֹּף','🥁'],
+  ['קִיפּוֹד','🦔'],['יַנְשׁוּף','🦉'],['לִוְיָתָן','🐳'],['תְּמָנוּן','🐙'],['עַכָּבִישׁ','🕷️'],['טֶלֶפוֹן','📱'],
+  ['מַשָּׂאִית','🚚'],['כַּבָּאִית','🚒'],['עוּגִיָּה','🍪'],['דֻּבְדְּבָן','🍒'],['פִּטְרִיָּה','🍄'],['שַׁבְּלוּל','🐌'],
+  ['סְפִינָה','🚢'],['מְנוֹרָה','💡'],['עִפָּרוֹן','✏️'],['מַחְבֶּרֶת','📓'],['יַלְקוּט','🎒'],
+  ['אוֹפַנַּיִם','🚲'],['מִשְׁקָפַיִם','👓'],['דּוֹלְפִין','🐬'],['חִפּוּשִׁית','🐞'],['טֶלֶוִיזְיָה','📺'],
+  ['אַמְבּוּלַנְס','🚑'],['הֶלִיקוֹפְּטֶר','🚁'],['מְלָפְפוֹן','🥒'],['מִסְפָּרַיִם','✂️'],['הִיפּוֹפּוֹטָם','🦛'],
+  ['קֶנְגּוּרוּ','🦘'],['כַּדּוּרְסַל','🏀']
 ].map(([w, e]) => ({ w, e, chunks: chunkify(w), len: (w.match(/[א-ת]/g) || []).length, first: w[0] }));
 
 // Split a pointed word into readable pieces: a letter with its marks, and a
@@ -307,6 +327,19 @@ const STICKERS = ['🐶','🐱','🦊','🐻','🐼','🐨','🐯','🦁','🐮'
   '🐙','🦀','🐠','🐬','🐳','🦒','🦓','🐘','🦔','🦉','🦕','🦖','🐉','🌈','🚀','🏰','🎡','👑'];
 const STARS_PER_STICKER = 5;
 const ROUND = 8;
+const MAX_LEVEL = 5;
+// What each level means in each game (first entry = level 1).
+// lens: [fewest, most] letters in the word.
+const LENS = [[2, 3], [3, 4], [4, 5], [5, 6], [6, 99]];
+const LV = {
+  letters:     { options: [3, 4, 4, 5, 6], lookalike: [0, 0, 1, 1, 1] },
+  count:       { max: [5, 7, 10, 10, 10], options: [3, 3, 3, 4, 4] },
+  firstLetter: { options: [3, 3, 4, 4, 5], maxLen: [3, 4, 5, 99, 99] },
+  sound:       { options: [3, 3, 4, 4, 4], maxLen: [3, 4, 5, 99, 99] },
+  read:        { options: [3, 3, 4, 4, 4], lens: LENS },
+  pick:        { options: [3, 3, 3, 4, 4], lens: LENS, sameStart: [0, 1, 1, 1, 1] },
+  build:       { lens: [[3, 3], [4, 4], [5, 5], [5, 6], [6, 99]], decoys: [0, 0, 0, 1, 2] }
+};
 
 const PLAYERS = {
   gan:  { name: 'גַּן', face: '🐣', games: ['letters', 'count', 'firstLetter'] },
@@ -396,12 +429,12 @@ function renderMenu() {
   $('#menuStars').textContent = starsText(S.p);
   const grid = $('#gamesGrid'); grid.innerHTML = '';
   for (const g of pl.games) {
-    const m = GAMES[g], lvl = DB[S.p].levels[g] || 1;
+    const m = GAMES[g], lvl = Math.min(MAX_LEVEL, DB[S.p].levels[g] || 1);
     const b = document.createElement('button');
     b.className = 'block game-card';
     b.innerHTML = `<span class="gicon ${m.emo ? 'emo' : ''}" style="background:${m.bg}">${m.icon}</span>
       <span class="gname">${m.name}</span>
-      <span class="lvl" aria-label="שלב ${lvl}">${[1, 2, 3].map(i => `<i class="${i <= lvl ? 'on' : ''}"></i>`).join('')}</span>`;
+      <span class="lvl" aria-label="שלב ${lvl}">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= lvl ? 'on' : ''}"></i>`).join('')}</span>`;
     b.onclick = () => startGame(g);
     grid.appendChild(b);
   }
@@ -419,26 +452,29 @@ function renderAlbum() {
 }
 
 /* ---------- game flow ---------- */
-function level() { return DB[S.p].levels[S.g] || 1; }
+function level() { return Math.min(MAX_LEVEL, DB[S.p].levels[S.g] || 1); }
+const L = key => LV[S.g][key][level() - 1];
 function startGame(g) {
-  S.g = g; S.q = 0; S.firstTries = 0; S.gained = 0; S.newStickers = []; S.recent = [];
+  S.g = g; S.q = 0; S.gained = 0; S.newStickers = []; S.recent = []; S.streak = 0; S.struggle = 0;
   show('game');
   nextQ();
+}
+function renderLevel() {
+  const lv = level();
+  $('#gameLvl').innerHTML = `שָׁלָב ${lv} <span class="lvl">${Array.from({ length: MAX_LEVEL }, (_, i) => `<i class="${i < lv ? 'on' : ''}"></i>`).join('')}</span>`;
 }
 function nextQ() {
   if (S.q >= ROUND) return finish();
   S.firstTry = true; S.locked = false; S.misses = 0;
   $('#dots').innerHTML = Array.from({ length: ROUND }, (_, i) => `<i class="${i < S.q ? 'done' : i === S.q ? 'now' : ''}"></i>`).join('');
   $('#gameStars').textContent = starsText(S.p);
+  renderLevel();
   $('#stage').innerHTML = ''; $('#choices').innerHTML = ''; $('#choices').className = 'choices';
   S.cur = MAKERS[S.g]();
   $('#prompt').textContent = S.cur.prompt;
   speak(S.cur.say, true);
 }
 function finish() {
-  const lv = level();
-  if (S.firstTries >= ROUND - 1 && lv < 3) DB[S.p].levels[S.g] = lv + 1;
-  else if (S.firstTries <= 3 && lv > 1) DB[S.p].levels[S.g] = lv - 1;
   save();
   $('#doneGain').textContent = `+${S.gained} ⭐`;
   $('#doneStickers').hidden = !S.newStickers.length;
@@ -447,9 +483,25 @@ function finish() {
   sfx('good'); confetti();
   speak('כָּל הַכָּבוֹד! ' + (S.newStickers.length ? 'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!' : ''));
 }
+// Difficulty follows the child during the round: 3 clean answers in a row
+// move up a level, 2 answers in a row that needed retries move down.
+function adjustLevel(clean) {
+  const lv = level();
+  if (clean) { S.streak++; S.struggle = 0; } else { S.streak = 0; S.struggle++; }
+  if (S.streak >= 3 && lv < MAX_LEVEL) { DB[S.p].levels[S.g] = lv + 1; S.streak = 0; return 'up'; }
+  if (S.struggle >= 2 && lv > 1) { DB[S.p].levels[S.g] = lv - 1; S.struggle = 0; return 'down'; }
+  return '';
+}
+function levelUpBanner() {
+  const b = $('#lvlUp');
+  b.textContent = `⬆️ שָׁלָב ${level()}!`;
+  b.hidden = false; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show');
+  setTimeout(() => { b.hidden = true; }, 1900);
+  speak('עוֹלִים שָׁלָב!', true);
+}
 function win() {
   S.locked = true;
-  if (S.firstTry) S.firstTries++;
+  const change = adjustLevel(S.firstTry);
   const d = DB[S.p];
   d.stars++; S.gained++;
   if (d.stars % STARS_PER_STICKER === 0 && d.stars / STARS_PER_STICKER <= STICKERS.length)
@@ -459,8 +511,9 @@ function win() {
   sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump');
   sfx('good'); confetti();
   speak(rand(PRAISE) + ' ' + (S.cur.after || ''));
+  if (change === 'up') setTimeout(levelUpBanner, 700);
   S.q++;
-  setTimeout(nextQ, 2200);
+  setTimeout(nextQ, change === 'up' ? 2800 : 2200);
 }
 function miss(el) {
   S.firstTry = false; S.misses++;
@@ -471,8 +524,8 @@ function miss(el) {
 
 /* choice buttons */
 function choices(opts, kind) {
-  const box = $('#choices');
-  box.className = 'choices' + (opts.length === 4 ? ' n4' : '') + (kind === 'word' ? ' words' : '');
+  const box = $('#choices'), n = opts.length;
+  box.className = 'choices' + (kind === 'word' ? ' words' + (n === 4 ? ' w4' : '') : n === 4 ? ' n4' : '');
   box.innerHTML = '';
   for (const o of shuffle(opts)) {
     const b = document.createElement('button');
@@ -495,25 +548,24 @@ function picture(word, tappable) {
 }
 // pick a word the player has not seen in the last few questions
 function pickWord(pool) {
+  if (!pool.length) pool = WORDS;
   const fresh = pool.filter(w => !S.recent.includes(w.w));
   const w = rand(fresh.length ? fresh : pool);
-  S.recent = [w.w, ...S.recent].slice(0, 6);
+  S.recent = [w.w, ...S.recent].slice(0, 8);
   return w;
 }
 const soundsAlike = (a, b) => SOUNDALIKE.some(g => g.includes(a) && g.includes(b));
-const wordPool = maxLen => WORDS.filter(w => w.len <= maxLen);
+const wordPool = ([min, max]) => WORDS.filter(w => w.len >= min && w.len <= max);
+const ALL_LETTERS = LETTERS.map(l => l[0]);
 
 const MAKERS = {
   letters() {
-    const lv = level(), n = lv === 1 ? 3 : 4;
+    const n = L('options');
     const [ch, name] = rand(LETTERS.filter(l => !S.recent.includes(l[0])));
     S.recent = [ch, ...S.recent].slice(0, 5);
-    let others;
-    if (lv === 3) {
-      const near = [...new Set(LOOKALIKE.filter(g => g.includes(ch)).flat())].filter(x => x !== ch);
-      others = sample(near, n - 1);
-      if (others.length < n - 1) others = others.concat(sample(LETTERS.map(l => l[0]).filter(x => x !== ch && !others.includes(x)), n - 1 - others.length));
-    } else others = sample(LETTERS.map(l => l[0]).filter(x => x !== ch), n - 1);
+    let others = [];
+    if (L('lookalike')) others = sample([...new Set(LOOKALIKE.filter(g => g.includes(ch)).flat())].filter(x => x !== ch), n - 1);
+    others = others.concat(sample(ALL_LETTERS.filter(x => x !== ch && !others.includes(x)), n - 1 - others.length));
     if (!heVoice) {
       const h = document.createElement('div'); h.className = 'hint';
       h.innerHTML = `מוֹצְאִים אֶת: <b>${ch}</b>`;
@@ -524,7 +576,7 @@ const MAKERS = {
   },
 
   count() {
-    const lv = level(), max = [5, 8, 10][lv - 1];
+    const max = L('max');
     let n; do { n = 1 + Math.floor(Math.random() * max); } while (n === S.lastN);
     S.lastN = n;
     const item = rand(COUNT_ITEMS);
@@ -541,24 +593,19 @@ const MAKERS = {
       field.appendChild(b);
     }
     $('#stage').appendChild(field);
-    const others = new Set();
-    while (others.size < 2) {
-      const x = n + rand([-2, -1, 1, 2]);
-      if (x >= 1 && x <= 10) others.add(x);
-    }
-    choices([{ label: String(n), ok: true }, ...[...others].map(x => ({ label: String(x) }))], 'num');
+    const others = sample([-3, -2, -1, 1, 2, 3].map(d => n + d).filter(x => x >= 1 && x <= 10), L('options') - 1);
+    choices([{ label: String(n), ok: true }, ...others.map(x => ({ label: String(x) }))], 'num');
     return { prompt: 'כַּמָּה יֵשׁ? נוֹגְעִים וְסוֹפְרִים', say: 'כַּמָּה יֵשׁ? אֶפְשָׁר לִגְעַת וְלִסְפֹּר', after: NUMS[n] };
   },
 
   firstLetter() {
-    const lv = level(), n = lv === 1 ? 3 : 4;
-    const w = pickWord(wordPool(lv === 1 ? 4 : 99));
+    const w = pickWord(wordPool([1, L('maxLen')]));
     picture(w, true);
     if (!heVoice) {
       const t = document.createElement('div'); t.className = 'hint'; t.innerHTML = `<b>${w.w}</b>`;
       $('#stage').appendChild(t);
     }
-    const others = sample(LETTERS.map(l => l[0]).filter(x => x !== w.first && !soundsAlike(x, w.first)), n - 1);
+    const others = sample(ALL_LETTERS.filter(x => x !== w.first && !soundsAlike(x, w.first)), L('options') - 1);
     choices([{ label: w.first, ok: true }, ...others.map(x => ({ label: x }))]);
     return {
       prompt: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
@@ -568,59 +615,57 @@ const MAKERS = {
   },
 
   sound() {
-    const lv = level();
-    const pool = wordPool([3, 5, 99][lv - 1]).filter(w => vowelClass(w.chunks[0]));
-    const w = pickWord(pool);
+    const w = pickWord(wordPool([1, L('maxLen')]).filter(w => vowelClass(w.chunks[0])));
     picture(w, true);
-    const first = w.chunks[0], base = baseOf(first), v = vowelClass(first);
+    const first = w.chunks[0], base = baseOf(first), v = vowelClass(first), n = L('options');
     const opts = new Set([first]);
     // same letter, another vowel
     for (const ov of shuffle(Object.keys(VOWEL).filter(x => x !== v))) {
-      if (opts.size >= 2) break;
+      if (opts.size >= (n >= 4 ? 3 : 2)) break;
       opts.add(base + VOWEL[ov]);
     }
     // another letter, same vowel
     const pool2 = ['מ', 'ל', 'נ', 'ר', 'ד', 'ג', 'ז', 'י', 'ס', 'ה', 'שׁ', 'ק', 'צ']
       .filter(x => x[0] !== base[0] && !soundsAlike(x[0], base[0]));
-    while (opts.size < (lv === 3 ? 4 : 3)) opts.add(rand(pool2) + VOWEL[opts.size === 2 ? v : rand(Object.keys(VOWEL))]);
+    while (opts.size < n) opts.add(rand(pool2) + VOWEL[v]);
     choices([...opts].map(o => ({ label: o, ok: o === first })));
     return { prompt: 'מָה הַצְּלִיל הָרִאשׁוֹן?', say: `מָה הַצְּלִיל הָרִאשׁוֹן בַּמִּלָּה ${w.w}?`, after: w.w };
   },
 
   read() {
-    const lv = level();
-    const w = pickWord(wordPool([3, 4, 99][lv - 1]));
+    const w = pickWord(wordPool(L('lens')));
     const big = document.createElement('div'); big.className = 'bigword'; big.textContent = w.w;
     $('#stage').appendChild(big);
-    const others = sample(WORDS.filter(x => x.e !== w.e), lv === 3 ? 3 : 2);
+    const others = sample(WORDS.filter(x => x.e !== w.e), L('options') - 1);
     choices([{ label: w.e, ok: true }, ...others.map(x => ({ label: x.e }))], 'emo');
     return { prompt: 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?', say: 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?', after: w.w };
   },
 
   pick() {
-    const lv = level();
-    const w = pickWord(wordPool([3, 4, 99][lv - 1]));
+    const w = pickWord(wordPool(L('lens')));
     picture(w, false);
+    const k = L('options') - 1;
     let pool = WORDS.filter(x => x.w !== w.w);
-    if (lv >= 2) { // harder: distractors that start with the same letter
+    if (L('sameStart')) { // harder: distractors that start with the same letter, so the whole word must be read
       const same = pool.filter(x => x.first === w.first);
-      pool = same.length >= 2 ? same : pool.filter(x => Math.abs(x.len - w.len) <= 1);
+      pool = same.length >= k ? same : pool.filter(x => Math.abs(x.len - w.len) <= 1);
     }
-    const others = sample(pool, 2);
+    const others = sample(pool, k);
     choices([{ label: w.w, ok: true }, ...others.map(x => ({ label: x.w }))], 'word');
     return { prompt: 'אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?', say: 'אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?', after: w.w };
   },
 
   build() {
-    const lv = level();
-    const pool = WORDS.filter(w => w.chunks.length >= 2 && w.chunks.length <= [2, 3, 4][lv - 1]);
-    const w = pickWord(pool);
+    const w = pickWord(wordPool(L('lens')).filter(w => w.chunks.length >= 2));
     picture(w, true);
     const slots = document.createElement('div'); slots.className = 'slots';
     const slotEls = w.chunks.map(() => { const s = document.createElement('div'); s.className = 'slot'; slots.appendChild(s); return s; });
     $('#stage').appendChild(slots);
-    let order; do { order = shuffle(w.chunks); } while (order.join() === w.chunks.join() && new Set(w.chunks).size > 1);
-    const box = $('#choices'); box.className = 'tiles'; box.innerHTML = '';
+    // higher levels mix in extra tiles that are not part of the word
+    const decoys = sample([...new Set(WORDS.flatMap(x => x.chunks))].filter(c => !w.chunks.includes(c)), L('decoys'));
+    let order; do { order = shuffle(w.chunks.concat(decoys)); } while (order.join() === w.chunks.join() && new Set(w.chunks).size > 1);
+    const box = $('#choices'); box.className = 'tiles' + (order.length > 6 ? ' many' : ''); box.innerHTML = '';
+    slots.classList.toggle('many', w.chunks.length > 5);
     let pos = 0;
     const tiles = order.map(c => {
       const b = document.createElement('button'); b.className = 'block tile'; b.textContent = c;
