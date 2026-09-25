@@ -150,6 +150,23 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
   font-variant-numeric:tabular-nums;background:var(--paper);border:3px solid var(--ink);border-radius:16px;box-shadow:0 5px 0 var(--ink)}
 .seq span.hole{background:var(--sun)}
 
+/* memory */
+.memory{display:grid;gap:10px;grid-template-columns:repeat(3,1fr);width:100%;max-width:620px;margin:auto}
+.memory.m8,.memory.m12,.memory.m16{grid-template-columns:repeat(4,1fr)}
+.mcard{position:relative;height:clamp(96px,24vw,140px);padding:4px;background:var(--plum)}
+.memory.m12 .mcard{height:clamp(84px,20vw,124px)}
+.memory.m16 .mcard{height:clamp(72px,17vw,112px)}
+.mcard .back{font-size:clamp(34px,9vw,54px);font-weight:900;color:var(--paper)}
+.mcard .front{display:none;line-height:1.2;word-break:break-word}
+.mcard .front.emo{font-family:var(--emoji);font-size:clamp(40px,11vw,64px)}
+.mcard .front.letter{font-size:clamp(44px,12vw,72px);font-weight:900}
+.mcard .front.word{font-size:clamp(20px,5.2vw,32px);font-weight:900}
+.mcard.up{background:var(--paper);animation:flip .25s}
+.mcard.up .back{display:none}
+.mcard.up .front{display:block}
+.mcard.done{background:#C9F0C4;border-color:var(--good);box-shadow:0 6px 0 var(--good)}
+@keyframes flip{from{transform:rotateY(90deg)}}
+
 /* build a word */
 .slots{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .slot{width:clamp(70px,17vw,100px);height:clamp(84px,20vw,116px);display:grid;place-items:center;
@@ -372,12 +389,15 @@ const LV = {
   picAdd:      { max: [3, 5, 7, 10, 5], options: [2, 3, 3, 4, 4], minus: [0, 0, 0, 0, 1] },
   // math, first grade (arith: + to 5, + to 10, - to 10, +/- to 20, missing number)
   arith:       { options: [3, 3, 4, 4, 4], dots: [1, 0, 0, 0, 0] },
-  seq:         { options: [3, 3, 4, 4, 4], step: [1, 1, -1, 2, 10], max: [10, 20, 20, 20, 100] }
+  seq:         { options: [3, 3, 4, 4, 4], step: [1, 1, -1, 2, 10], max: [10, 20, 20, 20, 100] },
+  // memory: kindergarten matches identical pictures, then identical letters;
+  // first grade matches a word to its picture
+  memory:      { pairs: [3, 4, 6, 6, 8], letters: [0, 0, 0, 1, 1], lens: [[2, 3], [3, 4], [3, 4], [4, 5], [5, 99]] }
 };
 
 const PLAYERS = {
-  gan:  { name: 'גַּן', say: 'גַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd'] },
-  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq'] }
+  gan:  { name: 'גַּן', say: 'גַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd', 'memory'] },
+  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq', 'memory'] }
 };
 const GAMES = {
   letters:     { name: 'אֵיפֹה הָאוֹת?',      icon: 'א',   bg: 'var(--berry)' },
@@ -390,7 +410,8 @@ const GAMES = {
   compare:     { name: 'אֵיפֹה יוֹתֵר?',       icon: '⚖️',  bg: 'var(--sky-hi)', emo: true },
   picAdd:      { name: 'חִבּוּר בִּתְמוּנוֹת',  icon: '1+2', bg: 'var(--grass-deep)', sm: true },
   arith:       { name: 'תַּרְגִּילִים',          icon: '3+4', bg: 'var(--plum)', sm: true },
-  seq:         { name: 'מָה חָסֵר?',          icon: '1 2 ?', bg: 'var(--sea)', sm: true }
+  seq:         { name: 'מָה חָסֵר?',          icon: '1 2 ?', bg: 'var(--sea)', sm: true },
+  memory:      { name: 'זִכָּרוֹן',             icon: '🃏',  bg: 'var(--sun)', emo: true, rounds: 3 }
 };
 
 /* ---------- saved progress ---------- */
@@ -550,7 +571,7 @@ function renderAlbum() {
 function level() { return Math.min(MAX_LEVEL, DB[S.p].levels[S.g] || 1); }
 const L = key => LV[S.g][key][level() - 1];
 function startGame(g) {
-  S.g = g; S.q = 0; S.gained = 0; S.newStickers = []; S.recent = []; S.streak = 0; S.struggle = 0;
+  S.g = g; S.q = 0; S.total = GAMES[g].rounds || ROUND; S.gained = 0; S.newStickers = []; S.recent = []; S.streak = 0; S.struggle = 0;
   show('game');
   nextQ();
 }
@@ -559,9 +580,9 @@ function renderLevel() {
   $('#gameLvl').innerHTML = `שָׁלָב ${lv} <span class="lvl">${Array.from({ length: MAX_LEVEL }, (_, i) => `<i class="${i < lv ? 'on' : ''}"></i>`).join('')}</span>`;
 }
 function nextQ() {
-  if (S.q >= ROUND) return finish();
+  if (S.q >= S.total) return finish();
   S.firstTry = true; S.locked = false; S.misses = 0;
-  $('#dots').innerHTML = Array.from({ length: ROUND }, (_, i) => `<i class="${i < S.q ? 'done' : i === S.q ? 'now' : ''}"></i>`).join('');
+  $('#dots').innerHTML = Array.from({ length: S.total }, (_, i) => `<i class="${i < S.q ? 'done' : i === S.q ? 'now' : ''}"></i>`).join('');
   $('#gameStars').textContent = starsText(S.p);
   renderLevel();
   $('#stage').innerHTML = ''; $('#choices').innerHTML = ''; $('#choices').className = 'choices';
@@ -598,9 +619,11 @@ function win() {
   S.locked = true;
   const change = adjustLevel(S.firstTry);
   const d = DB[S.p];
-  d.stars++; S.gained++;
-  if (d.stars % STARS_PER_STICKER === 0 && d.stars / STARS_PER_STICKER <= STICKERS.length)
-    S.newStickers.push(STICKERS[d.stars / STARS_PER_STICKER - 1]);
+  for (let i = 0; i < (S.cur.stars || 1); i++) {
+    d.stars++; S.gained++;
+    if (d.stars % STARS_PER_STICKER === 0 && d.stars / STARS_PER_STICKER <= STICKERS.length)
+      S.newStickers.push(STICKERS[d.stars / STARS_PER_STICKER - 1]);
+  }
   save();
   const sc = $('#gameStars'); sc.textContent = starsText(S.p);
   sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump');
@@ -911,8 +934,58 @@ const MAKERS = {
     $('#stage').appendChild(row);
     numChoices(ans, L('options'), size, 0, max);
     return { prompt: 'אֵיזֶה מִסְפָּר חָסֵר?', say: 'אֵיזֶה מִסְפָּר חָסֵר?', after: terms.map(numWord) };
+  },
+
+  /* ---------- memory ---------- */
+  memory() {
+    const pairs = L('pairs');
+    // each pair: two card faces that belong together, and what to say when they are matched
+    let set;
+    if (S.p === 'gan' && L('letters')) {
+      set = sample(LETTERS, pairs).map(([ch, name]) => ({ a: ch, b: ch, kind: 'letter', say: name }));
+    } else if (S.p === 'gan') {
+      set = sample(WORDS, pairs).map(w => ({ a: w.e, b: w.e, kind: 'emo', say: w.w }));
+    } else {
+      const pool = wordPool(L('lens'));
+      set = sample(pool.length >= pairs ? pool : WORDS, pairs).map(w => ({ a: w.w, b: w.e, kind: 'word', say: w.w }));
+    }
+    const cards = shuffle(set.flatMap((p, id) => [
+      { id, face: p.a, kind: p.kind },
+      { id, face: p.b, kind: p.kind === 'word' ? 'emo' : p.kind }
+    ]));
+    const box = $('#choices');
+    box.className = 'memory' + (cards.length > 12 ? ' m16' : cards.length > 8 ? ' m12' : cards.length > 6 ? ' m8' : '');
+    box.innerHTML = '';
+    let open = [], found = 0, misses = 0;
+    for (const c of cards) {
+      const b = document.createElement('button');
+      b.className = 'block mcard';
+      b.innerHTML = `<span class="back">?</span><span class="front ${c.kind}">${c.face}</span>`;
+      b.onclick = () => {
+        if (S.locked || open.length === 2 || b.classList.contains('up')) return;
+        b.classList.add('up'); sfx('pop');
+        open.push([b, c]);
+        if (open.length < 2) return;
+        const [[b1, c1], [b2, c2]] = open;
+        if (c1.id === c2.id) {
+          open = [];
+          setTimeout(() => {
+            b1.classList.add('done'); b2.classList.add('done');
+            found++;
+            if (found === pairs) { S.firstTry = misses <= pairs; win(); }
+            else { sfx('good'); speak(set[c1.id].say); }
+          }, 350);
+        } else {
+          misses++;
+          setTimeout(() => { b1.classList.remove('up'); b2.classList.remove('up'); open = []; }, 1100);
+        }
+      };
+      box.appendChild(b);
+    }
+    return { prompt: 'מוֹצְאִים זוּגוֹת!', say: 'מוֹצְאִים זוּגוֹת!', stars: 2 };
   }
 };
+
 
 /* Every phrase the game can say, for tools/make_voice.py (voice/phrases.txt).
    In the browser console: copy(allPhrases().join('\n')) */
@@ -927,7 +1000,7 @@ window.allPhrases = () => {
     ...items.map(i => `כַּמָּה ${i} יֵשׁ?`), ...items.map(i => `כַּמָּה ${i} יֵשׁ בְּיַחַד?`), ...items.map(i => `כַּמָּה ${i} נִשְׁאֲרוּ?`),
     'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה', 'מַתְחִילָה בָּאוֹת', 'מָה הַצְּלִיל הָרִאשׁוֹן בַּמִּלָּה', 'בּוֹאוּ נִבְנֶה אֶת הַמִּלָּה',
     'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?', 'אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?', 'אֵיזֶה מִסְפָּר חָסֵר?',
-    'אֵיפֹה יֵשׁ יוֹתֵר?', 'אֵיפֹה יֵשׁ פָּחוֹת?', 'כָּאן יֵשׁ',
+    'אֵיפֹה יֵשׁ יוֹתֵר?', 'אֵיפֹה יֵשׁ פָּחוֹת?', 'כָּאן יֵשׁ', 'מוֹצְאִים זוּגוֹת!',
     'וְעוֹד', 'פָּחוֹת', 'זֶה', 'כַּמָּה זֶה?', 'וְעוֹד כַּמָּה זֶה', 'הָיוּ', 'לָקַחְנוּ', 'נִשְׁאֲרוּ'
   ])];
 };

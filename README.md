@@ -31,6 +31,14 @@ Each round has 8 questions. Every correct answer earns a star, and every 5 stars
 
 Equations are written left to right, the way Israeli math books write them.
 
+## Memory (זִכָּרוֹן), both kids
+
+Flip two cards at a time to find the pairs. A round is 3 boards, and each finished board earns 2 stars.
+- **גַּן:** identical pictures (3, 4, then 6 pairs), then identical letters (6, then 8 pairs). The letter's name is said when a pair is found.
+- **כִּתָּה א׳:** a word and its picture make a pair, so each match means reading the word. Boards grow from 3 to 8 pairs, and the words get longer.
+
+A board finished with no more wrong flips than it has pairs counts as a clean answer for moving up a level.
+
 ## Levels
 
 Each game has 5 levels, and the level adjusts while the child plays:
