@@ -150,6 +150,18 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
   font-variant-numeric:tabular-nums;background:var(--paper);border:3px solid var(--ink);border-radius:16px;box-shadow:0 5px 0 var(--ink)}
 .seq span.hole{background:var(--sun)}
 
+/* colors, shapes, patterns, shadows */
+.choice.swatch{background:var(--c);min-height:120px}
+.choice.swatch.right{background:var(--c)}
+.choice.swatch.right::after{content:"✔";font-size:56px;color:#fff;text-shadow:0 0 6px #000}
+.choice.shape svg{width:min(100%,110px);height:auto;display:block}
+.pattern{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;padding:10px;max-width:100%;
+  background:var(--paper);border:3px solid var(--ink);border-radius:24px;box-shadow:0 6px 0 var(--ink)}
+.pattern span{font-family:var(--emoji);font-size:clamp(26px,7.5vw,52px);line-height:1.2}
+.pattern.long span{font-size:clamp(22px,6vw,44px)}
+.pattern span.hole{font-family:var(--font);font-weight:900;color:var(--ink);background:var(--sun);border-radius:12px;padding-inline:10px}
+.pic.shadow .sil{filter:brightness(0)}
+
 /* memory */
 .memory{display:grid;gap:10px;grid-template-columns:repeat(3,1fr);width:100%;max-width:620px;margin:auto}
 .memory.m8,.memory.m12,.memory.m16{grid-template-columns:repeat(4,1fr)}
@@ -398,6 +410,38 @@ const TENS = { 30: 'שְׁלוֹשִׁים', 40: 'אַרְבָּעִים', 50: '
 const numWord = n => NUMS[n] || TENS[n] || String(n);
 const COUNT_ITEMS = [['🍎','תַּפּוּחִים'],['🐟','דָּגִים'],['⭐','כּוֹכָבִים'],['🎈','בָּלוֹנִים'],['🐞','חִפּוּשִׁיּוֹת'],
   ['🍓','תּוּתִים'],['🚗','מְכוֹנִיּוֹת'],['🦆','בַּרְוָזִים'],['🌸','פְּרָחִים'],['🐢','צָבִים'],['🍪','עוּגִיּוֹת'],['⚽','כַּדּוּרִים']];
+// colors: name, "the ___" form for questions, and a swatch color
+const COLORS = [
+  { id: 'red', name: 'אָדוֹם', the: 'הָאָדוֹם', hex: '#E53935' },
+  { id: 'blue', name: 'כָּחוֹל', the: 'הַכָּחוֹל', hex: '#1E6FE0' },
+  { id: 'yellow', name: 'צָהוֹב', the: 'הַצָּהוֹב', hex: '#FFD21F' },
+  { id: 'green', name: 'יָרוֹק', the: 'הַיָּרוֹק', hex: '#34A853' },
+  { id: 'orange', name: 'כָּתוֹם', the: 'הַכָּתוֹם', hex: '#FF8A00' },
+  { id: 'purple', name: 'סָגוֹל', the: 'הַסָּגוֹל', hex: '#8E44AD' },
+  { id: 'pink', name: 'וָרוֹד', the: 'הַוָּרוֹד', hex: '#FF7EB9' },
+  { id: 'brown', name: 'חוּם', the: 'הַחוּם', hex: '#8D5A2B' },
+  { id: 'black', name: 'שָׁחוֹר', the: 'הַשָּׁחוֹר', hex: '#222222' },
+  { id: 'white', name: 'לָבָן', the: 'הַלָּבָן', hex: '#FFFFFF' }
+];
+const COLOR_THINGS = {
+  red: ['🍎', '🍓', '🚒'], yellow: ['🍌', '🌽', '☀️'], green: ['🐸', '🥒', '🌳'], orange: ['🥕'], purple: ['🍇'],
+  pink: ['🐷', '🌸'], blue: ['🌊', '🐳'], brown: ['🍫', '🐴'], white: ['☁️', '🥛', '🐑']
+};
+const SHAPES = [
+  { name: 'עִגּוּל', the: 'הָעִגּוּל', svg: '<circle cx="50" cy="50" r="42"/>' },
+  { name: 'רִבּוּעַ', the: 'הָרִבּוּעַ', svg: '<rect x="10" y="10" width="80" height="80" rx="3"/>' },
+  { name: 'מְשֻׁלָּשׁ', the: 'הַמְּשֻׁלָּשׁ', svg: '<polygon points="50,8 94,90 6,90"/>' },
+  { name: 'כּוֹכָב', the: 'הַכּוֹכָב', svg: '<polygon points="50,5 61,38 96,38 67,58 78,92 50,72 22,92 33,58 4,38 39,38"/>' },
+  { name: 'לֵב', the: 'הַלֵּב', svg: '<path d="M50 88C20 66 6 50 6 33C6 19 17 9 30 9C39 9 46 14 50 21C54 14 61 9 70 9C83 9 94 19 94 33C94 50 80 66 50 88Z"/>' },
+  { name: 'מַלְבֵּן', the: 'הַמַּלְבֵּן', svg: '<rect x="4" y="27" width="92" height="46" rx="3"/>' },
+  { name: 'מְעֻיָּן', the: 'הַמְּעֻיָּן', svg: '<polygon points="50,4 90,50 50,96 10,50"/>' }
+];
+const PATTERN_ITEMS = ['🍎', '🍌', '🍇', '🍓', '🐶', '🐱', '🐸', '⭐', '🎈', '🌸', '🚗', '⚽'];
+const SHADOW_GROUPS = [
+  ['🐟','🐴','🐱','🐶','🐘','🦁','🐒','🐢','🐍','🦋','🐝','🐓','🐷','🐰','🐭','🐸','🐜','🐫','🦓','🕊️','🐊','🦔','🦉','🐳','🐙','🕷️','🐌','🐬','🐞','🦛','🦘','🐑','🐄'],
+  ['🍎','🍌','🍦','🎂','🥚','🥕','🍉','🍓','🍇','🍋','🥛','🍞','🌽','🍕','🍫','🍒','🍄','🍪','🥒'],
+  ['🚗','🚌','🚂','✈️','⛵','🚚','🚒','🚢','🚲','🚑','🚁']
+];
 const PRAISE = ['כָּל הַכָּבוֹד!', 'מְצֻיָּן!', 'יוֹפִי!', 'נֶהֱדָר!', 'אַלּוּף הָעוֹלָם!', 'וָואוּ!'];
 // Album pages, 18 stickers each, unlocked in this order. The first two pages
 // are the original 36 stickers, so children keep what they already have.
@@ -457,11 +501,19 @@ const LV = {
   seq:         { options: [3, 3, 4, 4, 4], step: [1, 1, -1, 2, 10], max: [10, 20, 20, 20, 100] },
   // memory: kindergarten matches identical pictures, then identical letters;
   // first grade matches a word to its picture
-  memory:      { pairs: [3, 4, 6, 6, 8], letters: [0, 0, 0, 1, 1], lens: [[2, 3], [3, 4], [3, 4], [4, 5], [5, 99]] }
+  memory:      { pairs: [3, 4, 6, 6, 8], letters: [0, 0, 0, 1, 1], lens: [[2, 3], [3, 4], [3, 4], [4, 5], [5, 99]] },
+  // colors: 2 basic colors up to 4 of all 10; level 5 asks "what is red?" with pictures
+  colors:      { options: [2, 3, 4, 4, 4], pool: [3, 4, 6, 10, 10], objects: [0, 0, 0, 0, 1] },
+  // shapes: circle/square/triangle first, then star, heart, rectangle, diamond; level 5 adds colors
+  shapes:      { options: [2, 3, 4, 4, 4], pool: [3, 4, 5, 7, 5], colorMix: [0, 0, 0, 0, 1] },
+  // patterns: which item comes next in the row
+  pattern:     { options: [2, 3, 3, 4, 4], forms: [['AB'], ['AB', 'AAB'], ['ABC', 'ABB', 'AAB'], ['AABB', 'ABC', 'ABAC'], ['ABCD', 'AABC', 'ABBC']] },
+  // shadows: match a black silhouette to its picture; later all choices are from the same group
+  shadow:      { options: [2, 3, 3, 4, 4], similar: [0, 0, 1, 1, 1] }
 };
 
 const PLAYERS = {
-  gan:  { name: 'גַּן', say: 'גַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd', 'memory'] },
+  gan:  { name: 'גַּן', say: 'גַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd', 'memory', 'colors', 'shapes', 'pattern', 'shadow'] },
   kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq', 'memory'] }
 };
 const GAMES = {
@@ -476,7 +528,11 @@ const GAMES = {
   picAdd:      { name: 'חִבּוּר בִּתְמוּנוֹת',  icon: '1+2', bg: 'var(--grass-deep)', sm: true },
   arith:       { name: 'תַּרְגִּילִים',          icon: '3+4', bg: 'var(--plum)', sm: true },
   seq:         { name: 'מָה חָסֵר?',          icon: '1 2 ?', bg: 'var(--sea)', sm: true },
-  memory:      { name: 'זִכָּרוֹן',             icon: '🃏',  bg: 'var(--sun)', emo: true, rounds: 3 }
+  memory:      { name: 'זִכָּרוֹן',             icon: '🃏',  bg: 'var(--sun)', emo: true, rounds: 3 },
+  colors:      { name: 'צְבָעִים',              icon: '🎨',  bg: 'var(--sky-hi)', emo: true },
+  shapes:      { name: 'צוּרוֹת',               icon: '🔺',  bg: 'var(--sky-hi)', emo: true },
+  pattern:     { name: 'מָה בָּא אַחַר כָּךְ?',     icon: '🍎🍌', bg: 'var(--grass-deep)', emo: true, sm: true },
+  shadow:      { name: 'שֶׁל מִי הַצֵּל?',        icon: '👤',  bg: 'var(--plum)', emo: true }
 };
 
 /* ---------- saved progress ---------- */
@@ -574,9 +630,16 @@ const SAY_AS = {
   'דֻּבְדְּבָן': 'דובדבן', 'מִשְׁקָפַיִם': 'משקפיים', 'אוֹפַנַּיִם': 'אופניים', 'מִסְפָּרַיִם': 'מספריים',
   'עִפָּרוֹן': 'עיפרון', 'לִוְיָתָן': 'לוויתן', 'עוּגִיָּה': 'עוגייה', 'פִּטְרִיָּה': 'פטרייה',
   'מַטְרִיָּה': 'מטרייה', 'חִפּוּשִׁית': 'חיפושית', 'טֶלֶוִיזְיָה': 'טלוויזיה', 'חָלָב': 'חָלָב',
-  'סֵפֶר': 'סֵפֶר', 'כִּבְשָׂה': 'כבשה'
+  'סֵפֶר': 'סֵפֶר', 'כִּבְשָׂה': 'כבשה',
+  // colors and shapes
+  'וָרוֹד': 'וורוד', 'אֵיפֹה הַצֶּבַע הַוָּרוֹד?': 'איפה הצבע הוורוד?', 'מָה בְּצֶבַע וָרוֹד?': 'מה בצבע וורוד?',
+  'עִגּוּל': 'עיגול', 'רִבּוּעַ': 'ריבוע', 'מְשֻׁלָּשׁ': 'משולש', 'מְעֻיָּן': 'מעוין',
+  'אֵיפֹה הָעִגּוּל?': 'איפה העיגול?', 'אֵיפֹה הָרִבּוּעַ?': 'איפה הריבוע?', 'אֵיפֹה הַמְּשֻׁלָּשׁ?': 'איפה המשולש?',
+  'אֵיפֹה הַמְּעֻיָּן?': 'איפה המעוין?'
 };
-const sayAs = p => SAY_AS[p] || p.replace(/[֑-ׇ]/g, '');
+// plain spelling of shape words that also appear inside longer phrases
+const PLAIN_FIX = [['עגול', 'עיגול'], ['רבוע', 'ריבוע'], ['משלש', 'משולש']];
+const sayAs = p => SAY_AS[p] || PLAIN_FIX.reduce((t, [a, b]) => t.split(a).join(b), p.replace(/[֑-ׇ]/g, ''));
 window.SAY_AS = SAY_AS;
 
 function speakTTS(text, queue) {
@@ -848,6 +911,7 @@ function pickWord(pool) {
 const soundsAlike = (a, b) => SOUNDALIKE.some(g => g.includes(a) && g.includes(b));
 const wordPool = ([min, max]) => WORDS.filter(w => w.len >= min && w.len <= max);
 const ALL_LETTERS = LETTERS.map(l => l[0]);
+const WORD_BY_EMOJI = Object.fromEntries(WORDS.map(w => [w.e, w.w]));
 const between = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
 // number buttons: the answer plus near misses (answer ± step, 2*step, 3*step)
 function numChoices(ans, n, step, lo, hi) {
@@ -1156,8 +1220,92 @@ const MAKERS = {
       box.appendChild(b);
     }
     return { prompt: 'מוֹצְאִים זוּגוֹת!', say: 'מוֹצְאִים זוּגוֹת!', stars: 2 };
+  },
+
+  /* ---------- more kindergarten games ---------- */
+  colors() {
+    const n = L('options');
+    if (L('objects')) { // "what is red?" - pick the thing that has that color
+      const withThings = COLORS.filter(c => COLOR_THINGS[c.id]);
+      const [target, ...others] = sample(withThings, n);
+      const thing = rand(COLOR_THINGS[target.id]);
+      const opts = [{ label: thing, ok: true }, ...others.map(c => ({ label: rand(COLOR_THINGS[c.id]) }))];
+      choices(opts, 'emo');
+      return { prompt: `מָה בְּצֶבַע ${target.name}?`, say: `מָה בְּצֶבַע ${target.name}?`, after: WORD_BY_EMOJI[thing] || target.name };
+    }
+    const [target, ...others] = sample(COLORS.slice(0, L('pool')), n);
+    const box = $('#choices'); box.className = 'choices' + (n === 4 ? ' n4' : n === 2 ? ' n2' : ''); box.innerHTML = '';
+    for (const c of shuffle([target, ...others])) {
+      const b = document.createElement('button');
+      b.className = 'block choice swatch';
+      b.style.setProperty('--c', c.hex);
+      b.setAttribute('aria-label', c.name);
+      b.onclick = () => { if (S.locked) return; if (c === target) { b.classList.add('right'); win(); } else { miss(b); b.disabled = true; } };
+      box.appendChild(b);
+    }
+    return { prompt: `אֵיפֹה הַצֶּבַע ${target.the}?`, say: `אֵיפֹה הַצֶּבַע ${target.the}?`, after: target.name };
+  },
+
+  shapes() {
+    const n = L('options'), pool = SHAPES.slice(0, L('pool'));
+    const draw = (sh, color) => `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="${color}" stroke="#1F2A44" stroke-width="4" stroke-linejoin="round">${sh.svg}</g></svg>`;
+    let target, tColor, opts;
+    if (L('colorMix')) { // "where is the blue circle?" - same shape in other colors, other shapes in the same color
+      const cols = COLORS.slice(0, 4);
+      target = rand(pool); tColor = rand(cols);
+      // half the wrong answers are the same shape in another color, half another shape in the same color
+      const sameShape = shuffle(cols.filter(c => c !== tColor)).map(c => [target, c]);
+      const sameColor = shuffle(pool.filter(sh => sh !== target)).map(sh => [sh, tColor]);
+      opts = [[target, tColor]];
+      while (opts.length < n) opts.push((opts.length % 2 ? sameShape : sameColor).shift() || sameColor.shift() || sameShape.shift());
+    } else {
+      const picked = sample(pool, n); target = picked[0];
+      const color = rand(COLORS.slice(0, 4)).hex; // all the same color, so only the shape differs
+      opts = picked.map(sh => [sh, { hex: color }]);
+      tColor = null;
+    }
+    const box = $('#choices'); box.className = 'choices' + (n === 4 ? ' n4' : n === 2 ? ' n2' : ''); box.innerHTML = '';
+    for (const [sh, c] of shuffle(opts)) {
+      const b = document.createElement('button');
+      b.className = 'block choice shape';
+      b.innerHTML = draw(sh, c.hex);
+      const ok = sh === target && (!tColor || c === tColor);
+      b.onclick = () => { if (S.locked) return; if (ok) { b.classList.add('right'); win(); } else { miss(b); b.disabled = true; } };
+      box.appendChild(b);
+    }
+    const q = tColor ? `אֵיפֹה ${target.the} ${tColor.the}?` : `אֵיפֹה ${target.the}?`;
+    return { prompt: q, say: q, after: tColor ? `${target.name} ${tColor.name}` : target.name };
+  },
+
+  pattern() {
+    const form = rand(L('forms'));                      // e.g. 'AAB'
+    const kinds = [...new Set(form)].length;
+    const items = sample(PATTERN_ITEMS, kinds);
+    const seq = [];
+    for (let i = 0; seq.length < Math.max(6, form.length * 2) + 1; i++) seq.push(items[form.charCodeAt(i % form.length) - 65]);
+    const answer = seq.pop();
+    const row = document.createElement('div'); row.className = 'pattern' + (seq.length > 6 ? ' long' : ''); row.dir = 'rtl';
+    row.innerHTML = seq.map(e => `<span>${e}</span>`).join('') + '<span class="hole">?</span>';
+    $('#stage').appendChild(row);
+    const extra = sample(PATTERN_ITEMS.filter(e => !items.includes(e)), Math.max(0, L('options') - kinds));
+    const opts = [...new Set([answer, ...items, ...extra])].slice(0, L('options'));
+    choices(opts.map(e => ({ label: e, ok: e === answer })), 'emo');
+    return { prompt: 'מָה בָּא אַחַר כָּךְ?', say: 'מָה בָּא אַחַר כָּךְ?', after: WORD_BY_EMOJI[answer] };
+  },
+
+  shadow() {
+    const w = pickWord(WORDS);
+    const shade = document.createElement('div'); shade.className = 'pic shadow'; shade.innerHTML = `<span class="sil">${w.e}</span>`;
+    $('#stage').appendChild(shade);
+    const group = SHADOW_GROUPS.find(g => g.includes(w.e));
+    let pool = WORDS.filter(x => x.e !== w.e);
+    if (L('similar') && group) { const same = pool.filter(x => group.includes(x.e)); if (same.length >= L('options')) pool = same; }
+    const others = sample(pool, L('options') - 1);
+    choices([{ label: w.e, ok: true }, ...others.map(x => ({ label: x.e }))], 'emo');
+    return { prompt: 'שֶׁל מִי הַצֵּל הַזֶּה?', say: 'שֶׁל מִי הַצֵּל הַזֶּה?', after: w.w };
   }
 };
+
 
 
 /* Every phrase the game can say, for tools/make_voice.py (voice/phrases.txt).
@@ -1174,6 +1322,12 @@ window.allPhrases = () => {
     'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה', 'מַתְחִילָה בָּאוֹת', 'מָה הַצְּלִיל הָרִאשׁוֹן בַּמִּלָּה', 'בּוֹאוּ נִבְנֶה אֶת הַמִּלָּה',
     'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?', 'אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?', 'אֵיזֶה מִסְפָּר חָסֵר?',
     'אֵיפֹה יֵשׁ יוֹתֵר?', 'אֵיפֹה יֵשׁ פָּחוֹת?', 'כָּאן יֵשׁ', 'מוֹצְאִים זוּגוֹת!', 'וְגַם גָּבִיעַ חָדָשׁ!',
+    ...COLORS.map(c => `אֵיפֹה הַצֶּבַע ${c.the}?`), ...COLORS.map(c => c.name),
+    ...COLORS.filter(c => COLOR_THINGS[c.id]).map(c => `מָה בְּצֶבַע ${c.name}?`),
+    ...SHAPES.map(sh => `אֵיפֹה ${sh.the}?`), ...SHAPES.map(sh => sh.name),
+    ...SHAPES.slice(0, 5).flatMap(sh => COLORS.slice(0, 4).map(c => `אֵיפֹה ${sh.the} ${c.the}?`)),
+    ...SHAPES.slice(0, 5).flatMap(sh => COLORS.slice(0, 4).map(c => `${sh.name} ${c.name}`)),
+    'מָה בָּא אַחַר כָּךְ?', 'שֶׁל מִי הַצֵּל הַזֶּה?',
     'וְעוֹד', 'פָּחוֹת', 'זֶה', 'כַּמָּה זֶה?', 'וְעוֹד כַּמָּה זֶה', 'הָיוּ', 'לָקַחְנוּ', 'נִשְׁאֲרוּ'
   ])];
 };

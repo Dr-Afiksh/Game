@@ -11,6 +11,11 @@ It runs in any browser, works well on a tablet, and needs no install or server.
 - **כַּמָּה יֵשׁ?** Counting objects from 1 to 5, then up to 10. Tapping an object counts it out loud.
 - **אוֹת רִאשׁוֹנָה** A picture and its spoken word. The child picks the letter the word starts with.
 
+- **צְבָעִים** "Where is red?" with color swatches: 2 basic colors, up to 4 of 10 colors. Level 5 asks "what is red?" with pictures (🍎 🍌 🥒…).
+- **צוּרוֹת** Find the shape: circle, square and triangle first, then star, heart, rectangle and diamond. Level 5 adds colors ("where is the blue circle?").
+- **מָה בָּא אַחַר כָּךְ?** Patterns: which picture comes next in the row. AB, then AAB, ABC, ABB, and up to ABCD.
+- **שֶׁל מִי הַצֵּל?** Match a black silhouette to its picture. From level 3 all the choices are from the same group (all animals, all food…).
+
 **כִּתָּה א׳ (first grade, just learning to read)**
 - **הַצְּלִיל הָרִאשׁוֹן** Picks the first syllable with its nikud (בָּ / בִּ / מָ…).
 - **קוֹרְאִים וּבוֹחֲרִים** Reads a pointed word and picks the matching picture.
