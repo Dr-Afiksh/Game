@@ -61,9 +61,12 @@ Progress is saved in the browser (localStorage), separately for each child.
 
 ## Voice
 
-The game can play pre-recorded clips from a neural Hebrew voice, which sounds
-much better than a phone's built-in voice. Any phrase without a clip falls
-back to the device's text-to-speech (`he-IL`).
+The game uses the device's own Hebrew text-to-speech (`he-IL`).
+
+It can also play pre-recorded clips instead, if `voice/voice.js` exists. That file is
+not included right now: the Microsoft and Google voices tried so far (samples in
+`voice/samples/`) did not pronounce the phrases well enough. Any phrase without a
+clip falls back to the device voice.
 
 - `voice/phrases.txt` lists every phrase the game says (about 250).
 - `tools/make_voice.py` records them with Microsoft's neural voices (free, no account) and writes `voice/voice.js`:
