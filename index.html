@@ -274,6 +274,7 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
   </section>
 
 </div>
+<script src="voice/voice.js"></script>
 <script>
 (() => {
 'use strict';
@@ -343,7 +344,8 @@ const VOWEL = { a: 'ָ', e: 'ֵ', i: 'ִ', o: 'וֹ', u: 'וּ' };
 const NUMS = ['אֶפֶס', 'אַחַת', 'שְׁתַּיִם', 'שָׁלוֹשׁ', 'אַרְבַּע', 'חָמֵשׁ', 'שֵׁשׁ', 'שֶׁבַע', 'שְׁמוֹנֶה', 'תֵּשַׁע', 'עֶשֶׂר',
   'אַחַת עֶשְׂרֵה', 'שְׁתֵּים עֶשְׂרֵה', 'שְׁלוֹשׁ עֶשְׂרֵה', 'אַרְבַּע עֶשְׂרֵה', 'חֲמֵשׁ עֶשְׂרֵה', 'שֵׁשׁ עֶשְׂרֵה',
   'שְׁבַע עֶשְׂרֵה', 'שְׁמוֹנֶה עֶשְׂרֵה', 'תְּשַׁע עֶשְׂרֵה', 'עֶשְׂרִים'];
-const numWord = n => NUMS[n] || String(n); // above 20 the speech engine reads the digits itself
+const TENS = { 30: 'שְׁלוֹשִׁים', 40: 'אַרְבָּעִים', 50: 'חֲמִשִּׁים', 60: 'שִׁשִּׁים', 70: 'שִׁבְעִים', 80: 'שְׁמוֹנִים', 90: 'תִּשְׁעִים', 100: 'מֵאָה' };
+const numWord = n => NUMS[n] || TENS[n] || String(n);
 const COUNT_ITEMS = [['🍎','תַּפּוּחִים'],['🐟','דָּגִים'],['⭐','כּוֹכָבִים'],['🎈','בָּלוֹנִים'],['🐞','חִפּוּשִׁיּוֹת'],
   ['🍓','תּוּתִים'],['🚗','מְכוֹנִיּוֹת'],['🦆','בַּרְוָזִים'],['🌸','פְּרָחִים'],['🐢','צָבִים'],['🍪','עוּגִיּוֹת'],['⚽','כַּדּוּרִים']];
 const PRAISE = ['כָּל הַכָּבוֹד!', 'מְצֻיָּן!', 'יוֹפִי!', 'נֶהֱדָר!', 'אַלּוּף הָעוֹלָם!', 'וָואוּ!'];
@@ -374,8 +376,8 @@ const LV = {
 };
 
 const PLAYERS = {
-  gan:  { name: 'גַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd'] },
-  kita: { name: 'כִּתָּה א׳', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq'] }
+  gan:  { name: 'גַּן', say: 'גַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd'] },
+  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq'] }
 };
 const GAMES = {
   letters:     { name: 'אֵיפֹה הָאוֹת?',      icon: 'א',   bg: 'var(--berry)' },
@@ -398,6 +400,13 @@ try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.gan && s.kita)
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) {} };
 
 /* ---------- sound ---------- */
+/* Voice: pre-recorded clips (voice/voice.js, made by tools/make_voice.py) are
+   played when they exist. Anything without a clip falls back to the device's
+   own Hebrew text-to-speech. Each utterance is a list of phrases; the clips
+   are played back to back. */
+const CLIPS = window.VOICE_CLIPS || null;
+const missingClips = new Set(); // phrases asked for that have no clip (see console: missingClips)
+window.missingClips = missingClips;
 let heVoice = null;
 const canSpeak = 'speechSynthesis' in window;
 function loadVoices() {
@@ -405,10 +414,39 @@ function loadVoices() {
   heVoice = speechSynthesis.getVoices().find(v => /^(he|iw)/i.test(v.lang)) || null;
 }
 if (canSpeak) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
-setTimeout(() => { $('#voiceNote').hidden = !!heVoice; }, 1500);
+const hasVoice = () => !!(CLIPS || heVoice);
+// let the game's sound play even when an iPhone's ring/silent switch is on silent
+try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+setTimeout(() => { $('#voiceNote').hidden = hasVoice(); }, 1500);
 
-function speak(text, queue) {
-  if (!DB.sound || !canSpeak || !text) return;
+let ac = null;
+function audioCtx() {
+  ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+  if (ac.state === 'suspended') ac.resume();
+  return ac;
+}
+// phones only allow sound after a tap, so wake the audio engine on the first one
+document.addEventListener('pointerdown', () => { try { audioCtx(); } catch (e) {} }, true);
+
+const clipCache = new Map();
+function clipBuffer(key) {
+  if (!clipCache.has(key)) {
+    const bin = atob(CLIPS[key]);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    clipCache.set(key, new Promise((ok, fail) => audioCtx().decodeAudioData(bytes.buffer, ok, fail)));
+  }
+  return clipCache.get(key);
+}
+let playing = [], queueEnd = 0, playToken = 0;
+function stopVoice() {
+  playToken++;
+  for (const s of playing) { try { s.stop(); } catch (e) {} }
+  playing = []; queueEnd = 0;
+  if (canSpeak) speechSynthesis.cancel();
+}
+function speakTTS(text, queue) {
+  if (!canSpeak) return;
   try {
     if (!queue) speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -417,11 +455,32 @@ function speak(text, queue) {
     speechSynthesis.speak(u);
   } catch (e) {}
 }
-let ac = null;
+async function speak(parts, queue) {
+  parts = [].concat(parts).filter(Boolean);
+  if (!DB.sound || !parts.length) return;
+  if (!queue) stopVoice();
+  const missing = CLIPS ? parts.filter(p => !CLIPS[p]) : parts;
+  if (CLIPS) missing.forEach(p => missingClips.add(p));
+  if (missing.length) return speakTTS(parts.join(' '), queue);
+  const token = playToken;
+  try {
+    const bufs = await Promise.all(parts.map(clipBuffer));
+    if (token !== playToken) return; // something newer started meanwhile
+    const ctx = audioCtx();
+    let t = Math.max(ctx.currentTime + 0.03, queueEnd);
+    for (const buf of bufs) {
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.connect(ctx.destination); src.start(t);
+      playing.push(src);
+      t += buf.duration + 0.06;
+    }
+    queueEnd = t + 0.15;
+  } catch (e) { speakTTS(parts.join(' '), queue); }
+}
 function sfx(kind) {
   if (!DB.sound) return;
   try {
-    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const ac = audioCtx();
     const notes = kind === 'good' ? [660, 880, 1175] : kind === 'pop' ? [620] : [240, 190];
     notes.forEach((f, i) => {
       const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + i * 0.09;
@@ -517,7 +576,7 @@ function finish() {
   $('#doneStickRow').textContent = S.newStickers.join(' ');
   show('done');
   sfx('good'); confetti();
-  speak('כָּל הַכָּבוֹד! ' + (S.newStickers.length ? 'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!' : ''));
+  speak(['כָּל הַכָּבוֹד!', S.newStickers.length && 'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!']);
 }
 // Difficulty follows the child during the round: 3 clean answers in a row
 // move up a level, 2 answers in a row that needed retries move down.
@@ -546,7 +605,7 @@ function win() {
   const sc = $('#gameStars'); sc.textContent = starsText(S.p);
   sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump');
   sfx('good'); confetti();
-  speak(rand(PRAISE) + ' ' + (S.cur.after || ''));
+  speak([rand(PRAISE)].concat(S.cur.after || []));
   if (change === 'up') setTimeout(levelUpBanner, 700);
   S.q++;
   setTimeout(nextQ, change === 'up' ? 2800 : 2200);
@@ -609,7 +668,7 @@ const MAKERS = {
     // easy levels keep look-alike letters out; hard levels put them in on purpose
     let others = L('lookalike') ? sample(near, n - 1) : [];
     others = others.concat(sample(ALL_LETTERS.filter(x => x !== ch && !others.includes(x) && (L('lookalike') || !near.includes(x))), n - 1 - others.length));
-    if (L('showLetter') || !heVoice) {
+    if (L('showLetter') || !hasVoice()) {
       const h = document.createElement('div'); h.className = 'hint';
       h.innerHTML = `מוֹצְאִים אֶת: <b>${ch}</b>`;
       $('#stage').appendChild(h);
@@ -652,14 +711,14 @@ const MAKERS = {
     return {
       prompt: 'כַּמָּה יֵשׁ? נוֹגְעִים וְסוֹפְרִים',
       say: `כַּמָּה ${itemName} יֵשׁ?`,
-      after: `${NUMS[n]} ${n === 1 ? '' : itemName}`
+      after: n === 1 ? [NUMS[n]] : [NUMS[n], itemName]
     };
   },
 
   firstLetter() {
     const w = pickWord(wordPool([1, L('maxLen')]));
     picture(w, true);
-    if (!heVoice) {
+    if (!hasVoice()) {
       const t = document.createElement('div'); t.className = 'hint'; t.innerHTML = `<b>${w.w}</b>`;
       $('#stage').appendChild(t);
     }
@@ -670,8 +729,8 @@ const MAKERS = {
     choices([{ label: w.first, ok: true }, ...others.map(x => ({ label: x }))]);
     return {
       prompt: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
-      say: `בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה ${w.w}?`,
-      after: `${w.w} מַתְחִילָה בָּאוֹת ${LETTER_NAME[w.first]}`
+      say: ['בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה', w.w],
+      after: [w.w, 'מַתְחִילָה בָּאוֹת', LETTER_NAME[w.first]]
     };
   },
 
@@ -690,7 +749,7 @@ const MAKERS = {
       .filter(x => x[0] !== base[0] && !soundsAlike(x[0], base[0]));
     while (opts.size < n) opts.add(rand(pool2) + VOWEL[v]);
     choices([...opts].map(o => ({ label: o, ok: o === first })));
-    return { prompt: 'מָה הַצְּלִיל הָרִאשׁוֹן?', say: `מָה הַצְּלִיל הָרִאשׁוֹן בַּמִּלָּה ${w.w}?`, after: w.w };
+    return { prompt: 'מָה הַצְּלִיל הָרִאשׁוֹן?', say: ['מָה הַצְּלִיל הָרִאשׁוֹן בַּמִּלָּה', w.w], after: w.w };
   },
 
   read() {
@@ -744,7 +803,7 @@ const MAKERS = {
       };
       box.appendChild(b); return b;
     });
-    return { prompt: 'בּוֹנִים אֶת הַמִּלָּה', say: `בּוֹאוּ נִבְנֶה אֶת הַמִּלָּה ${w.w}`, after: w.w };
+    return { prompt: 'בּוֹנִים אֶת הַמִּלָּה', say: ['בּוֹאוּ נִבְנֶה אֶת הַמִּלָּה', w.w], after: w.w };
   },
 
   /* ---------- math ---------- */
@@ -765,7 +824,7 @@ const MAKERS = {
       box.appendChild(btn);
     }
     const q = less ? 'אֵיפֹה יֵשׁ פָּחוֹת?' : 'אֵיפֹה יֵשׁ יוֹתֵר?';
-    return { prompt: q, say: q, after: `כָּאן יֵשׁ ${numWord(want)}` };
+    return { prompt: q, say: q, after: ['כָּאן יֵשׁ', numWord(want)] };
   },
 
   picAdd() {
@@ -799,8 +858,8 @@ const MAKERS = {
     $('#stage').appendChild(eq);
     numChoices(ans, L('options'), 1, minus ? 0 : 1, 10);
     return minus
-      ? { prompt: 'כַּמָּה נִשְׁאֲרוּ?', say: `הָיוּ ${numWord(a)}, לָקַחְנוּ ${numWord(b)}. כַּמָּה ${itemName} נִשְׁאֲרוּ?`, after: `נִשְׁאֲרוּ ${numWord(ans)}` }
-      : { prompt: 'כַּמָּה יֵשׁ בְּיַחַד?', say: `${numWord(a)} וְעוֹד ${numWord(b)}. כַּמָּה ${itemName} יֵשׁ בְּיַחַד?`, after: `${numWord(a)} וְעוֹד ${numWord(b)} זֶה ${numWord(ans)}` };
+      ? { prompt: 'כַּמָּה נִשְׁאֲרוּ?', say: ['הָיוּ', numWord(a), 'לָקַחְנוּ', numWord(b), `כַּמָּה ${itemName} נִשְׁאֲרוּ?`], after: ['נִשְׁאֲרוּ', numWord(ans)] }
+      : { prompt: 'כַּמָּה יֵשׁ בְּיַחַד?', say: [numWord(a), 'וְעוֹד', numWord(b), `כַּמָּה ${itemName} יֵשׁ בְּיַחַד?`], after: [numWord(a), 'וְעוֹד', numWord(b), 'זֶה', numWord(ans)] };
   },
 
   arith() {
@@ -811,8 +870,8 @@ const MAKERS = {
       else { a = between(2, 12); b = a + between(1, 8); }
       ans = b - a;
       text = `${a} + ? = ${b}`;
-      say = `${numWord(a)} וְעוֹד כַּמָּה זֶה ${numWord(b)}?`;
-      after = `${numWord(a)} וְעוֹד ${numWord(ans)} זֶה ${numWord(b)}`;
+      say = [numWord(a), 'וְעוֹד כַּמָּה זֶה', numWord(b)];
+      after = [numWord(a), 'וְעוֹד', numWord(ans), 'זֶה', numWord(b)];
     } else {
       if (lv === 1) { a = between(1, 4); b = between(1, 5 - a); op = '+'; }
       else if (lv === 2) { a = between(1, 9); b = between(1, 10 - a); op = '+'; }
@@ -822,8 +881,8 @@ const MAKERS = {
       ans = op === '+' ? a + b : a - b;
       const word = op === '+' ? 'וְעוֹד' : 'פָּחוֹת';
       text = `${a} ${op} ${b} = ?`;
-      say = `${numWord(a)} ${word} ${numWord(b)}, כַּמָּה זֶה?`;
-      after = `${numWord(a)} ${word} ${numWord(b)} זֶה ${numWord(ans)}`;
+      say = [numWord(a), word, numWord(b), 'כַּמָּה זֶה?'];
+      after = [numWord(a), word, numWord(b), 'זֶה', numWord(ans)];
     }
     const eq = document.createElement('div'); eq.className = 'bigword equation'; eq.dir = 'ltr'; eq.textContent = text;
     $('#stage').appendChild(eq);
@@ -851,19 +910,37 @@ const MAKERS = {
     });
     $('#stage').appendChild(row);
     numChoices(ans, L('options'), size, 0, max);
-    return { prompt: 'אֵיזֶה מִסְפָּר חָסֵר?', say: 'אֵיזֶה מִסְפָּר חָסֵר?', after: terms.map(numWord).join(', ') };
+    return { prompt: 'אֵיזֶה מִסְפָּר חָסֵר?', say: 'אֵיזֶה מִסְפָּר חָסֵר?', after: terms.map(numWord) };
   }
+};
+
+/* Every phrase the game can say, for tools/make_voice.py (voice/phrases.txt).
+   In the browser console: copy(allPhrases().join('\n')) */
+window.allPhrases = () => {
+  const items = COUNT_ITEMS.map(c => c[1]);
+  return [...new Set([
+    ...Object.values(PLAYERS).map(p => p.say),
+    ...PRAISE, 'עוֹד נִסָּיוֹן', 'עוֹלִים שָׁלָב!', 'כָּל הַכָּבוֹד!', 'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!',
+    ...LETTERS.map(([, n]) => `אֵיפֹה הָאוֹת ${n}?`), ...LETTERS.map(([, n]) => n),
+    ...WORDS.map(w => w.w),
+    ...NUMS, ...Object.values(TENS), ...items,
+    ...items.map(i => `כַּמָּה ${i} יֵשׁ?`), ...items.map(i => `כַּמָּה ${i} יֵשׁ בְּיַחַד?`), ...items.map(i => `כַּמָּה ${i} נִשְׁאֲרוּ?`),
+    'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה', 'מַתְחִילָה בָּאוֹת', 'מָה הַצְּלִיל הָרִאשׁוֹן בַּמִּלָּה', 'בּוֹאוּ נִבְנֶה אֶת הַמִּלָּה',
+    'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?', 'אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?', 'אֵיזֶה מִסְפָּר חָסֵר?',
+    'אֵיפֹה יֵשׁ יוֹתֵר?', 'אֵיפֹה יֵשׁ פָּחוֹת?', 'כָּאן יֵשׁ',
+    'וְעוֹד', 'פָּחוֹת', 'זֶה', 'כַּמָּה זֶה?', 'וְעוֹד כַּמָּה זֶה', 'הָיוּ', 'לָקַחְנוּ', 'נִשְׁאֲרוּ'
+  ])];
 };
 
 /* ---------- wiring ---------- */
 for (const p of ['gan', 'kita']) $('#p-' + p).onclick = () => {
-  S.p = p; sfx('pop'); speak(PLAYERS[p].name); renderMenu();
+  S.p = p; sfx('pop'); speak(PLAYERS[p].say); renderMenu();
 };
-$('#soundBtn').onclick = () => { DB.sound = !DB.sound; save(); if (!DB.sound && canSpeak) speechSynthesis.cancel(); renderHome(); };
+$('#soundBtn').onclick = () => { DB.sound = !DB.sound; save(); if (!DB.sound) stopVoice(); renderHome(); };
 $('#menuBack').onclick = renderHome;
 $('#albumBtn').onclick = renderAlbum;
 $('#albumBack').onclick = renderMenu;
-$('#gameBack').onclick = () => { if (canSpeak) speechSynthesis.cancel(); renderMenu(); };
+$('#gameBack').onclick = () => { stopVoice(); renderMenu(); };
 $('#sayAgain').onclick = () => S.cur && speak(S.cur.say);
 $('#againBtn').onclick = () => startGame(S.g);
 $('#toMenuBtn').onclick = renderMenu;

@@ -61,12 +61,31 @@ Progress is saved in the browser (localStorage), separately for each child.
 
 ## Voice
 
-Spoken prompts use the browser's text-to-speech with a Hebrew voice (`he-IL`).
+The game can play pre-recorded clips from a neural Hebrew voice, which sounds
+much better than a phone's built-in voice. Any phrase without a clip falls
+back to the device's text-to-speech (`he-IL`).
+
+- `voice/phrases.txt` lists every phrase the game says (about 250).
+- `tools/make_voice.py` records them with Microsoft's neural voices (free, no account) and writes `voice/voice.js`:
+
+  ```
+  pip install edge-tts
+  python tools/make_voice.py                           # Hila (female)
+  python tools/make_voice.py --voice he-IL-AvriNeural  # Avri (male)
+  ```
+
+- To fix a word that sounds wrong, edit its line in `phrases.txt` as
+  `phrase | how to say it` and run the script again. Only changed lines are re-recorded.
+- After adding words or games, refresh the list: in the browser console run
+  `copy(allPhrases().join('\n'))` and paste it into `phrases.txt` (keep your `|` fixes).
+  `missingClips` in the console shows anything the game tried to say without a clip.
+
+Without `voice/voice.js`, the device voice is used:
 - **iPad / iPhone:** Hebrew (Carmit) is built in.
 - **Android:** Settings → Text-to-speech → Google → install Hebrew.
 - **Windows:** Settings → Time & language → Speech → add Hebrew.
 
-If there is no Hebrew voice, the game still works and shows visual hints in place of the audio.
+If there is no voice at all, the game still works and shows visual hints in place of the audio.
 
 ## Running it
 
