@@ -156,5 +156,6 @@ If there is no voice at all, the game still works and shows visual hints in plac
 
 ## Adding words
 
-Words are in the `WORDS` list in `index.html` as `['word with nikud', 'emoji']`.
+There are about 200 words (animals, food, clothes, home, nature, vehicles, body, music and more).
+Words are in the `WORDS` list in `index.html` as `['word with nikud', 'emoji']`; each emoji is used by one word only.
 The game splits each word into syllable tiles automatically.
