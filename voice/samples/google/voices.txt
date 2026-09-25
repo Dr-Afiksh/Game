@@ -1,0 +1,50 @@
+he-IL-Chirp3-HD-Achernar         FEMALE
+he-IL-Chirp3-HD-Achird           MALE
+he-IL-Chirp3-HD-Algenib          MALE
+he-IL-Chirp3-HD-Algieba          MALE
+he-IL-Chirp3-HD-Alnilam          MALE
+he-IL-Chirp3-HD-Aoede            FEMALE
+he-IL-Chirp3-HD-Autonoe          FEMALE
+he-IL-Chirp3-HD-Callirrhoe       FEMALE
+he-IL-Chirp3-HD-Charon           MALE
+he-IL-Chirp3-HD-Despina          FEMALE
+he-IL-Chirp3-HD-Enceladus        MALE
+he-IL-Chirp3-HD-Erinome          FEMALE
+he-IL-Chirp3-HD-Fenrir           MALE
+he-IL-Chirp3-HD-Gacrux           FEMALE
+he-IL-Chirp3-HD-Iapetus          MALE
+he-IL-Chirp3-HD-Kore             FEMALE
+he-IL-Chirp3-HD-Laomedeia        FEMALE
+he-IL-Chirp3-HD-Leda             FEMALE
+he-IL-Chirp3-HD-Orus             MALE
+he-IL-Chirp3-HD-Puck             MALE
+he-IL-Chirp3-HD-Pulcherrima      FEMALE
+he-IL-Chirp3-HD-Rasalgethi       MALE
+he-IL-Chirp3-HD-Sadachbia        MALE
+he-IL-Chirp3-HD-Sadaltager       MALE
+he-IL-Chirp3-HD-Schedar          MALE
+he-IL-Chirp3-HD-Sulafat          FEMALE
+he-IL-Chirp3-HD-Umbriel          MALE
+he-IL-Chirp3-HD-Vindemiatrix     FEMALE
+he-IL-Chirp3-HD-Zephyr           FEMALE
+he-IL-Chirp3-HD-Zubenelgenubi    MALE
+he-IL-Standard-A                 FEMALE
+he-IL-Standard-B                 MALE
+he-IL-Standard-C                 FEMALE
+he-IL-Standard-D                 MALE
+he-IL-Wavenet-A                  FEMALE
+he-IL-Wavenet-B                  MALE
+he-IL-Wavenet-C                  FEMALE
+he-IL-Wavenet-D                  MALE
+
+Sample files (speakingRate 0.85):
+he-IL-Chirp3-HD-Aoede.mp3                FEMALE
+he-IL-Chirp3-HD-Kore.mp3                 FEMALE
+he-IL-Chirp3-HD-Leda.mp3                 FEMALE
+he-IL-Chirp3-HD-Zephyr.mp3               FEMALE
+he-IL-Chirp3-HD-Puck.mp3                 MALE
+he-IL-Chirp3-HD-Charon.mp3               MALE
+he-IL-Chirp3-HD-Fenrir.mp3               MALE
+he-IL-Chirp3-HD-Orus.mp3                 MALE
+he-IL-Chirp3-HD-Aoede-nikud.mp3          FEMALE - with nikud
+he-IL-Chirp3-HD-Puck-nikud.mp3           MALE - with nikud
