@@ -41,6 +41,15 @@ Each round has 8 questions, and every correct answer earns a star.
 
 Saves from before this change keep every sticker already earned.
 
+## Playing together (מְשַׂחֲקִים יַחַד)
+
+A cooperative mode for both kids on one device, from the button on the home screen.
+- 10 turns, alternating 🐣 and 🦉. Each turn is a random game from that child's own list, at their own level.
+- Every right answer moves the shared path one step toward the 🎁 treasure.
+- If a child taps two wrong answers, the right one starts to glow, a cue for the other to help.
+- Each child keeps the stars they earn, and both get +5 bonus stars when they reach the treasure.
+- Trophies: 🤝 played together, 👫 10 times together. Levels do not change in this mode.
+
 ## Math
 
 **גַּן**

@@ -207,7 +207,23 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
   box-shadow:0 8px 0 var(--ink);pointer-events:none}
 .lvlup.show{animation:lvlpop 1.9s ease-out forwards}
 @keyframes lvlpop{0%{transform:translate(-50%,-50%) scale(.3)}15%{transform:translate(-50%,-50%) scale(1.1)}25%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
-.tile.glow{animation:glow 1s infinite}
+.tile.glow,.choice.glow{animation:glow 1s infinite}
+.together-btn{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 18px;font-size:clamp(24px,6vw,32px);font-weight:900;
+  background:linear-gradient(90deg,#FFF1C7,#E7E0FB)}
+.together-btn .faces{font-family:var(--emoji);font-weight:400;font-size:clamp(32px,8vw,44px)}
+.team{display:flex;flex-direction:column;align-items:center;gap:8px}
+.turn-tag{padding:6px 18px;border:3px solid var(--ink);border-radius:999px;font-size:clamp(22px,5.5vw,28px);font-weight:900;animation:pop .4s}
+.turn-tag.gan{background:#FFF1C7}
+.turn-tag.kita{background:#E7E0FB}
+.road{display:flex;align-items:center;gap:4px;direction:rtl}
+.road i{width:clamp(24px,6.5vw,34px);height:clamp(24px,6.5vw,34px);border-radius:50%;border:2px solid var(--ink);background:var(--paper);
+  display:grid;place-items:center;font-style:normal;font-family:var(--emoji);font-size:clamp(14px,4vw,20px)}
+.road i.now{background:var(--sun);transform:scale(1.15)}
+.road i.done{background:#C9F0C4}
+.road b{font-family:var(--emoji);font-weight:400;font-size:clamp(26px,7vw,38px)}
+.who-next{display:flex;align-items:center;gap:8px;font-family:var(--emoji);font-size:28px}
+.who-next .pbar{flex:1}
+.who-next .album-next{font-family:var(--font);font-size:15px}
 @keyframes glow{50%{background:var(--sun)}}
 
 /* done + album */
@@ -279,6 +295,7 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
         <span class="face">🦉</span><span class="pname">כִּתָּה א׳</span><span class="pstars"></span>
       </button>
     </div>
+    <button class="block together-btn" id="togetherBtn"><span class="faces">🐣🤝🦉</span><span>מְשַׂחֲקִים יַחַד</span></button>
     <div class="home-foot">
       <button class="block pill" id="soundBtn"></button>
     </div>
@@ -305,6 +322,7 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
       <div class="starcount block" id="gameStars"></div>
     </div>
     <div class="lvlchip" id="gameLvl"></div>
+    <div class="team" id="team" hidden></div>
     <p class="prompt" id="prompt"></p>
     <div class="lvlup" id="lvlUp" hidden></div>
     <div class="stage" id="stage"></div>
@@ -313,7 +331,7 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 
   <section id="done" class="screen done" hidden>
     <div class="big">🏆</div>
-    <h2>כָּל הַכָּבוֹד!</h2>
+    <h2 id="doneTitle">כָּל הַכָּבוֹד!</h2>
     <div class="gain" id="doneGain"></div>
     <div class="bonuses" id="doneBonus"></div>
     <div class="newstick block" id="doneStickers" hidden>
@@ -502,7 +520,9 @@ const TROPHIES = [
   ['days3', '📅', '3 יָמִים בִּרְצִיפוּת', d => d.dayStreak >= 3],
   ['days7', '🔥', 'שָׁבוּעַ שָׁלֵם', d => d.dayStreak >= 7],
   ['page', '📒', 'דַּף מָלֵא בָּאַלְבּוֹם', d => d.stickers >= 18],
-  ['album', '👑', 'כָּל הָאַלְבּוֹם', d => d.stickers >= STICKERS.length]
+  ['album', '👑', 'כָּל הָאַלְבּוֹם', d => d.stickers >= STICKERS.length],
+  ['together', '🤝', 'שִׂחַקְנוּ יַחַד', d => d.together >= 1],
+  ['together10', '👫', '10 מִשְׂחָקִים יַחַד', d => d.together >= 10]
 ];
 const ROUND = 8;
 const MAX_LEVEL = 5;
@@ -544,8 +564,8 @@ const LV = {
 };
 
 const PLAYERS = {
-  gan:  { name: 'גַּן', say: 'גַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd', 'memory', 'colors', 'shapes', 'pattern', 'shadow'] },
-  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq', 'memory', 'syllables', 'missing', 'sentences', 'numCompare'] }
+  gan:  { name: 'גַּן', say: 'גַּן', turn: 'תּוֹר הַגַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd', 'memory', 'colors', 'shapes', 'pattern', 'shadow'] },
+  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', turn: 'תּוֹר כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq', 'memory', 'syllables', 'missing', 'sentences', 'numCompare'] }
 };
 const GAMES = {
   letters:     { name: 'אֵיפֹה הָאוֹת?',      icon: 'א',   bg: 'var(--berry)' },
@@ -581,7 +601,7 @@ for (const p of ['gan', 'kita']) {
     d.progress = d.stickers >= 36 ? 0 : d.stars % 5;
   }
   d.rounds = d.rounds || 0; d.perfects = d.perfects || 0; d.played = d.played || []; d.trophies = d.trophies || [];
-  d.dayStreak = d.dayStreak || 0; d.lastDay = d.lastDay || '';
+  d.dayStreak = d.dayStreak || 0; d.lastDay = d.lastDay || ''; d.together = d.together || 0;
 }
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) {} };
 
@@ -672,7 +692,7 @@ const SAY_AS = {
   'אֵיפֹה הָעִגּוּל?': 'איפה העיגול?', 'אֵיפֹה הָרִבּוּעַ?': 'איפה הריבוע?', 'אֵיפֹה הַמְּשֻׁלָּשׁ?': 'איפה המשולש?',
   'אֵיפֹה הַמְּעֻיָּן?': 'איפה המעוין?',
   // first-grade games
-  'כַּמָּה הֲבָרוֹת יֵשׁ בַּמִּלָּה': 'כמה הברות יש במילה', 'אֵיזוֹ אוֹת חֲסֵרָה בַּמִּלָּה': 'איזו אות חסרה במילה',
+  'תּוֹר כִּתָּה אָלֶף': 'תור כיתה אָלֶף', 'כַּמָּה הֲבָרוֹת יֵשׁ בַּמִּלָּה': 'כמה הברות יש במילה', 'אֵיזוֹ אוֹת חֲסֵרָה בַּמִּלָּה': 'איזו אות חסרה במילה',
   'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?': 'איזו תמונה מתאימה למשפט?', 'שָׁוֶה לְ': 'שווה ל',
   'הַצִּפּוֹר עָפָה.': 'הציפור עפה.', 'הַמָּטוֹס עָף בַּשָּׁמַיִם.': 'המטוס עף בשמיים.',
   'יֵשׁ לִי עוּגָה לְיוֹם הֻלֶּדֶת.': 'יש לי עוגה ליום הולדת.', 'הַתַּרְנְגוֹל קוֹרֵא קוּקוּרִיקוּ.': 'התרנגול קורא קוקוריקו.',
@@ -811,6 +831,7 @@ function renderAlbum() {
 function level() { return Math.min(MAX_LEVEL, DB[S.p].levels[S.g] || 1); }
 const L = key => LV[S.g][key][level() - 1];
 function startGame(g) {
+  S.together = false; $('#team').hidden = true; $('#dots').hidden = false;
   S.g = g; S.q = 0; S.total = GAMES[g].rounds || ROUND; S.gained = 0; S.newStickers = []; S.bonuses = []; S.clean = 0; S.recent = []; S.streak = 0; S.struggle = 0;
   show('game');
   nextQ();
@@ -820,14 +841,20 @@ function renderLevel() {
   $('#gameLvl').innerHTML = `שָׁלָב ${lv} <span class="lvl">${Array.from({ length: MAX_LEVEL }, (_, i) => `<i class="${i < lv ? 'on' : ''}"></i>`).join('')}</span>`;
 }
 function nextQ() {
-  if (S.q >= S.total) return finish();
+  if (S.q >= S.total) return S.together ? finishTogether() : finish();
   S.firstTry = true; S.locked = false; S.misses = 0;
+  if (S.together) { // take turns: the 4-year-old first, each gets a game from their own list at their own level
+    S.p = S.q % 2 ? 'kita' : 'gan';
+    S.g = rand(PLAYERS[S.p].games.filter(g => !TOGETHER_SKIP.includes(g)));
+    renderTeam();
+  }
   $('#dots').innerHTML = Array.from({ length: S.total }, (_, i) => `<i class="${i < S.q ? 'done' : i === S.q ? 'now' : ''}"></i>`).join('');
   $('#gameStars').textContent = starsText(S.p);
   renderLevel();
   $('#stage').innerHTML = ''; $('#choices').innerHTML = ''; $('#choices').className = 'choices';
   S.cur = MAKERS[S.g]();
   $('#prompt').textContent = S.cur.prompt;
+  if (S.together) speak(PLAYERS[S.p].turn, true);
   speak(S.cur.say, true);
 }
 function today() { const t = new Date(); return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`; }
@@ -848,6 +875,7 @@ function finish() {
   newTrophies.forEach(([id]) => d.trophies.push(id));
   save();
 
+  $('#doneTitle').textContent = 'כָּל הַכָּבוֹד!';
   $('#doneGain').textContent = `+${S.gained} ⭐`;
   const merged = {}; // the same bonus twice shows once, e.g. "עוֹלִים שָׁלָב ×2 +4"
   for (const [icon, name, n] of S.bonuses) (merged[name] = merged[name] || { icon, n: 0, times: 0 }), merged[name].n += n, merged[name].times++;
@@ -887,10 +915,12 @@ function addStars(n) {
   const d = DB[S.p];
   for (let i = 0; i < n; i++) {
     d.stars++; S.gained++;
+    if (S.together) S.gainedBy[S.p]++;
     if (d.stickers >= STICKERS.length) continue;
     d.progress++;
     if (d.progress >= stickerCost(d.stickers + 1)) {
       S.newStickers.push(d.stickers);
+      if (S.together) S.teamStickers.push(d.stickers);
       d.stickers++; d.progress = 0;
     }
   }
@@ -898,8 +928,9 @@ function addStars(n) {
 function win() {
   S.locked = true;
   if (S.firstTry) S.clean++;
-  const change = adjustLevel(S.firstTry);
+  const change = S.together ? '' : adjustLevel(S.firstTry); // levels only change when playing alone
   addStars(S.cur.stars || 1);
+  if (S.together) S.path.push(PLAYERS[S.p].face);
   if (change === 'up') { addStars(BONUS.levelUp); S.bonuses.push(['⬆️', 'עוֹלִים שָׁלָב', BONUS.levelUp]); }
   save();
   const sc = $('#gameStars'); sc.textContent = starsText(S.p);
@@ -915,6 +946,54 @@ function miss(el) {
   el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
   sfx('bad');
   speak('עוֹד נִסָּיוֹן');
+  if (S.together && S.misses >= 2) { // time for a little help: the right answer starts to glow
+    const ok = document.querySelector('#choices [data-ok]');
+    if (ok) ok.classList.add('glow');
+  }
+}
+
+/* ---------- playing together ---------- */
+// one device, taking turns; every right answer moves the shared token one step closer to the treasure
+const TOGETHER_TURNS = 10;
+const TOGETHER_BONUS = 5;
+const TOGETHER_SKIP = ['memory', 'build']; // games that do not fit a single quick turn
+function startTogether() {
+  Object.assign(S, { together: true, q: 0, total: TOGETHER_TURNS, gained: 0, gainedBy: { gan: 0, kita: 0 },
+    newStickers: [], teamStickers: [], bonuses: [], clean: 0, recent: [], streak: 0, struggle: 0, path: [] });
+  $('#team').hidden = false; $('#dots').hidden = true;
+  show('game');
+  nextQ();
+}
+function renderTeam() {
+  const pl = PLAYERS[S.p];
+  const cells = Array.from({ length: S.total }, (_, i) =>
+    i < S.path.length ? `<i class="done">${S.path[i]}</i>` : `<i class="${i === S.q ? 'now' : ''}"></i>`).join('');
+  $('#team').innerHTML = `<div class="turn-tag ${S.p}">${pl.face} תּוֹר ${pl.name}</div><div class="road">${cells}<b>🎁</b></div>`;
+}
+function finishTogether() {
+  const newTrophies = [];
+  for (const p of ['gan', 'kita']) {
+    S.p = p;
+    addStars(TOGETHER_BONUS);
+    const d = DB[p];
+    d.together++;
+    TROPHIES.filter(([id, , , test]) => !d.trophies.includes(id) && test(d, p))
+      .forEach(t => { d.trophies.push(t[0]); newTrophies.push([PLAYERS[p].face, t]); });
+  }
+  save();
+  $('#doneTitle').textContent = 'בְּיַחַד הִצְלַחְתֶּם!';
+  $('#doneGain').textContent = `🐣 +${S.gainedBy.gan} ⭐   🦉 +${S.gainedBy.kita} ⭐`;
+  $('#doneBonus').innerHTML = `<span class="chip">🤝 בּוֹנוּס יַחַד +${TOGETHER_BONUS} ⭐</span>`;
+  $('#doneStickers').hidden = !S.teamStickers.length;
+  $('#doneStickTitle').textContent = 'מַדְבֵּקוֹת חֲדָשׁוֹת בָּאַלְבּוֹמִים!';
+  $('#doneStickRow').innerHTML = S.teamStickers.map((n, k) =>
+    `<span class="${isGold(n) ? 'gold' : ''}" style="animation-delay:${0.4 + k * 0.35}s">${STICKERS[n]}</span>`).join('');
+  $('#doneTrophies').hidden = !newTrophies.length;
+  $('#doneTrophyRow').innerHTML = newTrophies.map(([face, [, icon, name]]) => `<span class="trophy"><b>${icon}</b><small>${face} ${name}</small></span>`).join('');
+  $('#doneNext').innerHTML = ['gan', 'kita'].map(p => `<div class="who-next">${PLAYERS[p].face}${progressBar(p)}</div>`).join('');
+  show('done');
+  sfx('good'); confetti(); setTimeout(confetti, 600);
+  speak(['בְּיַחַד הִצְלַחְתֶּם!', S.teamStickers.length && 'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!']);
 }
 
 /* choice buttons */
@@ -926,6 +1005,7 @@ function choices(opts, kind) {
     const b = document.createElement('button');
     b.className = 'block choice ' + (kind || '');
     b.textContent = o.label;
+    if (o.ok) b.dataset.ok = '1';
     b.onclick = () => {
       if (S.locked) return;
       if (o.ok) { b.classList.add('right'); win(); }
@@ -1122,6 +1202,7 @@ const MAKERS = {
     for (const n of [a, b]) {
       const btn = document.createElement('button'); btn.className = 'block choice group';
       btn.textContent = Array(n).fill(item).join(' ');
+      if (n === want) btn.dataset.ok = '1';
       btn.onclick = () => {
         if (S.locked) return;
         if (n === want) { btn.classList.add('right'); win(); } else { miss(btn); btn.disabled = true; }
@@ -1285,6 +1366,7 @@ const MAKERS = {
       b.className = 'block choice swatch';
       b.style.setProperty('--c', c.hex);
       b.setAttribute('aria-label', c.name);
+      if (c === target) b.dataset.ok = '1';
       b.onclick = () => { if (S.locked) return; if (c === target) { b.classList.add('right'); win(); } else { miss(b); b.disabled = true; } };
       box.appendChild(b);
     }
@@ -1315,6 +1397,7 @@ const MAKERS = {
       b.className = 'block choice shape';
       b.innerHTML = draw(sh, c.hex);
       const ok = sh === target && (!tColor || c === tColor);
+      if (ok) b.dataset.ok = '1';
       b.onclick = () => { if (S.locked) return; if (ok) { b.classList.add('right'); win(); } else { miss(b); b.disabled = true; } };
       box.appendChild(b);
     }
@@ -1452,6 +1535,7 @@ window.allPhrases = () => {
     'מָה בָּא אַחַר כָּךְ?', 'שֶׁל מִי הַצֵּל הַזֶּה?',
     'כַּמָּה הֲבָרוֹת יֵשׁ בַּמִּלָּה', 'אֵיזוֹ אוֹת חֲסֵרָה בַּמִּלָּה', 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?', ...SENTENCES.map(x => x.text),
     'אֵיזֶה סִימָן מַתְאִים?', 'גָּדוֹל מִן', 'קָטָן מִן', 'שָׁוֶה לְ',
+    ...Object.values(PLAYERS).map(p => p.turn), 'בְּיַחַד הִצְלַחְתֶּם!',
     'וְעוֹד', 'פָּחוֹת', 'זֶה', 'כַּמָּה זֶה?', 'וְעוֹד כַּמָּה זֶה', 'הָיוּ', 'לָקַחְנוּ', 'נִשְׁאֲרוּ'
   ])];
 };
@@ -1464,10 +1548,11 @@ $('#soundBtn').onclick = () => { DB.sound = !DB.sound; save(); if (!DB.sound) st
 $('#menuBack').onclick = renderHome;
 $('#albumBtn').onclick = renderAlbum;
 $('#albumBack').onclick = renderMenu;
-$('#gameBack').onclick = () => { stopVoice(); renderMenu(); };
+$('#gameBack').onclick = () => { stopVoice(); S.together ? renderHome() : renderMenu(); };
 $('#sayAgain').onclick = () => S.cur && speak(S.cur.say);
-$('#againBtn').onclick = () => startGame(S.g);
-$('#toMenuBtn').onclick = renderMenu;
+$('#againBtn').onclick = () => S.together ? startTogether() : startGame(S.g);
+$('#toMenuBtn').onclick = () => S.together ? renderHome() : renderMenu();
+$('#togetherBtn').onclick = () => { sfx('pop'); startTogether(); };
 renderHome();
 })();
 </script>
