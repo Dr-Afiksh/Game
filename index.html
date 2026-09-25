@@ -162,6 +162,13 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 .pattern span.hole{font-family:var(--font);font-weight:900;color:var(--ink);background:var(--sun);border-radius:12px;padding-inline:10px}
 .pic.shadow .sil{filter:brightness(0)}
 
+.bigword.small{font-size:clamp(40px,11vw,72px);padding:2px 22px}
+.bigword.sentence{font-size:clamp(30px,8vw,54px);line-height:1.5;text-align:center;text-wrap:balance;max-width:100%}
+.slot.shown{background:var(--paper);animation:none}
+.choice.sign{direction:ltr;unicode-bidi:isolate}
+.equation{white-space:pre}
+.equation.cmp{font-size:clamp(30px,9vw,80px);padding-inline:18px}
+
 /* memory */
 .memory{display:grid;gap:10px;grid-template-columns:repeat(3,1fr);width:100%;max-width:620px;margin:auto}
 .memory.m8,.memory.m12,.memory.m16{grid-template-columns:repeat(4,1fr)}
@@ -436,6 +443,25 @@ const SHAPES = [
   { name: 'מַלְבֵּן', the: 'הַמַּלְבֵּן', svg: '<rect x="4" y="27" width="92" height="46" rx="3"/>' },
   { name: 'מְעֻיָּן', the: 'הַמְּעֻיָּן', svg: '<polygon points="50,4 90,50 50,96 10,50"/>' }
 ];
+// short sentences to read, with a matching picture; subj groups sentences about the same one,
+// so harder levels can ask to tell "the dog sleeps" from "the dog runs"
+const SENTENCES = [
+  ['הַכֶּלֶב יָשֵׁן.', '🐶💤', 'dog', 1], ['הַכֶּלֶב רָץ.', '🐕💨', 'dog', 1], ['הַחָתוּל יָשֵׁן.', '🐱💤', 'cat', 1],
+  ['הַחָתוּל שׁוֹתֶה חָלָב.', '🐱🥛', 'cat', 2], ['הַיֶּלֶד יָשֵׁן.', '👦💤', 'boy', 1],
+  ['הַיֶּלֶד אוֹכֵל תַּפּוּחַ.', '👦🍎', 'boy', 2], ['הַיֶּלֶד מְשַׂחֵק בְּכַדּוּר.', '👦⚽', 'boy', 2],
+  ['הַיַּלְדָּה קוֹרֵאת סֵפֶר.', '👧📖', 'girl', 2], ['הַיַּלְדָּה אוֹכֶלֶת גְּלִידָה.', '👧🍦', 'girl', 2],
+  ['הַדָּג שׂוֹחֶה בַּיָּם.', '🐟🌊', 'sea', 2], ['הַסִּירָה בַּיָּם.', '⛵🌊', 'sea', 1],
+  ['הַצִּפּוֹר עָפָה.', '🐦☁️', 'sky', 1], ['הַמָּטוֹס עָף בַּשָּׁמַיִם.', '✈️☁️', 'sky', 2],
+  ['יוֹרֵד גֶּשֶׁם.', '🌧️☔', 'weather', 1], ['הַשֶּׁמֶשׁ זוֹרַחַת.', '☀️😎', 'weather', 1],
+  ['בַּלַּיְלָה יֵשׁ יָרֵחַ.', '🌙⭐', 'weather', 2], ['הַשֶּׁלֶג לָבָן.', '⛄❄️', 'weather', 1],
+  ['הַפִּיל גָּדוֹל.', '🐘', 'animal', 1], ['הַקּוֹף אוֹכֵל בָּנָנָה.', '🐒🍌', 'eat', 2],
+  ['הָאַרְנָב אוֹכֵל גֶּזֶר.', '🐰🥕', 'eat', 2], ['הַמְּכוֹנִית נוֹסַעַת.', '🚗💨', 'road', 1],
+  ['הַדְּבוֹרָה עַל הַפֶּרַח.', '🐝🌸', 'flower', 2], ['הַפֶּרַח יָפֶה.', '🌸😍', 'flower', 1],
+  ['הַצָּב הוֹלֵךְ לְאַט.', '🐢🐌', 'animal', 2], ['הַתִּינוֹק בּוֹכֶה.', '👶😢', 'baby', 1],
+  ['הַתִּינוֹק צוֹחֵק.', '👶😄', 'baby', 1], ['יֵשׁ לִי עוּגָה לְיוֹם הֻלֶּדֶת.', '🎂🎉', 'party', 3],
+  ['הַתַּרְנְגוֹל קוֹרֵא קוּקוּרִיקוּ.', '🐓📢', 'animal', 3], ['הַכֶּלֶב וְהֶחָתוּל חֲבֵרִים.', '🐶❤️🐱', 'dog', 3],
+  ['הַיְּלָדִים מְשַׂחֲקִים בַּגַּן.', '👦👧🌳', 'boy', 3]
+].map(([text, pic, subj, level]) => ({ text, pic, subj, level }));
 const PATTERN_ITEMS = ['🍎', '🍌', '🍇', '🍓', '🐶', '🐱', '🐸', '⭐', '🎈', '🌸', '🚗', '⚽'];
 const SHADOW_GROUPS = [
   ['🐟','🐴','🐱','🐶','🐘','🦁','🐒','🐢','🐍','🦋','🐝','🐓','🐷','🐰','🐭','🐸','🐜','🐫','🦓','🕊️','🐊','🦔','🦉','🐳','🐙','🕷️','🐌','🐬','🐞','🦛','🦘','🐑','🐄'],
@@ -509,12 +535,17 @@ const LV = {
   // patterns: which item comes next in the row
   pattern:     { options: [2, 3, 3, 4, 4], forms: [['AB'], ['AB', 'AAB'], ['ABC', 'ABB', 'AAB'], ['AABB', 'ABC', 'ABAC'], ['ABCD', 'AABC', 'ABBC']] },
   // shadows: match a black silhouette to its picture; later all choices are from the same group
-  shadow:      { options: [2, 3, 3, 4, 4], similar: [0, 0, 1, 1, 1] }
+  shadow:      { options: [2, 3, 3, 4, 4], similar: [0, 0, 1, 1, 1] },
+  // first grade: count syllables (clap), fill in the missing letter, read a sentence, compare numbers
+  syllables:   { options: [3, 3, 4, 4, 4], range: [[1, 2], [1, 3], [2, 3], [2, 4], [3, 5]] },
+  missing:     { options: [3, 3, 3, 4, 4], lens: [[3, 3], [3, 4], [4, 5], [5, 6], [6, 99]] },
+  sentences:   { options: [3, 3, 3, 4, 4], maxLevel: [1, 2, 2, 3, 3], sameSubject: [0, 0, 1, 1, 1] },
+  numCompare:  { dots: [1, 0, 0, 0, 0] }
 };
 
 const PLAYERS = {
   gan:  { name: 'גַּן', say: 'גַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd', 'memory', 'colors', 'shapes', 'pattern', 'shadow'] },
-  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq', 'memory'] }
+  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq', 'memory', 'syllables', 'missing', 'sentences', 'numCompare'] }
 };
 const GAMES = {
   letters:     { name: 'אֵיפֹה הָאוֹת?',      icon: 'א',   bg: 'var(--berry)' },
@@ -532,7 +563,11 @@ const GAMES = {
   colors:      { name: 'צְבָעִים',              icon: '🎨',  bg: 'var(--sky-hi)', emo: true },
   shapes:      { name: 'צוּרוֹת',               icon: '🔺',  bg: 'var(--sky-hi)', emo: true },
   pattern:     { name: 'מָה בָּא אַחַר כָּךְ?',     icon: '🍎🍌', bg: 'var(--grass-deep)', emo: true, sm: true },
-  shadow:      { name: 'שֶׁל מִי הַצֵּל?',        icon: '👤',  bg: 'var(--plum)', emo: true }
+  shadow:      { name: 'שֶׁל מִי הַצֵּל?',        icon: '👤',  bg: 'var(--plum)', emo: true },
+  syllables:   { name: 'הֲבָרוֹת',              icon: '👏',  bg: 'var(--sun)', emo: true },
+  missing:     { name: 'אוֹת חֲסֵרָה',           icon: 'קוֹ?', bg: 'var(--berry)', sm: true },
+  sentences:   { name: 'קוֹרְאִים מִשְׁפָּט',       icon: '📖',  bg: 'var(--sky-hi)', emo: true },
+  numCompare:  { name: 'גָּדוֹל אוֹ קָטָן?',       icon: '7>5', bg: 'var(--grass-deep)', sm: true }
 };
 
 /* ---------- saved progress ---------- */
@@ -635,7 +670,13 @@ const SAY_AS = {
   'וָרוֹד': 'וורוד', 'אֵיפֹה הַצֶּבַע הַוָּרוֹד?': 'איפה הצבע הוורוד?', 'מָה בְּצֶבַע וָרוֹד?': 'מה בצבע וורוד?',
   'עִגּוּל': 'עיגול', 'רִבּוּעַ': 'ריבוע', 'מְשֻׁלָּשׁ': 'משולש', 'מְעֻיָּן': 'מעוין',
   'אֵיפֹה הָעִגּוּל?': 'איפה העיגול?', 'אֵיפֹה הָרִבּוּעַ?': 'איפה הריבוע?', 'אֵיפֹה הַמְּשֻׁלָּשׁ?': 'איפה המשולש?',
-  'אֵיפֹה הַמְּעֻיָּן?': 'איפה המעוין?'
+  'אֵיפֹה הַמְּעֻיָּן?': 'איפה המעוין?',
+  // first-grade games
+  'כַּמָּה הֲבָרוֹת יֵשׁ בַּמִּלָּה': 'כמה הברות יש במילה', 'אֵיזוֹ אוֹת חֲסֵרָה בַּמִּלָּה': 'איזו אות חסרה במילה',
+  'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?': 'איזו תמונה מתאימה למשפט?', 'שָׁוֶה לְ': 'שווה ל',
+  'הַצִּפּוֹר עָפָה.': 'הציפור עפה.', 'הַמָּטוֹס עָף בַּשָּׁמַיִם.': 'המטוס עף בשמיים.',
+  'יֵשׁ לִי עוּגָה לְיוֹם הֻלֶּדֶת.': 'יש לי עוגה ליום הולדת.', 'הַתַּרְנְגוֹל קוֹרֵא קוּקוּרִיקוּ.': 'התרנגול קורא קוקוריקו.',
+  'הַכֶּלֶב וְהֶחָתוּל חֲבֵרִים.': 'הכלב והחתול חברים.', 'הַיְּלָדִים מְשַׂחֲקִים בַּגַּן.': 'הילדים משחקים בגן.'
 };
 // plain spelling of shape words that also appear inside longer phrases
 const PLAIN_FIX = [['עגול', 'עיגול'], ['רבוע', 'ריבוע'], ['משלש', 'משולש']];
@@ -912,6 +953,10 @@ const soundsAlike = (a, b) => SOUNDALIKE.some(g => g.includes(a) && g.includes(b
 const wordPool = ([min, max]) => WORDS.filter(w => w.len >= min && w.len <= max);
 const ALL_LETTERS = LETTERS.map(l => l[0]);
 const WORD_BY_EMOJI = Object.fromEntries(WORDS.map(w => [w.e, w.w]));
+// syllables = pieces that carry a vowel (a shva, a silent letter or a final letter adds none)
+const syllableCount = w => w.chunks.filter(c => vowelClass(c)).length;
+// words where a shva in the middle is spoken (tar-ne-gol), so the count above would be off
+const SYLLABLE_SKIP = ['תַּרְנְגוֹל', 'דֻּבְדְּבָן'];
 const between = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
 // number buttons: the answer plus near misses (answer ± step, 2*step, 3*step)
 function numChoices(ans, n, step, lo, hi) {
@@ -1303,8 +1348,85 @@ const MAKERS = {
     const others = sample(pool, L('options') - 1);
     choices([{ label: w.e, ok: true }, ...others.map(x => ({ label: x.e }))], 'emo');
     return { prompt: 'שֶׁל מִי הַצֵּל הַזֶּה?', say: 'שֶׁל מִי הַצֵּל הַזֶּה?', after: w.w };
+  },
+
+  /* ---------- more first-grade games ---------- */
+  syllables() {
+    const [lo, hi] = L('range');
+    const pool = WORDS.filter(w => !SYLLABLE_SKIP.includes(w.w) && !/^.[ְ]/.test(w.w.replace(/[ּׁׂ]/g, '')) && syllableCount(w) >= lo && syllableCount(w) <= hi);
+    const w = pickWord(pool);
+    picture(w, true);
+    const big = document.createElement('div'); big.className = 'bigword small'; big.textContent = w.w;
+    $('#stage').appendChild(big);
+    const n = syllableCount(w);
+    numChoices(n, L('options'), 1, 1, 5);
+    return { prompt: 'כַּמָּה הֲבָרוֹת? מוֹחֲאִים כַּפַּיִם 👏', say: ['כַּמָּה הֲבָרוֹת יֵשׁ בַּמִּלָּה', w.w], after: [w.w, numWord(n)] };
+  },
+
+  missing() {
+    const w = pickWord(wordPool(L('lens')).filter(x => x.chunks.length >= 2));
+    picture(w, true);
+    const hole = between(0, w.chunks.length - 1), ans = w.chunks[hole];
+    const slots = document.createElement('div'); slots.className = 'slots' + (w.chunks.length > 5 ? ' many' : '');
+    w.chunks.forEach((c, i) => {
+      const s = document.createElement('div'); s.className = 'slot' + (i === hole ? '' : ' full shown'); s.textContent = i === hole ? '?' : c;
+      slots.appendChild(s);
+    });
+    $('#stage').appendChild(slots);
+    // wrong answers: the same letter with another vowel, and other letters with the same vowel
+    const base = baseOf(ans), v = vowelClass(ans), n = L('options');
+    const opts = new Set([ans]);
+    const FINALS = 'ךםןףץ';
+    if (FINALS.includes(ans[0]) || !v) {
+      const letters = FINALS.includes(ans[0]) ? FINALS.split('') : ['ל', 'מ', 'נ', 'ר', 'ד', 'ת', 'ש', 'ב'];
+      for (const x of shuffle(letters.filter(x => x !== ans[0] && !soundsAlike(x, ans[0])))) { if (opts.size >= n) break; opts.add(x); }
+    } else {
+      for (const ov of shuffle(Object.keys(VOWEL).filter(x => x !== v))) { if (opts.size >= Math.ceil(n / 2) + 1) break; opts.add(base + VOWEL[ov]); }
+      const others = ['מ', 'ל', 'נ', 'ר', 'ד', 'ג', 'ז', 'י', 'ס', 'ה', 'שׁ', 'ק', 'צ'].filter(x => x[0] !== base[0] && !soundsAlike(x[0], base[0]));
+      while (opts.size < n) opts.add(rand(others) + VOWEL[v]);
+    }
+    choices([...opts].map(o => ({ label: o, ok: o === ans })));
+    return { prompt: 'אֵיזוֹ אוֹת חֲסֵרָה?', say: ['אֵיזוֹ אוֹת חֲסֵרָה בַּמִּלָּה', w.w], after: w.w };
+  },
+
+  sentences() {
+    const pool = SENTENCES.filter(x => x.level <= L('maxLevel'));
+    const t = pickWord(pool.map(x => ({ w: x.text, e: x.pic, subj: x.subj })));
+    const big = document.createElement('div'); big.className = 'bigword sentence'; big.textContent = t.w;
+    $('#stage').appendChild(big);
+    let others = [];
+    if (L('sameSubject')) others = sample(SENTENCES.filter(x => x.subj === t.subj && x.text !== t.w), L('options') - 1);
+    others = others.concat(sample(SENTENCES.filter(x => x.text !== t.w && !others.includes(x) && x.pic !== t.e), L('options') - 1 - others.length));
+    choices([{ label: t.e, ok: true }, ...others.map(x => ({ label: x.pic }))], 'emo');
+    return { prompt: 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?', say: 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?', after: t.w };
+  },
+
+  numCompare() {
+    const lv = level();
+    const side = max => { // a number, or at levels 4-5 a small sum
+      if (lv >= 4 && Math.random() < 0.6) { const a = between(1, max - 1), b = between(1, max - a); return { text: `${a} + ${b}`, val: a + b }; }
+      const v = between(0, max); return { text: String(v), val: v };
+    };
+    const max = [10, 20, 100, 10, 20][lv - 1];
+    let A = side(max), B;
+    if (Math.random() < 0.25) B = lv >= 4 && Math.random() < 0.5 ? side(max) : { text: String(A.val), val: A.val };
+    else B = side(max);
+    if (lv === 5 && !A.text.includes('+') && !B.text.includes('+')) { const a = between(1, 9), b = between(1, 10 - a); A = { text: `${a} + ${b}`, val: a + b }; }
+    const sign = A.val > B.val ? '>' : A.val < B.val ? '<' : '=';
+    const eq = document.createElement('div'); eq.className = 'bigword equation cmp'; eq.dir = 'ltr';
+    eq.textContent = `${A.text}  ◯  ${B.text}`;
+    $('#stage').appendChild(eq);
+    if (L('dots')) {
+      const d = document.createElement('div'); d.className = 'dots-help'; d.dir = 'ltr';
+      d.textContent = '🔵'.repeat(A.val) + '   ' + '🔴'.repeat(B.val);
+      $('#stage').appendChild(d);
+    }
+    choices(['>', '<', '='].map(x => ({ label: x, ok: x === sign })), 'sign');
+    const word = { '>': 'גָּדוֹל מִן', '<': 'קָטָן מִן', '=': 'שָׁוֶה לְ' }[sign];
+    return { prompt: 'אֵיזֶה סִימָן מַתְאִים?', say: 'אֵיזֶה סִימָן מַתְאִים?', after: [numWord(A.val), word, numWord(B.val)] };
   }
 };
+
 
 
 
@@ -1328,6 +1450,8 @@ window.allPhrases = () => {
     ...SHAPES.slice(0, 5).flatMap(sh => COLORS.slice(0, 4).map(c => `אֵיפֹה ${sh.the} ${c.the}?`)),
     ...SHAPES.slice(0, 5).flatMap(sh => COLORS.slice(0, 4).map(c => `${sh.name} ${c.name}`)),
     'מָה בָּא אַחַר כָּךְ?', 'שֶׁל מִי הַצֵּל הַזֶּה?',
+    'כַּמָּה הֲבָרוֹת יֵשׁ בַּמִּלָּה', 'אֵיזוֹ אוֹת חֲסֵרָה בַּמִּלָּה', 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?', ...SENTENCES.map(x => x.text),
+    'אֵיזֶה סִימָן מַתְאִים?', 'גָּדוֹל מִן', 'קָטָן מִן', 'שָׁוֶה לְ',
     'וְעוֹד', 'פָּחוֹת', 'זֶה', 'כַּמָּה זֶה?', 'וְעוֹד כַּמָּה זֶה', 'הָיוּ', 'לָקַחְנוּ', 'נִשְׁאֲרוּ'
   ])];
 };

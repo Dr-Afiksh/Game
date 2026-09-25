@@ -21,6 +21,10 @@ It runs in any browser, works well on a tablet, and needs no install or server.
 - **קוֹרְאִים וּבוֹחֲרִים** Reads a pointed word and picks the matching picture.
 - **מָה בַּתְּמוּנָה?** Looks at a picture and picks the right word. On harder levels all the choices start with the same letter, so the child has to read the whole word.
 - **בּוֹנִים מִלָּה** Builds the word from syllable tiles. After two wrong taps the right tile starts to glow.
+- **הֲבָרוֹת** Count the syllables (clap along): 1–2 syllables up to 3–5. The word is shown with nikud and spoken.
+- **אוֹת חֲסֵרָה** A word with one piece missing (קֶ נְ ? רוּ); pick the missing letter with its vowel. Words grow from 3 letters to 6+.
+- **קוֹרְאִים מִשְׁפָּט** Read a short sentence (הַכֶּלֶב יָשֵׁן.) and pick the matching picture. From level 3 the wrong pictures are about the same subject (the dog sleeping vs. the dog running).
+- **גָּדוֹל אוֹ קָטָן?** Pick >, < or =. Up to 10 with dots, then up to 20 and 100, then sums on one or both sides (4 + 8 ◯ 16).
 
 Each round has 8 questions, and every correct answer earns a star.
 
