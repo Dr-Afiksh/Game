@@ -105,9 +105,11 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
   background:var(--paper);border:3px solid var(--ink);border-radius:28px;box-shadow:0 6px 0 var(--ink)}
 .hint{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
 .hint b{font-size:56px;line-height:1.2;padding:0 16px;background:var(--paper);border:3px solid var(--ink);border-radius:14px}
+.hint b.emo{font-family:var(--emoji);font-weight:400;font-size:48px}
 
 .choices{display:grid;gap:16px;grid-template-columns:repeat(3,1fr);margin-top:auto}
 .choices.n4{grid-template-columns:repeat(4,1fr)}
+.choices.n2{grid-template-columns:repeat(2,minmax(0,220px));justify-content:center}
 .choices.words{grid-template-columns:1fr}
 @media (min-width:640px){.choices.words{grid-template-columns:repeat(3,1fr)}.choices.words.w4{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:520px){.choices.n4{grid-template-columns:repeat(2,1fr)}}
@@ -321,7 +323,8 @@ function baseOf(c) { // letter + dagesh / shin dot, without the vowel
 const VOWEL = { a: 'ָ', e: 'ֵ', i: 'ִ', o: 'וֹ', u: 'וּ' };
 
 const NUMS = ['', 'אַחַת', 'שְׁתַּיִם', 'שָׁלוֹשׁ', 'אַרְבַּע', 'חָמֵשׁ', 'שֵׁשׁ', 'שֶׁבַע', 'שְׁמוֹנֶה', 'תֵּשַׁע', 'עֶשֶׂר'];
-const COUNT_ITEMS = ['🍎','🐟','⭐','🎈','🐞','🍓','🚗','🦆','🌸','🐢','🍪','⚽'];
+const COUNT_ITEMS = [['🍎','תַּפּוּחִים'],['🐟','דָּגִים'],['⭐','כּוֹכָבִים'],['🎈','בָּלוֹנִים'],['🐞','חִפּוּשִׁיּוֹת'],
+  ['🍓','תּוּתִים'],['🚗','מְכוֹנִיּוֹת'],['🦆','בַּרְוָזִים'],['🌸','פְּרָחִים'],['🐢','צָבִים'],['🍪','עוּגִיּוֹת'],['⚽','כַּדּוּרִים']];
 const PRAISE = ['כָּל הַכָּבוֹד!', 'מְצֻיָּן!', 'יוֹפִי!', 'נֶהֱדָר!', 'אַלּוּף הָעוֹלָם!', 'וָואוּ!'];
 const STICKERS = ['🐶','🐱','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🦄','🐝','🦋','🐢',
   '🐙','🦀','🐠','🐬','🐳','🦒','🦓','🐘','🦔','🦉','🦕','🦖','🐉','🌈','🚀','🏰','🎡','👑'];
@@ -332,9 +335,11 @@ const MAX_LEVEL = 5;
 // lens: [fewest, most] letters in the word.
 const LENS = [[2, 3], [3, 4], [4, 5], [5, 6], [6, 99]];
 const LV = {
-  letters:     { options: [3, 4, 4, 5, 6], lookalike: [0, 0, 1, 1, 1] },
-  count:       { max: [5, 7, 10, 10, 10], options: [3, 3, 3, 4, 4] },
-  firstLetter: { options: [3, 3, 4, 4, 5], maxLen: [3, 4, 5, 99, 99] },
+  // kindergarten: start by matching a letter you can see, end by finding look-alike letters by ear
+  letters:     { options: [2, 3, 3, 4, 6], lookalike: [0, 0, 0, 1, 1], showLetter: [1, 1, 0, 0, 0] },
+  // counting: 1-3 up to 1-10; at level 5 other things are mixed in and only one kind is counted
+  count:       { min: [1, 1, 2, 3, 2], max: [3, 5, 7, 10, 8], options: [2, 3, 3, 4, 4], mixed: [0, 0, 0, 0, 1] },
+  firstLetter: { options: [2, 3, 3, 4, 4], maxLen: [3, 3, 4, 99, 99], lookalike: [0, 0, 0, 0, 1] },
   sound:       { options: [3, 3, 4, 4, 4], maxLen: [3, 4, 5, 99, 99] },
   read:        { options: [3, 3, 4, 4, 4], lens: LENS },
   pick:        { options: [3, 3, 3, 4, 4], lens: LENS, sameStart: [0, 1, 1, 1, 1] },
@@ -525,7 +530,7 @@ function miss(el) {
 /* choice buttons */
 function choices(opts, kind) {
   const box = $('#choices'), n = opts.length;
-  box.className = 'choices' + (kind === 'word' ? ' words' + (n === 4 ? ' w4' : '') : n === 4 ? ' n4' : '');
+  box.className = 'choices' + (kind === 'word' ? ' words' + (n === 4 ? ' w4' : '') : n === 4 ? ' n4' : n === 2 ? ' n2' : '');
   box.innerHTML = '';
   for (const o of shuffle(opts)) {
     const b = document.createElement('button');
@@ -563,10 +568,11 @@ const MAKERS = {
     const n = L('options');
     const [ch, name] = rand(LETTERS.filter(l => !S.recent.includes(l[0])));
     S.recent = [ch, ...S.recent].slice(0, 5);
-    let others = [];
-    if (L('lookalike')) others = sample([...new Set(LOOKALIKE.filter(g => g.includes(ch)).flat())].filter(x => x !== ch), n - 1);
-    others = others.concat(sample(ALL_LETTERS.filter(x => x !== ch && !others.includes(x)), n - 1 - others.length));
-    if (!heVoice) {
+    const near = [...new Set(LOOKALIKE.filter(g => g.includes(ch)).flat())].filter(x => x !== ch);
+    // easy levels keep look-alike letters out; hard levels put them in on purpose
+    let others = L('lookalike') ? sample(near, n - 1) : [];
+    others = others.concat(sample(ALL_LETTERS.filter(x => x !== ch && !others.includes(x) && (L('lookalike') || !near.includes(x))), n - 1 - others.length));
+    if (L('showLetter') || !heVoice) {
       const h = document.createElement('div'); h.className = 'hint';
       h.innerHTML = `מוֹצְאִים אֶת: <b>${ch}</b>`;
       $('#stage').appendChild(h);
@@ -576,26 +582,41 @@ const MAKERS = {
   },
 
   count() {
-    const max = L('max');
-    let n; do { n = 1 + Math.floor(Math.random() * max); } while (n === S.lastN);
+    const min = L('min'), max = L('max');
+    let n; do { n = min + Math.floor(Math.random() * (max - min + 1)); } while (n === S.lastN && max > min);
     S.lastN = n;
-    const item = rand(COUNT_ITEMS);
+    const [item, itemName] = rand(COUNT_ITEMS);
     const field = document.createElement('div'); field.className = 'count-field';
+    const things = Array(n).fill(item);
+    if (L('mixed')) { // add 2-4 other things that should not be counted
+      const extra = rand(COUNT_ITEMS.filter(c => c[0] !== item))[0];
+      things.push(...Array(2 + Math.floor(Math.random() * 3)).fill(extra));
+    }
     let counted = 0;
-    for (let i = 0; i < n; i++) {
-      const b = document.createElement('button'); b.className = 'cnt'; b.textContent = item;
+    for (const t of shuffle(things)) {
+      const b = document.createElement('button'); b.className = 'cnt'; b.textContent = t;
       b.onclick = () => {
         if (b.classList.contains('on')) return;
+        if (t !== item) { b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong'); return; }
         counted++; b.classList.add('on');
         const tag = document.createElement('b'); tag.textContent = counted; b.appendChild(tag);
         sfx('pop'); speak(NUMS[counted]);
       };
       field.appendChild(b);
     }
+    if (L('mixed')) {
+      const h = document.createElement('div'); h.className = 'hint';
+      h.innerHTML = `סוֹפְרִים רַק אֶת: <b class="emo">${item}</b>`;
+      $('#stage').appendChild(h);
+    }
     $('#stage').appendChild(field);
     const others = sample([-3, -2, -1, 1, 2, 3].map(d => n + d).filter(x => x >= 1 && x <= 10), L('options') - 1);
     choices([{ label: String(n), ok: true }, ...others.map(x => ({ label: String(x) }))], 'num');
-    return { prompt: 'כַּמָּה יֵשׁ? נוֹגְעִים וְסוֹפְרִים', say: 'כַּמָּה יֵשׁ? אֶפְשָׁר לִגְעַת וְלִסְפֹּר', after: NUMS[n] };
+    return {
+      prompt: 'כַּמָּה יֵשׁ? נוֹגְעִים וְסוֹפְרִים',
+      say: `כַּמָּה ${itemName} יֵשׁ?`,
+      after: `${NUMS[n]} ${n === 1 ? '' : itemName}`
+    };
   },
 
   firstLetter() {
@@ -605,7 +626,10 @@ const MAKERS = {
       const t = document.createElement('div'); t.className = 'hint'; t.innerHTML = `<b>${w.w}</b>`;
       $('#stage').appendChild(t);
     }
-    const others = sample(ALL_LETTERS.filter(x => x !== w.first && !soundsAlike(x, w.first)), L('options') - 1);
+    const n = L('options');
+    const ok = x => x !== w.first && !soundsAlike(x, w.first);
+    let others = L('lookalike') ? sample([...new Set(LOOKALIKE.filter(g => g.includes(w.first)).flat())].filter(ok), n - 1) : [];
+    others = others.concat(sample(ALL_LETTERS.filter(x => ok(x) && !others.includes(x)), n - 1 - others.length));
     choices([{ label: w.first, ok: true }, ...others.map(x => ({ label: x }))]);
     return {
       prompt: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',

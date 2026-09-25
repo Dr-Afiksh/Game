@@ -33,8 +33,17 @@ and 2 answers in a row that needed retries move down one level quietly.
 | 4 | 5–6 letters + 1 extra tile that doesn't belong | 5–6 letters, 4 choices |
 | 5 | 6+ letters + 2 extra tiles | 6+ letters, 4 choices |
 
-The other games scale too: more choices, letters that look alike (ב/כ/פ), counting up to 10,
-and in מָה בַּתְּמוּנָה? all choices start with the same letter.
+In מָה בַּתְּמוּנָה? all choices start with the same letter from level 2.
+
+**Kindergarten (גַּן) levels**
+
+| Level | אֵיפֹה הָאוֹת? | כַּמָּה יֵשׁ? | אוֹת רִאשׁוֹנָה |
+|---|---|---|---|
+| 1 | 2 letters, the letter is shown to match | count 1–3, 2 choices | 2 letters, short words |
+| 2 | 3 letters, still shown | count 1–5 | 3 letters |
+| 3 | 3 letters, heard only | count 2–7 | 3 letters, longer words |
+| 4 | 4 letters incl. look-alikes (ב/כ/פ, ד/ר) | count 3–10, 4 choices | 4 letters, any word |
+| 5 | 6 letters incl. look-alikes | two kinds of things mixed, count only one | 4 letters incl. look-alikes |
 The current level shows above the question and on each game card in the menu.
 Progress is saved in the browser (localStorage), separately for each child.
 
