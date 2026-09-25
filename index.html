@@ -198,16 +198,41 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 .done h2{margin:0;font-size:clamp(36px,8vw,54px);font-weight:900}
 .done .gain{font-size:28px;font-weight:700}
 .newstick{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 22px;background:#FFF1C7}
-.newstick .row{font-family:var(--emoji);font-size:64px;display:flex;gap:8px}
+.newstick .row{font-family:var(--emoji);font-size:56px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
 .actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 .actions button{padding:14px 26px;font-size:24px;font-weight:900}
 .actions .go{background:var(--grass);color:var(--paper)}
 
-.album{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:12px;padding:16px}
-.album span{aspect-ratio:1;max-width:100%;display:grid;place-items:center;font-size:52px;font-family:var(--emoji);
+.pages{display:flex;flex-direction:column;gap:18px}
+.page{padding:12px 14px 16px}
+.page h3,.trophy-shelf h3{margin:0 0 10px;font-size:22px;font-weight:900}
+.page h3 small{font-size:16px;color:var(--ink-soft)}
+.album{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px}
+.album span{aspect-ratio:1;max-width:100%;display:grid;place-items:center;font-size:40px;font-family:var(--emoji);
   border-radius:16px;background:var(--sky-hi);border:2px solid var(--ink)}
 .album span.locked{font-family:var(--font);font-size:34px;font-weight:900;color:var(--ink-soft);background:#E4E8EF;border-style:dashed}
-.album-next{text-align:center;font-size:20px;font-weight:700;margin:0}
+.album span.gold{background:linear-gradient(135deg,#FFE58A,#FFC93C 60%,#F5A623);border-color:#B7791F;box-shadow:0 0 0 2px #FFE58A inset}
+.album span.locked.gold{font-family:var(--emoji);font-size:26px;background:#FFF4CC;border-color:#D9A640}
+.album-next{text-align:center;font-size:20px;font-weight:700;margin:6px 0 0}
+.pbar{position:relative;height:22px;max-width:420px;margin:0 auto;background:var(--paper);border:3px solid var(--ink);border-radius:999px;overflow:visible}
+.pbar i{display:block;height:100%;background:var(--sun);border-radius:999px;transition:width .6s}
+.pbar span{position:absolute;left:-14px;top:50%;transform:translateY(-50%);font-family:var(--emoji);font-size:30px}
+.trophy-shelf{padding:12px 14px 16px}
+.shelf,.trophies .row{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+.trophy{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.trophy b{font-family:var(--emoji);font-weight:400;font-size:40px;line-height:1.2}
+.trophy small{font-size:13px;font-weight:700;line-height:1.25}
+.trophy.locked{opacity:.45}
+.trophies .row{font-size:inherit;width:100%}
+.bonuses{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{padding:6px 12px;border:2px solid var(--ink);border-radius:999px;background:var(--paper);font-weight:700;font-size:18px}
+.newstick .row span{display:inline-grid;place-items:center;width:84px;height:84px;border-radius:18px;background:var(--paper);border:3px solid var(--ink);
+  animation:reveal .7s both}
+.newstick .row span.gold{background:linear-gradient(135deg,#FFE58A,#FFC93C 60%,#F5A623);box-shadow:0 0 18px 4px #FFE58A}
+.newstick.trophies{width:min(440px,100%)}
+.newstick.trophies .row span{width:auto;height:auto;border:0;background:none;animation:reveal .7s .3s both}
+@keyframes reveal{0%{transform:scale(0) rotate(-200deg);opacity:0}70%{transform:scale(1.2) rotate(8deg);opacity:1}100%{transform:none}}
+.done-next{width:100%}
 
 /* confetti */
 .confetti{position:fixed;left:50%;top:40%;width:14px;height:14px;border-radius:3px;z-index:50;pointer-events:none;
@@ -248,6 +273,7 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
       <button class="block icon-btn" id="albumBtn" aria-label="אלבום מדבקות">📒</button>
       <div class="starcount block" id="menuStars"></div>
     </div>
+    <div id="menuNext"></div>
     <h2 class="menu-title">בְּמָה מְשַׂחֲקִים?</h2>
     <div class="games" id="gamesGrid"></div>
   </section>
@@ -270,10 +296,16 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
     <div class="big">🏆</div>
     <h2>כָּל הַכָּבוֹד!</h2>
     <div class="gain" id="doneGain"></div>
+    <div class="bonuses" id="doneBonus"></div>
     <div class="newstick block" id="doneStickers" hidden>
-      <div>מַדְבֵּקָה חֲדָשָׁה בָּאַלְבּוֹם!</div>
+      <div id="doneStickTitle"></div>
       <div class="row" id="doneStickRow"></div>
     </div>
+    <div class="newstick trophies block" id="doneTrophies" hidden>
+      <div>גָּבִיעַ חָדָשׁ!</div>
+      <div class="row" id="doneTrophyRow"></div>
+    </div>
+    <div class="done-next" id="doneNext"></div>
     <div class="actions">
       <button class="block go" id="againBtn">עוֹד סִבּוּב</button>
       <button class="block" id="toMenuBtn">לַמִּשְׂחָקִים</button>
@@ -286,8 +318,9 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
       <div class="grow who" id="albumWho"></div>
       <div class="starcount block" id="albumStars"></div>
     </div>
-    <p class="album-next" id="albumNext"></p>
-    <div class="album block" id="albumGrid"></div>
+    <div id="albumNext"></div>
+    <div class="trophy-shelf block" id="trophyShelf"></div>
+    <div class="pages" id="albumGrid"></div>
   </section>
 
 </div>
@@ -366,9 +399,41 @@ const numWord = n => NUMS[n] || TENS[n] || String(n);
 const COUNT_ITEMS = [['🍎','תַּפּוּחִים'],['🐟','דָּגִים'],['⭐','כּוֹכָבִים'],['🎈','בָּלוֹנִים'],['🐞','חִפּוּשִׁיּוֹת'],
   ['🍓','תּוּתִים'],['🚗','מְכוֹנִיּוֹת'],['🦆','בַּרְוָזִים'],['🌸','פְּרָחִים'],['🐢','צָבִים'],['🍪','עוּגִיּוֹת'],['⚽','כַּדּוּרִים']];
 const PRAISE = ['כָּל הַכָּבוֹד!', 'מְצֻיָּן!', 'יוֹפִי!', 'נֶהֱדָר!', 'אַלּוּף הָעוֹלָם!', 'וָואוּ!'];
-const STICKERS = ['🐶','🐱','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🦄','🐝','🦋','🐢',
-  '🐙','🦀','🐠','🐬','🐳','🦒','🦓','🐘','🦔','🦉','🦕','🦖','🐉','🌈','🚀','🏰','🎡','👑'];
-const STARS_PER_STICKER = 5;
+// Album pages, 18 stickers each, unlocked in this order. The first two pages
+// are the original 36 stickers, so children keep what they already have.
+const ALBUM = [
+  ['חַיּוֹת', ['🐶','🐱','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🦄','🐝','🦋','🐢']],
+  ['חֲבֵרִים', ['🐙','🦀','🐠','🐬','🐳','🦒','🦓','🐘','🦔','🦉','🦕','🦖','🐉','🌈','🚀','🏰','🎡','👑']],
+  ['בַּיָּם', ['🐡','🦈','🐋','🦭','🐚','🦑','🦞','🦐','🦦','🐊','🐟','⚓','🏝️','🌊','🧜','⛵','🤿','🏄']],
+  ['בַּשָּׁמַיִם', ['🌍','🌙','⭐','☀️','🪐','🌠','☄️','👽','🛸','🛰️','🧑‍🚀','🔭','🌌','⚡','❄️','🌋','🏔️','🌤️']],
+  ['כְּלֵי רֶכֶב', ['🚗','🚕','🚌','🚓','🚑','🚒','🚜','🏎️','🏍️','🚲','🛴','🚂','🚁','✈️','🚢','🛶','🚠','🛻']],
+  ['אֹכֶל טָעִים', ['🍎','🍌','🍉','🍇','🍓','🍒','🍍','🥝','🥕','🌽','🍕','🍔','🍟','🧁','🍩','🍪','🍫','🍭']]
+];
+const STICKERS = ALBUM.flatMap(([, items]) => items);
+const isGold = i => i % 6 === 5; // every 6th sticker is a rare golden one
+// Stars needed for sticker n (1-based): 5 for the first, then 1.5 more each
+// time, up to 30. The whole album takes roughly 2,800 stars.
+const stickerCost = n => Math.min(30, 5 + Math.floor((n - 1) * 1.5));
+const BONUS = { perfect: 3, daily: 5, levelUp: 2 };
+// Trophies: [id, icon, name, test(d, player)] checked at the end of each round
+const TROPHIES = [
+  ['round1', '🎉', 'סִבּוּב רִאשׁוֹן', d => d.rounds >= 1],
+  ['perfect', '💯', 'סִבּוּב מֻשְׁלָם', d => d.perfects >= 1],
+  ['perfect10', '🎯', '10 סִבּוּבִים מֻשְׁלָמִים', d => d.perfects >= 10],
+  ['rounds10', '🔟', '10 סִבּוּבִים', d => d.rounds >= 10],
+  ['rounds50', '🏅', '50 סִבּוּבִים', d => d.rounds >= 50],
+  ['rounds100', '🏆', '100 סִבּוּבִים', d => d.rounds >= 100],
+  ['stars100', '⭐', '100 כּוֹכָבִים', d => d.stars >= 100],
+  ['stars500', '🌟', '500 כּוֹכָבִים', d => d.stars >= 500],
+  ['stars1000', '💫', '1000 כּוֹכָבִים', d => d.stars >= 1000],
+  ['allgames', '🧭', 'נִסִּיתִי אֶת כָּל הַמִּשְׂחָקִים', (d, p) => PLAYERS[p].games.every(g => d.played.includes(g))],
+  ['level5', '🥇', 'שָׁלָב 5 בְּמִשְׂחָק', d => Object.values(d.levels).some(l => l >= 5)],
+  ['level5all', '🎓', 'שָׁלָב 5 בְּכָל הַמִּשְׂחָקִים', (d, p) => PLAYERS[p].games.every(g => (d.levels[g] || 1) >= 5)],
+  ['days3', '📅', '3 יָמִים בִּרְצִיפוּת', d => d.dayStreak >= 3],
+  ['days7', '🔥', 'שָׁבוּעַ שָׁלֵם', d => d.dayStreak >= 7],
+  ['page', '📒', 'דַּף מָלֵא בָּאַלְבּוֹם', d => d.stickers >= 18],
+  ['album', '👑', 'כָּל הָאַלְבּוֹם', d => d.stickers >= STICKERS.length]
+];
 const ROUND = 8;
 const MAX_LEVEL = 5;
 // What each level means in each game (first entry = level 1).
@@ -418,6 +483,15 @@ const GAMES = {
 const KEY = 'eretz-haotiyot-v1';
 let DB = { gan: { stars: 0, levels: {} }, kita: { stars: 0, levels: {} }, sound: true };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.gan && s.kita) DB = Object.assign(DB, s); } catch (e) {}
+for (const p of ['gan', 'kita']) {
+  const d = DB[p];
+  if (d.stickers === undefined) { // saves from before stickers got pricier: keep what was earned (old price, 5 stars each)
+    d.stickers = Math.min(36, Math.floor(d.stars / 5));
+    d.progress = d.stickers >= 36 ? 0 : d.stars % 5;
+  }
+  d.rounds = d.rounds || 0; d.perfects = d.perfects || 0; d.played = d.played || []; d.trophies = d.trophies || [];
+  d.dayStreak = d.dayStreak || 0; d.lastDay = d.lastDay || '';
+}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) {} };
 
 /* ---------- sound ---------- */
@@ -582,6 +656,7 @@ function renderMenu() {
   const pl = PLAYERS[S.p];
   $('#menuWho').textContent = pl.face + ' ' + pl.name;
   $('#menuStars').textContent = starsText(S.p);
+  $('#menuNext').innerHTML = progressBar(S.p);
   const grid = $('#gamesGrid'); grid.innerHTML = '';
   for (const g of pl.games) {
     const m = GAMES[g], lvl = Math.min(MAX_LEVEL, DB[S.p].levels[g] || 1);
@@ -595,14 +670,36 @@ function renderMenu() {
   }
   show('menu');
 }
+function nextStickerText(p) {
+  const d = DB[p];
+  if (d.stickers >= STICKERS.length) return 'הָאַלְבּוֹם מָלֵא! 🎉';
+  return `עוֹד ${stickerCost(d.stickers + 1) - d.progress} ⭐ לַמַּדְבֵּקָה הַבָּאָה`;
+}
+function progressBar(p) {
+  const d = DB[p], full = d.stickers >= STICKERS.length;
+  const pct = full ? 100 : Math.round(100 * d.progress / stickerCost(d.stickers + 1));
+  return `<div class="pbar" role="img" aria-label="${nextStickerText(p)}"><i style="width:${pct}%"></i><span>🎁</span></div>
+    <p class="album-next">${nextStickerText(p)}</p>`;
+}
 function renderAlbum() {
-  const pl = PLAYERS[S.p], stars = DB[S.p].stars;
-  const have = Math.min(STICKERS.length, Math.floor(stars / STARS_PER_STICKER));
+  const pl = PLAYERS[S.p], d = DB[S.p];
   $('#albumWho').textContent = 'הָאַלְבּוֹם שֶׁל ' + pl.name;
   $('#albumStars').textContent = starsText(S.p);
-  $('#albumNext').textContent = have >= STICKERS.length ? 'הָאַלְבּוֹם מָלֵא! 🎉'
-    : `עוֹד ${STARS_PER_STICKER - stars % STARS_PER_STICKER} ⭐ לַמַּדְבֵּקָה הַבָּאָה`;
-  $('#albumGrid').innerHTML = STICKERS.map((s, i) => i < have ? `<span>${s}</span>` : `<span class="locked">?</span>`).join('');
+  $('#albumNext').innerHTML = progressBar(S.p);
+  $('#trophyShelf').innerHTML = `<h3>גְּבִיעִים · ${d.trophies.length}/${TROPHIES.length}</h3><div class="shelf">` +
+    TROPHIES.map(([id, icon, name]) => d.trophies.includes(id)
+      ? `<span class="trophy" title="${name}"><b>${icon}</b><small>${name}</small></span>`
+      : `<span class="trophy locked" title="${name}"><b>🔒</b><small>${name}</small></span>`).join('') + '</div>';
+  let i = 0;
+  $('#albumGrid').innerHTML = ALBUM.map(([title, items]) => {
+    const got = items.filter((_, k) => i + k < d.stickers).length;
+    const cells = items.map(e => {
+      const n = i++;
+      if (n >= d.stickers) return `<span class="locked${isGold(n) ? ' gold' : ''}">${isGold(n) ? '✨' : '?'}</span>`;
+      return `<span class="${isGold(n) ? 'gold' : ''}">${e}</span>`;
+    }).join('');
+    return `<section class="page block"><h3>${title} <small>${got}/${items.length}</small></h3><div class="album">${cells}</div></section>`;
+  }).join('');
   show('albumScr');
 }
 
@@ -610,7 +707,7 @@ function renderAlbum() {
 function level() { return Math.min(MAX_LEVEL, DB[S.p].levels[S.g] || 1); }
 const L = key => LV[S.g][key][level() - 1];
 function startGame(g) {
-  S.g = g; S.q = 0; S.total = GAMES[g].rounds || ROUND; S.gained = 0; S.newStickers = []; S.recent = []; S.streak = 0; S.struggle = 0;
+  S.g = g; S.q = 0; S.total = GAMES[g].rounds || ROUND; S.gained = 0; S.newStickers = []; S.bonuses = []; S.clean = 0; S.recent = []; S.streak = 0; S.struggle = 0;
   show('game');
   nextQ();
 }
@@ -629,14 +726,41 @@ function nextQ() {
   $('#prompt').textContent = S.cur.prompt;
   speak(S.cur.say, true);
 }
+function today() { const t = new Date(); return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`; }
 function finish() {
+  const d = DB[S.p];
+  d.rounds++;
+  if (!d.played.includes(S.g)) d.played.push(S.g);
+  if (S.clean === S.total) { d.perfects++; addStars(BONUS.perfect); S.bonuses.push(['💯', 'סִבּוּב מֻשְׁלָם', BONUS.perfect]); }
+  const t = today();
+  if (d.lastDay !== t) { // first round of the day
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    const yesterday = `${y.getFullYear()}-${y.getMonth() + 1}-${y.getDate()}`;
+    d.dayStreak = d.lastDay === yesterday ? d.dayStreak + 1 : 1;
+    d.lastDay = t;
+    addStars(BONUS.daily); S.bonuses.push(['☀️', 'בּוֹנוּס יוֹמִי', BONUS.daily]);
+  }
+  const newTrophies = TROPHIES.filter(([id, , , test]) => !d.trophies.includes(id) && test(d, S.p));
+  newTrophies.forEach(([id]) => d.trophies.push(id));
   save();
+
   $('#doneGain').textContent = `+${S.gained} ⭐`;
+  const merged = {}; // the same bonus twice shows once, e.g. "עוֹלִים שָׁלָב ×2 +4"
+  for (const [icon, name, n] of S.bonuses) (merged[name] = merged[name] || { icon, n: 0, times: 0 }), merged[name].n += n, merged[name].times++;
+  $('#doneBonus').innerHTML = Object.entries(merged).map(([name, b]) =>
+    `<span class="chip">${b.icon} ${name}${b.times > 1 ? ' ×' + b.times : ''} +${b.n}</span>`).join('');
   $('#doneStickers').hidden = !S.newStickers.length;
-  $('#doneStickRow').textContent = S.newStickers.join(' ');
+  $('#doneStickTitle').textContent = S.newStickers.some(isGold) ? '✨ מַדְבֵּקַת זָהָב! ✨' :
+    S.newStickers.length > 1 ? 'מַדְבֵּקוֹת חֲדָשׁוֹת בָּאַלְבּוֹם!' : 'מַדְבֵּקָה חֲדָשָׁה בָּאַלְבּוֹם!';
+  $('#doneStickRow').innerHTML = S.newStickers.map((n, k) =>
+    `<span class="${isGold(n) ? 'gold' : ''}" style="animation-delay:${0.4 + k * 0.35}s">${STICKERS[n]}</span>`).join('');
+  $('#doneTrophies').hidden = !newTrophies.length;
+  $('#doneTrophyRow').innerHTML = newTrophies.map(([, icon, name]) => `<span class="trophy"><b>${icon}</b><small>${name}</small></span>`).join('');
+  $('#doneNext').innerHTML = progressBar(S.p);
   show('done');
   sfx('good'); confetti();
-  speak(['כָּל הַכָּבוֹד!', S.newStickers.length && 'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!']);
+  if (S.newStickers.length || newTrophies.length) setTimeout(confetti, 600);
+  speak(['כָּל הַכָּבוֹד!', S.newStickers.length && 'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!', newTrophies.length && 'וְגַם גָּבִיעַ חָדָשׁ!']);
 }
 // Difficulty follows the child during the round: 3 clean answers in a row
 // move up a level, 2 answers in a row that needed retries move down.
@@ -654,15 +778,25 @@ function levelUpBanner() {
   setTimeout(() => { b.hidden = true; }, 1900);
   speak('עוֹלִים שָׁלָב!', true);
 }
+// Add stars; every time the progress reaches the next sticker's price, it is unlocked.
+function addStars(n) {
+  const d = DB[S.p];
+  for (let i = 0; i < n; i++) {
+    d.stars++; S.gained++;
+    if (d.stickers >= STICKERS.length) continue;
+    d.progress++;
+    if (d.progress >= stickerCost(d.stickers + 1)) {
+      S.newStickers.push(d.stickers);
+      d.stickers++; d.progress = 0;
+    }
+  }
+}
 function win() {
   S.locked = true;
+  if (S.firstTry) S.clean++;
   const change = adjustLevel(S.firstTry);
-  const d = DB[S.p];
-  for (let i = 0; i < (S.cur.stars || 1); i++) {
-    d.stars++; S.gained++;
-    if (d.stars % STARS_PER_STICKER === 0 && d.stars / STARS_PER_STICKER <= STICKERS.length)
-      S.newStickers.push(STICKERS[d.stars / STARS_PER_STICKER - 1]);
-  }
+  addStars(S.cur.stars || 1);
+  if (change === 'up') { addStars(BONUS.levelUp); S.bonuses.push(['⬆️', 'עוֹלִים שָׁלָב', BONUS.levelUp]); }
   save();
   const sc = $('#gameStars'); sc.textContent = starsText(S.p);
   sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump');
@@ -1039,7 +1173,7 @@ window.allPhrases = () => {
     ...items.map(i => `כַּמָּה ${i} יֵשׁ?`), ...items.map(i => `כַּמָּה ${i} יֵשׁ בְּיַחַד?`), ...items.map(i => `כַּמָּה ${i} נִשְׁאֲרוּ?`),
     'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה', 'מַתְחִילָה בָּאוֹת', 'מָה הַצְּלִיל הָרִאשׁוֹן בַּמִּלָּה', 'בּוֹאוּ נִבְנֶה אֶת הַמִּלָּה',
     'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?', 'אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?', 'אֵיזֶה מִסְפָּר חָסֵר?',
-    'אֵיפֹה יֵשׁ יוֹתֵר?', 'אֵיפֹה יֵשׁ פָּחוֹת?', 'כָּאן יֵשׁ', 'מוֹצְאִים זוּגוֹת!',
+    'אֵיפֹה יֵשׁ יוֹתֵר?', 'אֵיפֹה יֵשׁ פָּחוֹת?', 'כָּאן יֵשׁ', 'מוֹצְאִים זוּגוֹת!', 'וְגַם גָּבִיעַ חָדָשׁ!',
     'וְעוֹד', 'פָּחוֹת', 'זֶה', 'כַּמָּה זֶה?', 'וְעוֹד כַּמָּה זֶה', 'הָיוּ', 'לָקַחְנוּ', 'נִשְׁאֲרוּ'
   ])];
 };

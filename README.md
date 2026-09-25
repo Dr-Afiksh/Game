@@ -17,7 +17,20 @@ It runs in any browser, works well on a tablet, and needs no install or server.
 - **מָה בַּתְּמוּנָה?** Looks at a picture and picks the right word. On harder levels all the choices start with the same letter, so the child has to read the whole word.
 - **בּוֹנִים מִלָּה** Builds the word from syllable tiles. After two wrong taps the right tile starts to glow.
 
-Each round has 8 questions. Every correct answer earns a star, and every 5 stars unlocks a sticker in the child's album.
+Each round has 8 questions, and every correct answer earns a star.
+
+## Rewards
+
+- **Stickers:** 108 stickers on 6 album pages (animals, friends, sea, sky, vehicles, food).
+  They get pricier as the album fills: the first costs 5 stars, each next one 1.5 more, up to 30.
+  The whole album takes about 3,000 stars. Every 6th sticker is a rare golden one.
+- **Bonus stars:** +3 for a perfect round (every answer right the first time), +5 for the first round
+  of the day, +2 for each level up.
+- **Trophies (16):** first round, perfect rounds, 10/50/100 rounds, 100/500/1000 stars, trying every game,
+  reaching level 5, 3 and 7 days in a row, a full album page, the whole album.
+- A progress bar to the next sticker shows in the menu, after each round, and in the album.
+
+Saves from before this change keep every sticker already earned.
 
 ## Math
 
