@@ -50,6 +50,20 @@ A cooperative mode for both kids on one device, from the button on the home scre
 - Each child keeps the stars they earn, and both get +5 bonus stars when they reach the treasure.
 - Trophies: 🤝 played together, 👫 10 times together. Levels do not change in this mode.
 
+## For parents (👪 הורים)
+
+The **👪 הורים** button on the home screen opens a parents' page after a quick multiplication
+question (so the kids don't wander in). For each child it shows:
+- stars, questions and time this week, first-try accuracy, active days and day streak
+- a bar chart of questions answered per day over the last two weeks (tap a bar for details)
+- every game with its current level, first-try accuracy (green 80%+, yellow 60–79%, red below 60%),
+  number of questions, when it was last played, and time spent
+- **what was hard**: the letters, words and exercises answered wrong most often
+- stickers, trophies and rounds, and a reset button (with a confirm step)
+
+Tracking starts from this version; earlier play is only counted in stars and stickers.
+Everything is stored in the browser on that device.
+
 ## Math
 
 **גַּן**

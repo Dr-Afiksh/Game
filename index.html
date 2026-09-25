@@ -169,6 +169,51 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 .equation{white-space:pre}
 .equation.cmp{font-size:clamp(30px,9vw,80px);padding-inline:18px}
 
+/* parents' page: plain and calm, for grown-ups */
+.gate{display:flex;flex-direction:column;align-items:center;gap:14px;padding:22px;max-width:420px;width:100%;margin:10px auto 0;text-align:center;font-size:22px}
+.gate p{margin:0}
+.gate b{font-size:30px}
+.gate input{font:inherit;font-size:32px;width:140px;text-align:center;padding:6px;border:3px solid var(--ink);border-radius:14px;background:var(--paper);color:var(--ink)}
+.gate .go{padding:10px 30px;font-size:22px;font-weight:900;background:var(--grass);color:var(--paper)}
+.gate-note{font-size:15px;color:var(--ink-soft)}
+.gate.wrong{animation:shake .4s}
+.ptabs{display:flex;gap:10px;justify-content:center}
+.ptab{padding:8px 18px;font-size:20px;font-weight:700;border-radius:999px}
+.ptab.on{background:var(--sun)}
+.pbody{display:flex;flex-direction:column;gap:14px;font-size:16px}
+.ptiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile-stat{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;padding:10px 12px;box-shadow:0 4px 0 var(--ink)}
+.tile-stat .ti{grid-row:span 2;font-family:var(--emoji);font-size:28px;align-self:center}
+.tile-stat b{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.2}
+.tile-stat small{font-size:13px;color:var(--ink-soft)}
+.psec{padding:12px 14px;box-shadow:0 4px 0 var(--ink)}
+.psec h3{margin:0 0 8px;font-size:19px}
+.psec p{margin:6px 0}
+.muted{color:var(--ink-soft);font-size:14px}
+.pchart{width:100%;height:auto;display:block}
+.pchart .gl{stroke:#E4E8EF;stroke-width:1}
+.pchart .ax{fill:#56627F;font-size:10px;font-family:var(--font)}
+.pchart .bar{fill:#2FA7D6}
+.pchart .day.hot .bar{fill:#1E86B3}
+.pchart .hit{fill:transparent;cursor:pointer}
+.ptip{position:fixed;z-index:70;background:var(--ink);color:var(--paper);padding:6px 10px;border-radius:8px;font-size:14px;pointer-events:none;white-space:nowrap}
+.ptable-wrap{overflow-x:auto}
+.ptable{border-collapse:collapse;width:100%;min-width:520px;font-size:15px}
+.ptable th{font-size:13px;color:var(--ink-soft);font-weight:700;text-align:start;padding:6px;border-bottom:2px solid var(--ink)}
+.ptable td{padding:7px 6px;border-bottom:1px solid #E4E8EF;white-space:nowrap}
+.ptable td.num{font-variant-numeric:tabular-nums}
+.ptable .lvl i{width:10px;height:10px}
+.acc{padding:1px 8px;border-radius:999px;font-weight:700}
+.acc.good{background:#DDF3D8;color:#23662C}
+.acc.ok{background:#FFF1C7;color:#7A5A00}
+.acc.low{background:#FDE0E6;color:#A3223E}
+.hard{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.hard li{display:flex;align-items:baseline;gap:10px;padding:4px 0;border-bottom:1px solid #E4E8EF}
+.hard b{font-size:20px;min-width:80px}
+.hard span{flex:1;color:var(--ink-soft);font-size:14px}
+.hard em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums}
+.pill.danger{background:#FDE0E6}
+
 /* memory */
 .memory{display:grid;gap:10px;grid-template-columns:repeat(3,1fr);width:100%;max-width:620px;margin:auto}
 .memory.m8,.memory.m12,.memory.m16{grid-template-columns:repeat(4,1fr)}
@@ -298,6 +343,7 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
     <button class="block together-btn" id="togetherBtn"><span class="faces">🐣🤝🦉</span><span>מְשַׂחֲקִים יַחַד</span></button>
     <div class="home-foot">
       <button class="block pill" id="soundBtn"></button>
+      <button class="block pill" id="parentBtn">👪 הורים</button>
     </div>
     <p class="note" id="voiceNote" hidden>לא נמצא קול עברי במכשיר, אז המשחק ירוץ בלי הקראה. בטלפון או בטאבלט אפשר להוסיף קול עברי בהגדרות הדיבור (טקסט לדיבור).</p>
   </section>
@@ -347,6 +393,29 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
       <button class="block go" id="againBtn">עוֹד סִבּוּב</button>
       <button class="block" id="toMenuBtn">לַמִּשְׂחָקִים</button>
     </div>
+  </section>
+
+  <section id="gateScr" class="screen" hidden>
+    <div class="bar"><button class="block icon-btn" id="gateBack" aria-label="חזרה">🏠</button><div class="grow who">לוח הורים</div></div>
+    <form class="gate block" id="gateForm">
+      <p>כדי להיכנס, כמה זה <b id="gateQ" dir="ltr"></b>?</p>
+      <input id="gateInput" type="number" inputmode="numeric" autocomplete="off" aria-label="התשובה">
+      <button class="block go" type="submit">כניסה</button>
+      <p class="gate-note">שאלה קטנה כדי שהילדים לא ייכנסו בטעות.</p>
+    </form>
+  </section>
+
+  <section id="parentScr" class="screen" hidden>
+    <div class="bar">
+      <button class="block icon-btn" id="parentBack" aria-label="חזרה">🏠</button>
+      <div class="grow who">לוח הורים</div>
+    </div>
+    <div class="ptabs" role="tablist">
+      <button class="block ptab" id="ptab-gan" role="tab">🐣 גן</button>
+      <button class="block ptab" id="ptab-kita" role="tab">🦉 כיתה א׳</button>
+    </div>
+    <div id="parentBody" class="pbody"></div>
+    <div class="ptip" id="ptip" hidden></div>
   </section>
 
   <section id="albumScr" class="screen" hidden>
@@ -602,6 +671,7 @@ for (const p of ['gan', 'kita']) {
   }
   d.rounds = d.rounds || 0; d.perfects = d.perfects || 0; d.played = d.played || []; d.trophies = d.trophies || [];
   d.dayStreak = d.dayStreak || 0; d.lastDay = d.lastDay || ''; d.together = d.together || 0;
+  d.stats = d.stats || { games: {}, days: {}, missed: {} };
 }
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) {} };
 
@@ -853,6 +923,7 @@ function nextQ() {
   renderLevel();
   $('#stage').innerHTML = ''; $('#choices').innerHTML = ''; $('#choices').className = 'choices';
   S.cur = MAKERS[S.g]();
+  S.qStart = Date.now();
   $('#prompt').textContent = S.cur.prompt;
   if (S.together) speak(PLAYERS[S.p].turn, true);
   speak(S.cur.say, true);
@@ -861,6 +932,7 @@ function today() { const t = new Date(); return `${t.getFullYear()}-${t.getMonth
 function finish() {
   const d = DB[S.p];
   d.rounds++;
+  trackRound(S.p, S.g);
   if (!d.played.includes(S.g)) d.played.push(S.g);
   if (S.clean === S.total) { d.perfects++; addStars(BONUS.perfect); S.bonuses.push(['💯', 'סִבּוּב מֻשְׁלָם', BONUS.perfect]); }
   const t = today();
@@ -925,8 +997,32 @@ function addStars(n) {
     }
   }
 }
+/* ---------- progress tracking for the parents' page ---------- */
+function statFor(p) { return DB[p].stats; }
+function track(firstTry, misses) {
+  const st = statFor(S.p), t = today(), ms = Math.min(Date.now() - (S.qStart || Date.now()), 60000);
+  const gs = st.games[S.g] = st.games[S.g] || { q: 0, first: 0, miss: 0, rounds: 0, ms: 0, last: '' };
+  gs.q++; gs.miss += misses; gs.ms += ms; gs.last = t; if (firstTry) gs.first++;
+  const day = st.days[t] = st.days[t] || { q: 0, first: 0, rounds: 0, ms: 0 };
+  day.q++; day.ms += ms; if (firstTry) day.first++;
+  if (!firstTry) { // remember what was hard, e.g. which letter or word
+    const item = S.cur.item !== undefined ? S.cur.item : [].concat(S.cur.after || [])[0];
+    if (item !== undefined && item !== '') { const m = st.missed[S.g] = st.missed[S.g] || {}; m[item] = (m[item] || 0) + 1; }
+  }
+}
+function trackRound(p, g) {
+  const st = statFor(p), t = today();
+  if (g && st.games[g]) st.games[g].rounds++;
+  (st.days[t] = st.days[t] || { q: 0, first: 0, rounds: 0, ms: 0 }).rounds++;
+  const old = Object.keys(st.days).sort(byDate).slice(0, -120); // keep about four months
+  old.forEach(k => delete st.days[k]);
+}
+const dateKey = d => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+const byDate = (a, b) => new Date(a.replace(/-/g, '/')) - new Date(b.replace(/-/g, '/'));
+
 function win() {
   S.locked = true;
+  track(S.firstTry, S.misses);
   if (S.firstTry) S.clean++;
   const change = S.together ? '' : adjustLevel(S.firstTry); // levels only change when playing alone
   addStars(S.cur.stars || 1);
@@ -950,6 +1046,110 @@ function miss(el) {
     const ok = document.querySelector('#choices [data-ok]');
     if (ok) ok.classList.add('glow');
   }
+}
+
+/* ---------- parents' page ---------- */
+let gateAnswer = 0;
+function openGate() {
+  const a = between(6, 9), b = between(3, 9);
+  gateAnswer = a * b;
+  $('#gateQ').textContent = `${a} × ${b}`;
+  $('#gateInput').value = '';
+  show('gateScr');
+  setTimeout(() => $('#gateInput').focus(), 50);
+}
+function renderParent(p) {
+  S.parentOf = p;
+  for (const k of ['gan', 'kita']) { $('#ptab-' + k).classList.toggle('on', k === p); $('#ptab-' + k).setAttribute('aria-selected', k === p); }
+  const d = DB[p], st = d.stats, now = new Date();
+  const lastDays = n => Array.from({ length: n }, (_, i) => { const x = new Date(now); x.setDate(x.getDate() - (n - 1 - i)); return x; });
+  const days14 = lastDays(14).map(x => ({ date: x, key: dateKey(x), ...(st.days[dateKey(x)] || { q: 0, first: 0, rounds: 0, ms: 0 }) }));
+  const week = days14.slice(7);
+  const sum = (arr, f) => arr.reduce((t, x) => t + x[f], 0);
+  const wq = sum(week, 'q'), wFirst = sum(week, 'first');
+  const acc = wq ? Math.round(100 * wFirst / wq) + '%' : '—';
+  const mins = Math.round(sum(week, 'ms') / 60000);
+  const active = days14.filter(x => x.q > 0).length;
+  const tiles = [
+    ['⭐', d.stars, 'כוכבים בסך הכול'],
+    ['🎯', wq, 'שאלות ב־7 הימים האחרונים'],
+    ['✅', acc, 'נכון בניסיון הראשון (שבוע)'],
+    ['⏱️', mins + ' דק׳', 'זמן משחק השבוע'],
+    ['📅', `${active}/14`, 'ימים פעילים בשבועיים'],
+    ['🔥', d.dayStreak || 0, 'ימים ברצף']
+  ];
+
+  // bar chart: questions answered per day, last 14 days
+  const W = 360, H = 170, padL = 26, padB = 22, padT = 10, cw = (W - padL) / 14;
+  const maxQ = Math.max(8, ...days14.map(x => x.q));
+  const step = maxQ <= 20 ? 5 : maxQ <= 50 ? 10 : 20, top = Math.ceil(maxQ / step) * step;
+  const y = v => padT + (H - padT - padB) * (1 - v / top);
+  let grid = '';
+  for (let v = 0; v <= top; v += step) grid += `<line x1="${padL}" x2="${W}" y1="${y(v)}" y2="${y(v)}" class="gl"/><text x="${padL - 6}" y="${y(v) + 4}" class="ax" text-anchor="end">${v}</text>`;
+  const dayName = x => ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'][x.getDay()];
+  const bars = days14.map((x, i) => {
+    const bx = padL + i * cw + cw * 0.18, bw = cw * 0.64, by = y(x.q), bh = y(0) - by;
+    const r = Math.min(4, bh / 2);
+    const bar = x.q ? `<path class="bar" d="M${bx} ${y(0)}V${by + r}Q${bx} ${by} ${bx + r} ${by}H${bx + bw - r}Q${bx + bw} ${by} ${bx + bw} ${by + r}V${y(0)}Z"/>` : '';
+    const tip = `${x.date.getDate()}/${x.date.getMonth() + 1} · ${x.q} שאלות` + (x.q ? ` · ${Math.round(100 * x.first / x.q)}% נכון בניסיון ראשון · ${Math.round(x.ms / 60000)} דק׳` : '');
+    return `<g class="day" data-tip="${tip}">${bar}<rect class="hit" x="${padL + i * cw}" y="${padT}" width="${cw}" height="${H - padT}"/>` +
+      `<text x="${padL + i * cw + cw / 2}" y="${H - 6}" class="ax" text-anchor="middle">${i === 13 ? 'היום' : dayName(x.date)}</text></g>`;
+  }).join('');
+  const chart = `<svg viewBox="0 0 ${W} ${H}" class="pchart" role="img" aria-label="שאלות ביום בשבועיים האחרונים">${grid}${bars}</svg>`;
+
+  // per-game table
+  const rows = PLAYERS[p].games.map(g => ({ g, ...(st.games[g] || { q: 0, first: 0, rounds: 0, ms: 0, last: '' }) }))
+    .sort((a, b) => (b.last ? 1 : 0) - (a.last ? 1 : 0) || (b.last && a.last ? byDate(b.last, a.last) : 0) || b.q - a.q);
+  const fmtDay = k => { if (!k) return '—'; const t = today(); if (k === t) return 'היום'; const y2 = new Date(); y2.setDate(y2.getDate() - 1); if (k === dateKey(y2)) return 'אתמול'; const [yy, mm, dd] = k.split('-'); return `${dd}/${mm}`; };
+  const lvDots = lv => `<span class="lvl">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= lv ? 'on' : ''}"></i>`).join('')}</span>`;
+  const table = `<div class="ptable-wrap"><table class="ptable"><thead><tr><th>משחק</th><th>שלב</th><th>נכון בניסיון ראשון</th><th>שאלות</th><th>לאחרונה</th><th>זמן</th></tr></thead><tbody>` +
+    rows.map(r => {
+      const a = r.q ? Math.round(100 * r.first / r.q) : null;
+      const cls = a === null ? '' : a >= 80 ? 'good' : a >= 60 ? 'ok' : 'low';
+      return `<tr><td>${GAMES[r.g].name}</td><td>${lvDots(d.levels[r.g] || 1)}</td><td class="num"><span class="acc ${cls}">${a === null ? '—' : a + '%'}</span></td>` +
+        `<td class="num">${r.q}</td><td>${fmtDay(r.last)}</td><td class="num">${Math.round(r.ms / 60000)} דק׳</td></tr>`;
+    }).join('') + '</tbody></table></div>';
+
+  // what was hard
+  const hard = [];
+  for (const [g, items] of Object.entries(st.missed)) for (const [item, n] of Object.entries(items)) if (GAMES[g]) hard.push({ g, item, n });
+  hard.sort((a, b) => b.n - a.n);
+  const hardHtml = hard.length ? `<ul class="hard">${hard.slice(0, 10).map(h => `<li><b>${h.item}</b><span>${GAMES[h.g].name}</span><em>${h.n}×</em></li>`).join('')}</ul>`
+    : '<p class="muted">עוד אין מספיק נתונים. אחרי כמה סבבים יופיעו כאן מילים, אותיות ותרגילים שהיו קשים.</p>';
+
+  $('#parentBody').innerHTML = `
+    <div class="ptiles">${tiles.map(([i, v, l]) => `<div class="tile-stat block"><span class="ti">${i}</span><b>${v}</b><small>${l}</small></div>`).join('')}</div>
+    <section class="block psec"><h3>שאלות ביום · שבועיים אחרונים</h3>${chart}</section>
+    <section class="block psec"><h3>לפי משחק</h3>${table}
+      <p class="muted">השלב עולה ויורד לבד לפי ההצלחה. ירוק: 80% ומעלה בניסיון ראשון, צהוב: 60–79%, אדום: פחות מ־60%.</p></section>
+    <section class="block psec"><h3>מה היה קשה</h3>${hardHtml}</section>
+    <section class="block psec"><h3>אלבום וגביעים</h3>
+      <p>${d.stickers} מתוך ${STICKERS.length} מדבקות · ${d.trophies.length} מתוך ${TROPHIES.length} גביעים · ${d.rounds} סבבים לבד · ${d.together} משחקים ביחד</p></section>
+    <section class="block psec"><h3>הגדרות</h3>
+      <p class="muted">ההתקדמות נשמרת רק בדפדפן הזה, במכשיר הזה.</p>
+      <button class="block pill danger" id="resetBtn">איפוס ההתקדמות של ${PLAYERS[p].name}</button>
+      <div id="resetConfirm" hidden><p>למחוק את כל הכוכבים, המדבקות, השלבים והנתונים של ${PLAYERS[p].name}? אי אפשר לבטל.</p>
+        <button class="block pill danger" id="resetYes">כן, למחוק</button> <button class="block pill" id="resetNo">ביטול</button></div>
+    </section>`;
+
+  const tipEl = $('#ptip');
+  for (const g of document.querySelectorAll('.pchart .day')) {
+    const showTip = e => {
+      const r = g.getBoundingClientRect();
+      tipEl.textContent = g.dataset.tip; tipEl.hidden = false;
+      tipEl.style.left = Math.min(window.innerWidth - tipEl.offsetWidth - 8, Math.max(8, r.left + r.width / 2 - tipEl.offsetWidth / 2)) + 'px';
+      tipEl.style.top = Math.max(8, r.top - tipEl.offsetHeight - 6) + 'px';
+      document.querySelectorAll('.pchart .day').forEach(o => o.classList.toggle('hot', o === g));
+    };
+    g.addEventListener('pointerenter', showTip); g.addEventListener('click', showTip);
+    g.addEventListener('pointerleave', () => { tipEl.hidden = true; g.classList.remove('hot'); });
+  }
+  $('#resetBtn').onclick = () => { $('#resetConfirm').hidden = false; };
+  $('#resetNo').onclick = () => { $('#resetConfirm').hidden = true; };
+  $('#resetYes').onclick = () => {
+    DB[p] = { stars: 0, levels: {}, stickers: 0, progress: 0, rounds: 0, perfects: 0, played: [], trophies: [], dayStreak: 0, lastDay: '', together: 0, stats: { games: {}, days: {}, missed: {} } };
+    save(); renderParent(p);
+  };
 }
 
 /* ---------- playing together ---------- */
@@ -977,6 +1177,7 @@ function finishTogether() {
     addStars(TOGETHER_BONUS);
     const d = DB[p];
     d.together++;
+    trackRound(p, null);
     TROPHIES.filter(([id, , , test]) => !d.trophies.includes(id) && test(d, p))
       .forEach(t => { d.trophies.push(t[0]); newTrophies.push([PLAYERS[p].face, t]); });
   }
@@ -1059,7 +1260,7 @@ const MAKERS = {
       $('#stage').appendChild(h);
     }
     choices([{ label: ch, ok: true }, ...others.map(x => ({ label: x }))]);
-    return { prompt: `אֵיפֹה הָאוֹת ${name}?`, say: `אֵיפֹה הָאוֹת ${name}?`, after: name };
+    return { prompt: `אֵיפֹה הָאוֹת ${name}?`, say: `אֵיפֹה הָאוֹת ${name}?`, after: name, item: ch };
   },
 
   count() {
@@ -1210,7 +1411,7 @@ const MAKERS = {
       box.appendChild(btn);
     }
     const q = less ? 'אֵיפֹה יֵשׁ פָּחוֹת?' : 'אֵיפֹה יֵשׁ יוֹתֵר?';
-    return { prompt: q, say: q, after: ['כָּאן יֵשׁ', numWord(want)] };
+    return { prompt: q, say: q, after: ['כָּאן יֵשׁ', numWord(want)], item: `${a} / ${b}` };
   },
 
   picAdd() {
@@ -1244,8 +1445,8 @@ const MAKERS = {
     $('#stage').appendChild(eq);
     numChoices(ans, L('options'), 1, minus ? 0 : 1, 10);
     return minus
-      ? { prompt: 'כַּמָּה נִשְׁאֲרוּ?', say: ['הָיוּ', numWord(a), 'לָקַחְנוּ', numWord(b), `כַּמָּה ${itemName} נִשְׁאֲרוּ?`], after: ['נִשְׁאֲרוּ', numWord(ans)] }
-      : { prompt: 'כַּמָּה יֵשׁ בְּיַחַד?', say: [numWord(a), 'וְעוֹד', numWord(b), `כַּמָּה ${itemName} יֵשׁ בְּיַחַד?`], after: [numWord(a), 'וְעוֹד', numWord(b), 'זֶה', numWord(ans)] };
+      ? { item: `${a} − ${b}`, prompt: 'כַּמָּה נִשְׁאֲרוּ?', say: ['הָיוּ', numWord(a), 'לָקַחְנוּ', numWord(b), `כַּמָּה ${itemName} נִשְׁאֲרוּ?`], after: ['נִשְׁאֲרוּ', numWord(ans)] }
+      : { item: `${a} + ${b}`, prompt: 'כַּמָּה יֵשׁ בְּיַחַד?', say: [numWord(a), 'וְעוֹד', numWord(b), `כַּמָּה ${itemName} יֵשׁ בְּיַחַד?`], after: [numWord(a), 'וְעוֹד', numWord(b), 'זֶה', numWord(ans)] };
   },
 
   arith() {
@@ -1278,7 +1479,7 @@ const MAKERS = {
       $('#stage').appendChild(d);
     }
     numChoices(ans, L('options'), 1, 0, 20);
-    return { prompt: 'כַּמָּה זֶה?', say, after };
+    return { prompt: 'כַּמָּה זֶה?', say, after, item: text.replace(' = ?', '').replace('?', '_') };
   },
 
   seq() {
@@ -1296,7 +1497,7 @@ const MAKERS = {
     });
     $('#stage').appendChild(row);
     numChoices(ans, L('options'), size, 0, max);
-    return { prompt: 'אֵיזֶה מִסְפָּר חָסֵר?', say: 'אֵיזֶה מִסְפָּר חָסֵר?', after: terms.map(numWord) };
+    return { prompt: 'אֵיזֶה מִסְפָּר חָסֵר?', say: 'אֵיזֶה מִסְפָּר חָסֵר?', after: terms.map(numWord), item: terms.map((t, i) => i === hole ? '_' : t).join(', ') };
   },
 
   /* ---------- memory ---------- */
@@ -1506,7 +1707,7 @@ const MAKERS = {
     }
     choices(['>', '<', '='].map(x => ({ label: x, ok: x === sign })), 'sign');
     const word = { '>': 'גָּדוֹל מִן', '<': 'קָטָן מִן', '=': 'שָׁוֶה לְ' }[sign];
-    return { prompt: 'אֵיזֶה סִימָן מַתְאִים?', say: 'אֵיזֶה סִימָן מַתְאִים?', after: [numWord(A.val), word, numWord(B.val)] };
+    return { prompt: 'אֵיזֶה סִימָן מַתְאִים?', say: 'אֵיזֶה סִימָן מַתְאִים?', after: [numWord(A.val), word, numWord(B.val)], item: `${A.text} ◯ ${B.text}` };
   }
 };
 
@@ -1553,6 +1754,16 @@ $('#sayAgain').onclick = () => S.cur && speak(S.cur.say);
 $('#againBtn').onclick = () => S.together ? startTogether() : startGame(S.g);
 $('#toMenuBtn').onclick = () => S.together ? renderHome() : renderMenu();
 $('#togetherBtn').onclick = () => { sfx('pop'); startTogether(); };
+$('#parentBtn').onclick = openGate;
+$('#gateBack').onclick = renderHome;
+$('#parentBack').onclick = () => { $('#ptip').hidden = true; renderHome(); };
+$('#gateForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (Number($('#gateInput').value) === gateAnswer) { show('parentScr'); renderParent(S.parentOf || 'kita'); }
+  else { const f = $('#gateForm'); f.classList.remove('wrong'); void f.offsetWidth; f.classList.add('wrong'); openGate(); }
+});
+$('#ptab-gan').onclick = () => renderParent('gan');
+$('#ptab-kita').onclick = () => renderParent('kita');
 renderHome();
 })();
 </script>
