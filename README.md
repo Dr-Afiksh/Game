@@ -19,6 +19,18 @@ It runs in any browser, works well on a tablet, and needs no install or server.
 
 Each round has 8 questions. Every correct answer earns a star, and every 5 stars unlocks a sticker in the child's album.
 
+## Math
+
+**גַּן**
+- **אֵיפֹה יוֹתֵר?** Two groups of objects: tap the one with more. The gap between the groups shrinks as levels go up, and level 5 sometimes asks for fewer.
+- **חִבּוּר בִּתְמוּנוֹת** Picture addition (🍎🍎 + 🍎 = ?), sums up to 3, 5, 7, then 10. Level 5 is take-away: some objects are crossed out and the child counts what is left. Objects can be tapped to count them out loud.
+
+**כִּתָּה א׳**
+- **תַּרְגִּילִים** Level 1: addition up to 5 with dots under the numbers. 2: addition up to 10. 3: subtraction up to 10. 4: addition and subtraction up to 20. 5: missing number (8 + ? = 10).
+- **מָה חָסֵר?** A row of five numbers with one missing. Level 1 counts up to 10, 2 up to 20, 3 counts down, 4 goes by 2s, 5 goes by 10s up to 100.
+
+Equations are written left to right, the way Israeli math books write them.
+
 ## Levels
 
 Each game has 5 levels, and the level adjusts while the child plays:
