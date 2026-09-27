@@ -26,6 +26,12 @@ It runs in any browser, works well on a tablet, and needs no install or server.
 - **קוֹרְאִים מִשְׁפָּט** Read a short sentence (הַכֶּלֶב יָשֵׁן.) and pick the matching picture. From level 3 the wrong pictures are about the same subject (the dog sleeping vs. the dog running).
 - **גָּדוֹל אוֹ קָטָן?** Pick >, < or =. Up to 10 with dots, then up to 20 and 100, then sums on one or both sides (4 + 8 ◯ 16).
 
+**🇬🇧 English (first grade)**, spoken by the device's English voice, with praise in English and the Hebrew word after each answer:
+- **מִלִּים בְּאַנְגְּלִית** "Where is the dog?", pick the picture. 88 words; easy levels use 30 everyday words, level 4 also shows the word written, level 5 is reading only.
+- **ABC** Hear a letter name and find it: capitals A–J, then A–Z, then small letters, then match capital to small, then look-alikes (b d p q).
+- **צְבָעִים וּמִסְפָּרִים** "Where is red?" / "Find the number five": colors and numbers up to 20.
+- **First letter** See a picture, hear the English word, and pick its first letter.
+
 Each round has 8 questions, and every correct answer earns a star.
 
 ## Rewards

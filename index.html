@@ -6,7 +6,7 @@
 <title>ארץ האותיות</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@500;700;900&family=Andika:wght@400;700&display=swap">
 <style>
 :root{
   --ink:#1F2A44; --ink-soft:#56627F;
@@ -213,6 +213,13 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 .hard span{flex:1;color:var(--ink-soft);font-size:14px}
 .hard em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums}
 .pill.danger{background:#FDE0E6}
+
+/* English */
+.menu-section{grid-column:1/-1;margin:10px 0 -4px;font-size:22px;font-weight:900}
+.menu-section:empty{display:none}
+.bigword.english,.choice.latin{font-family:"Andika","Noto Sans Hebrew",Arial,sans-serif;direction:ltr;unicode-bidi:isolate}
+.bigword.english{letter-spacing:1px}
+.listen{font-family:var(--emoji);font-size:64px;padding:10px 28px;border-radius:28px}
 
 /* memory */
 .memory{display:grid;gap:10px;grid-template-columns:repeat(3,1fr);width:100%;max-width:620px;margin:auto}
@@ -573,6 +580,32 @@ const SENTENCES = [
   ['הַתַּרְנְגוֹל קוֹרֵא קוּקוּרִיקוּ.', '🐓📢', 'animal', 3], ['הַכֶּלֶב וְהֶחָתוּל חֲבֵרִים.', '🐶❤️🐱', 'dog', 3],
   ['הַיְּלָדִים מְשַׂחֲקִים בַּגַּן.', '👦👧🌳', 'boy', 3]
 ].map(([text, pic, subj, level]) => ({ text, pic, subj, level }));
+// English: [word, picture]; the first EN_EASY words are the everyday ones used on easy levels
+const EN_WORDS = [
+  ['dog','🐶'],['cat','🐱'],['fish','🐟'],['cow','🐄'],['pig','🐷'],['duck','🦆'],['lion','🦁'],['monkey','🐒'],
+  ['elephant','🐘'],['rabbit','🐰'],['apple','🍎'],['banana','🍌'],['milk','🥛'],['egg','🥚'],['cake','🎂'],['car','🚗'],
+  ['bus','🚌'],['ball','⚽'],['book','📖'],['house','🏠'],['tree','🌳'],['flower','🌸'],['sun','☀️'],['moon','🌙'],
+  ['star','⭐'],['baby','👶'],['boy','👦'],['girl','👧'],['hand','✋'],['heart','❤️'],
+  ['horse','🐴'],['sheep','🐑'],['mouse','🐭'],['frog','🐸'],['snake','🐍'],['bee','🐝'],['butterfly','🦋'],['turtle','🐢'],
+  ['tiger','🐯'],['fox','🦊'],['bear','🐻'],['penguin','🐧'],['chicken','🐔'],['owl','🦉'],['shark','🦈'],['whale','🐳'],
+  ['orange','🍊'],['grapes','🍇'],['strawberry','🍓'],['watermelon','🍉'],['lemon','🍋'],['carrot','🥕'],['tomato','🍅'],
+  ['cheese','🧀'],['bread','🍞'],['pizza','🍕'],['cookie','🍪'],['candy','🍬'],['train','🚂'],['airplane','✈️'],['boat','⛵'],
+  ['bike','🚲'],['taxi','🚕'],['rocket','🚀'],['key','🔑'],['hat','🧢'],['shoe','👟'],['shirt','👕'],['dress','👗'],
+  ['socks','🧦'],['cup','🥤'],['clock','⏰'],['gift','🎁'],['balloon','🎈'],['umbrella','☂️'],['robot','🤖'],['king','🤴'],
+  ['queen','👸'],['eye','👁️'],['nose','👃'],['ear','👂'],['fire','🔥'],['rainbow','🌈'],['snow','❄️'],['door','🚪'],
+  ['drum','🥁'],['guitar','🎸'],['piano','🎹']
+];
+const EN_EASY = 30;
+const EN_FIRST_SKIP = ['eye']; // "eye" does not sound like it starts with E
+const EN_ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+// letter names spelled out, so the voice says "ay" and not the word "a"
+const EN_LETTER_SAY = { A: 'ay', B: 'bee', C: 'see', D: 'dee', E: 'ee', F: 'ef', G: 'gee', H: 'aitch', I: 'eye', J: 'jay', K: 'kay', L: 'el', M: 'em',
+  N: 'en', O: 'oh', P: 'pee', Q: 'cue', R: 'ar', S: 'ess', T: 'tee', U: 'you', V: 'vee', W: 'double you', X: 'ex', Y: 'why', Z: 'zee' };
+const EN_TRICKY = [['b', 'd', 'p', 'q'], ['m', 'n', 'w'], ['u', 'v', 'w'], ['i', 'j', 'l'], ['c', 'e', 'o'], ['f', 't'], ['h', 'n'], ['g', 'q', 'y']];
+const EN_COLORS = { red: 'red', blue: 'blue', yellow: 'yellow', green: 'green', orange: 'orange', purple: 'purple', pink: 'pink', brown: 'brown', black: 'black', white: 'white' };
+const EN_NUMS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
+  'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+const EN_PRAISE = ['Great job!', 'Well done!', 'Super!', 'Excellent!', 'Yes!'];
 const PATTERN_ITEMS = ['🍎', '🍌', '🍇', '🍓', '🐶', '🐱', '🐸', '⭐', '🎈', '🌸', '🚗', '⚽'];
 const SHADOW_GROUPS = [
   ['🐟','🐴','🐱','🐶','🐘','🦁','🐒','🐢','🐍','🦋','🐝','🐓','🐷','🐰','🐭','🐸','🐜','🐫','🦓','🕊️','🐊','🦔','🦉','🐳','🐙','🕷️','🐌','🐬','🐞','🦛','🦘','🐑','🐄','🐺','🦊','🐻','🐯','🐧','🐔','🐥','🦆','🐐','🦈','🦇','🦎','🦍','🦏','🐿️','🦟','🦀','🦚','🦜','🦅','🦕','🐉'],
@@ -654,12 +687,18 @@ const LV = {
   syllables:   { options: [3, 3, 4, 4, 4], range: [[1, 2], [1, 3], [2, 3], [2, 4], [3, 5]] },
   missing:     { options: [3, 3, 3, 4, 4], lens: [[3, 3], [3, 4], [4, 5], [5, 6], [6, 99]] },
   sentences:   { options: [3, 3, 3, 4, 4], maxLevel: [1, 2, 2, 3, 3], sameSubject: [0, 0, 1, 1, 1] },
-  numCompare:  { dots: [1, 0, 0, 0, 0] }
+  numCompare:  { dots: [1, 0, 0, 0, 0] },
+  // English: listen and pick the picture; from level 4 the word is written, level 5 is reading only
+  enWords:     { options: [2, 3, 3, 4, 4], easy: [1, 1, 0, 0, 0], written: [0, 0, 0, 1, 1], silent: [0, 0, 0, 0, 1] },
+  // ABC: capitals A-J, then A-Z, then small letters, then capital-to-small, then look-alikes (b d p q)
+  abc:         { options: [3, 3, 4, 4, 4], upto: [10, 26, 26, 26, 26], mode: ['upper', 'upper', 'lower', 'match', 'tricky'] },
+  enColorsNumbers: { options: [2, 3, 3, 4, 4], kinds: ['colors', 'numbers', 'both', 'both', 'both'], colors: [3, 4, 6, 10, 10], numbers: [5, 5, 10, 10, 20] },
+  enFirst:     { options: [3, 3, 4, 4, 4], showWord: [1, 1, 0, 0, 0], lower: [0, 0, 1, 1, 1], tricky: [0, 0, 0, 1, 1] }
 };
 
 const PLAYERS = {
   gan:  { name: 'גַּן', say: 'גַּן', turn: 'תּוֹר הַגַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd', 'memory', 'colors', 'shapes', 'pattern', 'shadow'] },
-  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', turn: 'תּוֹר כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq', 'memory', 'syllables', 'missing', 'sentences', 'numCompare'] }
+  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', turn: 'תּוֹר כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq', 'memory', 'syllables', 'missing', 'sentences', 'numCompare', 'enWords', 'abc', 'enColorsNumbers', 'enFirst'] }
 };
 const GAMES = {
   letters:     { name: 'אֵיפֹה הָאוֹת?',      icon: 'א',   bg: 'var(--berry)' },
@@ -681,7 +720,11 @@ const GAMES = {
   syllables:   { name: 'הֲבָרוֹת',              icon: '👏',  bg: 'var(--sun)', emo: true },
   missing:     { name: 'אוֹת חֲסֵרָה',           icon: 'קוֹ?', bg: 'var(--berry)', sm: true },
   sentences:   { name: 'קוֹרְאִים מִשְׁפָּט',       icon: '📖',  bg: 'var(--sky-hi)', emo: true },
-  numCompare:  { name: 'גָּדוֹל אוֹ קָטָן?',       icon: '7>5', bg: 'var(--grass-deep)', sm: true }
+  numCompare:  { name: 'גָּדוֹל אוֹ קָטָן?',       icon: '7>5', bg: 'var(--grass-deep)', sm: true },
+  enWords:     { name: 'מִלִּים בְּאַנְגְּלִית',     icon: 'Hi', bg: 'var(--berry)', section: 'en' },
+  abc:         { name: 'ABC',                   icon: 'Aa', bg: 'var(--sea)', section: 'en' },
+  enColorsNumbers: { name: 'צְבָעִים וּמִסְפָּרִים', icon: '🎨5', bg: 'var(--sun)', emo: true, sm: true, section: 'en' },
+  enFirst:     { name: 'First letter',          icon: 'b🐻', bg: 'var(--grass-deep)', sm: true, section: 'en' }
 };
 
 /* ---------- saved progress ---------- */
@@ -708,11 +751,13 @@ const save = () => { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catc
 const CLIPS = window.VOICE_CLIPS || null;
 const missingClips = new Set(); // phrases asked for that have no clip (see console: missingClips)
 window.missingClips = missingClips;
-let heVoice = null;
+let heVoice = null, enVoice = null;
 const canSpeak = 'speechSynthesis' in window;
 function loadVoices() {
   if (!canSpeak) return;
-  heVoice = speechSynthesis.getVoices().find(v => /^(he|iw)/i.test(v.lang)) || null;
+  const vs = speechSynthesis.getVoices();
+  heVoice = vs.find(v => /^(he|iw)/i.test(v.lang)) || null;
+  enVoice = vs.find(v => /^en[-_]US/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
 }
 if (canSpeak) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
 const hasVoice = () => !!(CLIPS || heVoice);
@@ -801,20 +846,33 @@ const PLAIN_FIX = [['עגול', 'עיגול'], ['רבוע', 'ריבוע'], ['מ�
 const sayAs = p => SAY_AS[p] || PLAIN_FIX.reduce((t, [a, b]) => t.split(a).join(b), p.replace(/[֑-ׇ]/g, ''));
 window.SAY_AS = SAY_AS;
 
-function speakTTS(text, queue) {
+function speakTTS(text, queue, english) {
   if (!canSpeak) return;
   try {
     if (!queue) speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'he-IL'; if (heVoice) u.voice = heVoice;
-    u.rate = 0.9; u.pitch = 1.1;
+    if (english) { u.lang = 'en-US'; if (enVoice) u.voice = enVoice; u.rate = 0.8; }
+    else { u.lang = 'he-IL'; if (heVoice) u.voice = heVoice; u.rate = 0.9; }
+    u.pitch = 1.1;
     speechSynthesis.speak(u);
   } catch (e) {}
+}
+// a part like { en: 'dog' } is said by the English voice; runs of Hebrew parts are joined
+function speakMixed(parts, queue) {
+  const runs = [];
+  for (const p of parts) {
+    const en = typeof p === 'object';
+    const last = runs[runs.length - 1];
+    if (last && last.en === en) last.text += ' ' + (en ? p.en : sayAs(p));
+    else runs.push({ en, text: en ? p.en : sayAs(p) });
+  }
+  runs.forEach((r, i) => speakTTS(r.text, queue || i > 0, r.en));
 }
 async function speak(parts, queue) {
   parts = [].concat(parts).filter(Boolean);
   if (!DB.sound || !parts.length) return;
   if (!queue) stopVoice();
+  if (parts.some(p => typeof p === 'object')) return speakMixed(parts, queue);
   const missing = CLIPS ? parts.filter(p => !CLIPS[p]) : parts;
   if (CLIPS) missing.forEach(p => missingClips.add(p));
   if (missing.length) return speakTTS(parts.map(sayAs).join(' '), queue);
@@ -880,8 +938,15 @@ function renderMenu() {
   $('#menuStars').textContent = starsText(S.p);
   $('#menuNext').innerHTML = progressBar(S.p);
   const grid = $('#gamesGrid'); grid.innerHTML = '';
+  let section = '';
   for (const g of pl.games) {
     const m = GAMES[g], lvl = Math.min(MAX_LEVEL, DB[S.p].levels[g] || 1);
+    if ((m.section || '') !== section) {
+      section = m.section || '';
+      const h = document.createElement('h3'); h.className = 'menu-section';
+      h.textContent = section === 'en' ? '🇬🇧 English · אַנְגְּלִית' : '';
+      grid.appendChild(h);
+    }
     const b = document.createElement('button');
     b.className = 'block game-card';
     b.innerHTML = `<span class="gicon ${m.emo ? 'emo' : ''} ${m.sm ? 'sm' : ''}" dir="${m.sm ? 'ltr' : 'rtl'}" style="background:${m.bg}">${m.icon}</span>
@@ -1060,7 +1125,7 @@ function win() {
   const sc = $('#gameStars'); sc.textContent = starsText(S.p);
   sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump');
   sfx('good'); confetti();
-  speak([rand(PRAISE)].concat(S.cur.after || []));
+  speak([S.cur.english ? { en: rand(EN_PRAISE) } : rand(PRAISE)].concat(S.cur.after || []));
   if (change === 'up') setTimeout(levelUpBanner, 700);
   S.q++;
   setTimeout(nextQ, change === 'up' ? 2800 : 2200);
@@ -1069,7 +1134,7 @@ function miss(el) {
   S.firstTry = false; S.misses++;
   el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
   sfx('bad');
-  speak('עוֹד נִסָּיוֹן');
+  speak(S.cur && S.cur.english ? { en: 'Try again' } : 'עוֹד נִסָּיוֹן');
   if (S.together && S.misses >= 2) { // time for a little help: the right answer starts to glow
     const ok = document.querySelector('#choices [data-ok]');
     if (ok) ok.classList.add('glow');
@@ -1736,8 +1801,95 @@ const MAKERS = {
     choices(['>', '<', '='].map(x => ({ label: x, ok: x === sign })), 'sign');
     const word = { '>': 'גָּדוֹל מִן', '<': 'קָטָן מִן', '=': 'שָׁוֶה לְ' }[sign];
     return { prompt: 'אֵיזֶה סִימָן מַתְאִים?', say: 'אֵיזֶה סִימָן מַתְאִים?', after: [numWord(A.val), word, numWord(B.val)], item: `${A.text} ◯ ${B.text}` };
+  },
+
+  /* ---------- English (for the first grader) ---------- */
+  enWords() {
+    const pool = L('easy') ? EN_WORDS.slice(0, EN_EASY) : EN_WORDS;
+    const t = pickWord(pool.map(([en, e]) => ({ w: en, e })));
+    const n = L('options');
+    if (L('written')) {
+      const big = document.createElement('button'); big.className = 'bigword english'; big.textContent = t.w;
+      big.onclick = () => speak({ en: t.w });
+      $('#stage').appendChild(big);
+    } else {
+      const ear = document.createElement('button'); ear.className = 'block listen'; ear.textContent = '🔊';
+      ear.setAttribute('aria-label', 'להשמיע שוב'); ear.onclick = () => speak({ en: `Where is the ${t.w}?` });
+      $('#stage').appendChild(ear);
+    }
+    const others = sample(pool.filter(([en]) => en !== t.w), n - 1);
+    choices([{ label: t.e, ok: true }, ...others.map(([, e]) => ({ label: e }))], 'emo');
+    return {
+      prompt: L('written') ? 'קוֹרְאִים בְּאַנְגְּלִית: אֵיזוֹ תְּמוּנָה?' : 'מַקְשִׁיבִים וּבוֹחֲרִים',
+      say: L('written') && L('silent') ? 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?' : { en: `Where is the ${t.w}?` },
+      after: [{ en: t.w }, WORD_BY_EMOJI[t.e]], item: t.w, english: true
+    };
+  },
+
+  abc() {
+    const n = L('options'), mode = L('mode');
+    const letters = EN_ABC.slice(0, L('upto'));
+    const target = rand(letters.filter(x => !S.recent.includes(x)));
+    S.recent = [target, ...S.recent].slice(0, 5);
+    let pool = letters;
+    if (mode === 'tricky') pool = EN_TRICKY.find(g => g.includes(target.toLowerCase()))?.map(x => x.toUpperCase()) || letters;
+    let others = sample(pool.filter(x => x !== target), n - 1);
+    if (others.length < n - 1) others = others.concat(sample(letters.filter(x => x !== target && !others.includes(x)), n - 1 - others.length));
+    const lower = mode !== 'upper';
+    const show = x => lower ? x.toLowerCase() : x;
+    if (mode === 'match' || !hasVoice()) { // show the capital letter, find its small letter
+      const big = document.createElement('div'); big.className = 'bigword english'; big.textContent = target;
+      $('#stage').appendChild(big);
+    }
+    choices([{ label: show(target), ok: true }, ...others.map(x => ({ label: show(x) }))], 'latin');
+    return {
+      prompt: mode === 'match' ? 'אֵיפֹה הָאוֹת הַקְּטַנָּה?' : 'אֵיפֹה הָאוֹת?',
+      say: ['אֵיפֹה הָאוֹת', { en: EN_LETTER_SAY[target] }], after: { en: EN_LETTER_SAY[target] }, item: target, english: true
+    };
+  },
+
+  enColorsNumbers() {
+    const n = L('options');
+    const doColor = L('kinds') === 'colors' || (L('kinds') === 'both' && Math.random() < 0.5);
+    if (doColor) {
+      const [target, ...others] = sample(COLORS.slice(0, L('colors')), n);
+      const box = $('#choices'); box.className = 'choices' + (n === 4 ? ' n4' : n === 2 ? ' n2' : ''); box.innerHTML = '';
+      for (const c of shuffle([target, ...others])) {
+        const b = document.createElement('button');
+        b.className = 'block choice swatch'; b.style.setProperty('--c', c.hex); b.setAttribute('aria-label', EN_COLORS[c.id]);
+        if (c === target) b.dataset.ok = '1';
+        b.onclick = () => { if (S.locked) return; if (c === target) { b.classList.add('right'); win(); } else { miss(b); b.disabled = true; } };
+        box.appendChild(b);
+      }
+      const en = EN_COLORS[target.id];
+      return { prompt: 'מַקְשִׁיבִים וּבוֹחֲרִים', say: { en: `Where is ${en}?` }, after: [{ en }, target.name], item: en, english: true };
+    }
+    const max = L('numbers'), v = between(1, max);
+    numChoices(v, n, 1, 1, max);
+    return { prompt: 'מַקְשִׁיבִים וּבוֹחֲרִים', say: { en: `Find the number ${EN_NUMS[v]}` }, after: [{ en: EN_NUMS[v] }, numWord(v)], item: EN_NUMS[v], english: true };
+  },
+
+  enFirst() {
+    const pool = EN_WORDS.filter(([en]) => !EN_FIRST_SKIP.includes(en));
+    const t = pickWord(pool.map(([en, e]) => ({ w: en, e })));
+    const pic = document.createElement('button'); pic.className = 'pic'; pic.textContent = t.e;
+    pic.setAttribute('aria-label', 'להשמיע את המילה'); pic.onclick = () => speak({ en: t.w });
+    $('#stage').appendChild(pic);
+    if (L('showWord')) {
+      const w = document.createElement('div'); w.className = 'bigword english small'; w.textContent = '_' + t.w.slice(1);
+      $('#stage').appendChild(w);
+    }
+    const first = t.w[0].toUpperCase();
+    const near = EN_TRICKY.find(g => g.includes(first.toLowerCase())) || [];
+    let others = L('tricky') ? sample(near.map(x => x.toUpperCase()).filter(x => x !== first), L('options') - 1) : [];
+    others = others.concat(sample(EN_ABC.filter(x => x !== first && !others.includes(x)), L('options') - 1 - others.length));
+    const show = x => L('lower') ? x.toLowerCase() : x;
+    choices([{ label: show(first), ok: true }, ...others.map(x => ({ label: show(x) }))], 'latin');
+    return { prompt: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?', say: ['בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה', { en: t.w }],
+      after: [{ en: `${t.w} starts with ${EN_LETTER_SAY[first]}` }], item: t.w, english: true };
   }
 };
+
 
 
 
@@ -1765,6 +1917,7 @@ window.allPhrases = () => {
     'כַּמָּה הֲבָרוֹת יֵשׁ בַּמִּלָּה', 'אֵיזוֹ אוֹת חֲסֵרָה בַּמִּלָּה', 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?', ...SENTENCES.map(x => x.text),
     'אֵיזֶה סִימָן מַתְאִים?', 'גָּדוֹל מִן', 'קָטָן מִן', 'שָׁוֶה לְ',
     ...Object.values(PLAYERS).map(p => p.turn), 'בְּיַחַד הִצְלַחְתֶּם!',
+    'אֵיפֹה הָאוֹת', 'אֵיפֹה הָאוֹת?', 'אֵיפֹה הָאוֹת הַקְּטַנָּה?', 'מַקְשִׁיבִים וּבוֹחֲרִים', 'קוֹרְאִים בְּאַנְגְּלִית: אֵיזוֹ תְּמוּנָה?',
     'וְעוֹד', 'פָּחוֹת', 'זֶה', 'כַּמָּה זֶה?', 'וְעוֹד כַּמָּה זֶה', 'הָיוּ', 'לָקַחְנוּ', 'נִשְׁאֲרוּ'
   ])];
 };
