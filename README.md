@@ -27,7 +27,7 @@ It runs in any browser, works well on a tablet, and needs no install or server.
 - **גָּדוֹל אוֹ קָטָן?** Pick >, < or =. Up to 10 with dots, then up to 20 and 100, then sums on one or both sides (4 + 8 ◯ 16).
 
 **🇬🇧 English (first grade)**, spoken by the device's English voice, with praise in English and the Hebrew word after each answer:
-- **מִלִּים בְּאַנְגְּלִית** "Where is the dog?", pick the picture. 88 words; easy levels use 30 everyday words, level 4 also shows the word written, level 5 is reading only.
+- **מִלִּים בְּאַנְגְּלִית** "Where is the dog?", pick the picture. 211 words; easy levels use 30 everyday words, level 4 also shows the word written, level 5 is reading only.
 - **ABC** Hear a letter name and find it: capitals A–J, then A–Z, then small letters, then match capital to small, then look-alikes (b d p q).
 - **צְבָעִים וּמִסְפָּרִים** "Where is red?" / "Find the number five": colors and numbers up to 20.
 - **First letter** See a picture, hear the English word, and pick its first letter.
@@ -162,6 +162,6 @@ If there is no voice at all, the game still works and shows visual hints in plac
 
 ## Adding words
 
-There are about 200 words (animals, food, clothes, home, nature, vehicles, body, music and more).
+There are 268 Hebrew words (animals, food, clothes, home, nature, vehicles, body, people, music and more) and 211 English words.
 Words are in the `WORDS` list in `index.html` as `['word with nikud', 'emoji']`; each emoji is used by one word only.
 The game splits each word into syllable tiles automatically.

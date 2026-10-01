@@ -222,16 +222,17 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 .listen{font-family:var(--emoji);font-size:64px;padding:10px 28px;border-radius:28px}
 
 /* memory */
-.memory{display:grid;gap:10px;grid-template-columns:repeat(3,1fr);width:100%;max-width:620px;margin:auto}
+/* the board fills the free space under the question; rows share the height evenly */
+.memory{flex:1;display:grid;gap:10px;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(72px,1fr);
+  width:100%;max-width:640px;max-height:780px;min-height:0;margin:0 auto;padding-bottom:10px}
 .memory.m8,.memory.m12,.memory.m16{grid-template-columns:repeat(4,1fr)}
-.mcard{position:relative;height:clamp(96px,24vw,140px);padding:4px;background:var(--plum)}
-.memory.m12 .mcard{height:clamp(84px,20vw,124px)}
-.memory.m16 .mcard{height:clamp(72px,17vw,112px)}
-.mcard .back{font-size:clamp(34px,9vw,54px);font-weight:900;color:var(--paper)}
+.mcard{position:relative;width:100%;height:auto;min-height:72px;padding:4px;background:var(--plum);container-type:size;overflow:hidden}
+/* sizes follow the card (cqi = card width, cqh = card height); words shrink only as much as their length needs */
+.mcard .back{font-size:clamp(34px,9vw,54px);font-size:min(48cqi,42cqh);font-weight:900;color:var(--paper)}
 .mcard .front{display:none;line-height:1.2;word-break:break-word}
-.mcard .front.emo{font-family:var(--emoji);font-size:clamp(40px,11vw,64px)}
-.mcard .front.letter{font-size:clamp(44px,12vw,72px);font-weight:900}
-.mcard .front.word{font-size:clamp(20px,5.2vw,32px);font-weight:900}
+.mcard .front.emo{font-family:var(--emoji);font-size:clamp(40px,11vw,64px);font-size:min(62cqi,58cqh)}
+.mcard .front.letter{font-size:clamp(44px,12vw,72px);font-size:min(70cqi,62cqh);font-weight:900}
+.mcard .front.word{font-size:clamp(20px,5.2vw,32px);font-size:min(calc(175cqi / var(--n, 4)), 36cqh, 96px);line-height:1.4;font-weight:900;word-break:keep-all}
 .mcard.up{background:var(--paper);animation:flip .25s}
 .mcard.up .back{display:none}
 .mcard.up .front{display:block}
@@ -500,7 +501,19 @@ const WORDS = [
   // people and fantasy
   ['תִּינוֹק','👶'],['מֶלֶךְ','🤴'],['מַלְכָּה','👸'],['לֵיצָן','🤡'],['רוֹבּוֹט','🤖'],['רוּחַ','👻'],['דִּינוֹזָאוּר','🦕'],['דְּרָקוֹן','🐉'],
   // music
-  ['כִּנּוֹר','🎻'],['חֲצוֹצְרָה','🎺'],['פְּסַנְתֵּר','🎹'],['מִיקְרוֹפוֹן','🎤']
+  ['כִּנּוֹר','🎻'],['חֲצוֹצְרָה','🎺'],['פְּסַנְתֵּר','🎹'],['מִיקְרוֹפוֹן','🎤'],
+  // more animals, food, things, nature, vehicles and people
+  ['בַּרְבּוּר','🦢'],['פְּלָמִינְגּוֹ','🦩'],['בּוֹאֵשׁ','🦨'],['דְּבִיבוֹן','🦝'],['קוֹאָלָה','🐨'],['פַּנְדָּה','🐼'],['צְבִי','🦌'],
+  ['עַכְבְּרוֹשׁ','🐀'],['דְּיוֹנוֹן','🦑'],['לוֹבְּסְטֶר','🦞'],['צִדְפָּה','🐚'],['פַּסְטָה','🍝'],['אֹרֶז','🍚'],['סוּשִׁי','🍣'],
+  ['נַקְנִיקִיָּה','🌭'],['טָאקוֹ','🌮'],['בֵּייגֶלֶה','🥨'],['קְרוּאָסוֹן','🥐'],['פַּנְקֵייק','🥞'],['וָפֶל','🧇'],['סֻפְגָּנִיָּה','🍩'],
+  ['תֵּה','🍵'],['קָפֶה','☕'],['מִיץ','🧃'],['חָצִיל','🍆'],['בְּרוֹקוֹלִי','🥦'],['שׁוּם','🧄'],['עַרְמוֹן','🌰'],
+  ['בָּטָטָה','🍠'],['מֵלוֹן','🍈'],['חֶמְאָה','🧈'],['סֶרֶט','🎀'],['טַבַּעַת','💍'],['יַהֲלוֹם','💎'],['עֲגָלָה','🛒'],
+  ['עוֹגֶן','⚓'],['מַפָּה','🗺️'],['מָגֵן','🛡️'],['טֶלֶסְקוֹפּ','🔭'],['סוֹלְלָה','🔋'],['פָּנָס','🔦'],['סַפָּה','🛋️'],
+  ['אַמְבַּטְיָה','🛁'],['מִקְלַחַת','🚿'],['תְּמוּנָה','🖼️'],['עִתּוֹן','📰'],['קֻפְסָה','📦'],['מַגָּפַיִם','👢'],['עֲנִיבָה','👔'],
+  ['מֶדַלְיָה','🏅'],['גָּבִיעַ','🏆'],['שַׁחְמָט','♟️'],['מִדְבָּר','🏜️'],['אִי','🏝️'],['שׁוֹשַׁנָּה','🌹'],['חַמָּנִיָּה','🌻'],
+  ['צִבְעוֹנִי','🌷'],['גֶּשֶׁם','🌧️'],['נַיֶּדֶת','🚓'],['חַשְׁמַלִּית','🚋'],['רַכֶּבֶל','🚠'],['עֶצֶם','🦴'],['שְׁרִיר','💪'],
+  ['סַבָּא','👴'],['סַבְתָּא','👵'],['אַבָּא','👨'],['אִמָּא','👩'],['שׁוֹטֵר','👮'],['קוֹסֵם','🧙'],['פֵיָה','🧚'],
+  ['חַיְזָר','👽']
 ].map(([w, e]) => ({ w, e, chunks: chunkify(w), len: (w.match(/[א-ת]/g) || []).length, first: w[0] }));
 
 // Split a pointed word into readable pieces: a letter with its marks, and a
@@ -593,7 +606,21 @@ const EN_WORDS = [
   ['bike','🚲'],['taxi','🚕'],['rocket','🚀'],['key','🔑'],['hat','🧢'],['shoe','👟'],['shirt','👕'],['dress','👗'],
   ['socks','🧦'],['cup','🥤'],['clock','⏰'],['gift','🎁'],['balloon','🎈'],['umbrella','☂️'],['robot','🤖'],['king','🤴'],
   ['queen','👸'],['eye','👁️'],['nose','👃'],['ear','👂'],['fire','🔥'],['rainbow','🌈'],['snow','❄️'],['door','🚪'],
-  ['drum','🥁'],['guitar','🎸'],['piano','🎹']
+  ['drum','🥁'],['guitar','🎸'],['piano','🎹'],
+  ['wolf','🐺'],['camel','🐫'],['zebra','🦓'],['kangaroo','🦘'],['crocodile','🐊'],['octopus','🐙'],['spider','🕷️'],['snail','🐌'],['ant','🐜'],
+  ['dolphin','🐬'],['hedgehog','🦔'],['bat','🦇'],['gorilla','🦍'],['goat','🐐'],['parrot','🦜'],['peacock','🦚'],['eagle','🦅'],['squirrel','🐿️'],
+  ['swan','🦢'],['flamingo','🦩'],['koala','🐨'],['panda','🐼'],['deer','🦌'],['pear','🍐'],['pineapple','🍍'],['peach','🍑'],['avocado','🥑'],
+  ['cherry','🍒'],['mushroom','🍄'],['cucumber','🥒'],['onion','🧅'],['pepper','🌶️'],['honey','🍯'],['popcorn','🍿'],['hamburger','🍔'],['salad','🥗'],
+  ['soup','🍲'],['chocolate','🍫'],['pasta','🍝'],['rice','🍚'],['sushi','🍣'],['taco','🌮'],['pretzel','🥨'],['croissant','🥐'],['pancakes','🥞'],
+  ['waffle','🧇'],['doughnut','🍩'],['tea','🍵'],['coffee','☕'],['juice','🧃'],['eggplant','🍆'],['broccoli','🥦'],['garlic','🧄'],['melon','🍈'],
+  ['butter','🧈'],['truck','🚚'],['ambulance','🚑'],['helicopter','🚁'],['ship','🚢'],['scooter','🛴'],['motorcycle','🏍️'],['crown','👑'],['phone','📱'],
+  ['computer','💻'],['camera','📷'],['glasses','👓'],['scissors','✂️'],['pencil','✏️'],['bag','🎒'],['flag','🚩'],['bed','🛏️'],['chair','🪑'],
+  ['candle','🕯️'],['lamp','💡'],['bell','🔔'],['magnet','🧲'],['puzzle','🧩'],['hammer','🔨'],['spoon','🥄'],['fork','🍴'],['plate','🍽️'],
+  ['soap','🧼'],['tent','⛺'],['castle','🏰'],['bridge','🌉'],['gloves','🧤'],['scarf','🧣'],['boots','👢'],['tie','👔'],['ring','💍'],
+  ['diamond','💎'],['anchor','⚓'],['map','🗺️'],['box','📦'],['cactus','🌵'],['mountain','⛰️'],['sea','🌊'],['cloud','☁️'],['rain','🌧️'],
+  ['rose','🌹'],['sunflower','🌻'],['tulip','🌷'],['island','🏝️'],['tooth','🦷'],['tongue','👅'],['mouth','👄'],['leg','🦵'],['bone','🦴'],
+  ['ghost','👻'],['clown','🤡'],['dinosaur','🦕'],['dragon','🐉'],['alien','👽'],['fairy','🧚'],['grandma','👵'],['grandpa','👴'],['mom','👩'],
+  ['dad','👨'],['trumpet','🎺'],['violin','🎻'],['microphone','🎤'],['medal','🏅'],['trophy','🏆']
 ];
 const EN_EASY = 30;
 const EN_FIRST_SKIP = ['eye']; // "eye" does not sound like it starts with E
@@ -608,10 +635,11 @@ const EN_NUMS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 
 const EN_PRAISE = ['Great job!', 'Well done!', 'Super!', 'Excellent!', 'Yes!'];
 const PATTERN_ITEMS = ['🍎', '🍌', '🍇', '🍓', '🐶', '🐱', '🐸', '⭐', '🎈', '🌸', '🚗', '⚽'];
 const SHADOW_GROUPS = [
-  ['🐟','🐴','🐱','🐶','🐘','🦁','🐒','🐢','🐍','🦋','🐝','🐓','🐷','🐰','🐭','🐸','🐜','🐫','🦓','🕊️','🐊','🦔','🦉','🐳','🐙','🕷️','🐌','🐬','🐞','🦛','🦘','🐑','🐄','🐺','🦊','🐻','🐯','🐧','🐔','🐥','🦆','🐐','🦈','🦇','🦎','🦍','🦏','🐿️','🦟','🦀','🦚','🦜','🦅','🦕','🐉'],
-  ['🍎','🍌','🍦','🎂','🥚','🥕','🍉','🍓','🍇','🍋','🥛','🍞','🌽','🍕','🍫','🍒','🍄','🍪','🥒','🍊','🍐','🍍','🥝','🍑','🥑','🍅','🧅','🌶️','🧀','🍳','🥗','🍲','🍬','🍿','🍔','🍯','🥥'],
-  ['🚗','🚌','🚂','✈️','⛵','🚚','🚒','🚢','🚲','🚑','🚁','🚜','🏍️','🚕','🚀','🛴'],
-  ['🧢','👕','👖','👗','🧦','🧤','🧣','👟','👛','👑']
+  ['🐟','🐴','🐱','🐶','🐘','🦁','🐒','🐢','🐍','🦋','🐝','🐓','🐷','🐰','🐭','🐸','🐜','🐫','🦓','🕊️','🐊','🦔','🦉','🐳','🐙','🕷️','🐌','🐬','🐞','🦛','🦘','🐑','🐄','🐺','🦊','🐻','🐯','🐧','🐔','🐥','🦆','🐐','🦈','🦇','🦎','🦍','🦏','🐿️','🦟','🦀','🦚','🦜','🦅','🦕','🐉','🦢','🦩','🦨','🦝','🐨','🐼','🦌','🐀','🦑','🦞'],
+  ['🍎','🍌','🍦','🎂','🥚','🥕','🍉','🍓','🍇','🍋','🥛','🍞','🌽','🍕','🍫','🍒','🍄','🍪','🥒','🍊','🍐','🍍','🥝','🍑','🥑','🍅','🧅','🌶️','🧀','🍳','🥗','🍲','🍬','🍿','🍔','🍯','🥥','🍝','🍚','🍣','🌭','🌮','🥨','🥐','🥞','🧇','🍩','🍆','🥦','🧄','🌰','🍠','🍈','🧈'],
+  ['🚗','🚌','🚂','✈️','⛵','🚚','🚒','🚢','🚲','🚑','🚁','🚜','🏍️','🚕','🚀','🛴','🚓','🚋','🚠'],
+  ['🧢','👕','👖','👗','🧦','🧤','🧣','👟','👛','👑','👢','👔','🎀'],
+  ['👶','🤴','👸','🤡','👴','👵','👨','👩','👮','🧙','🧚','👦','👧']
 ];
 const PRAISE = ['כָּל הַכָּבוֹד!', 'מְצֻיָּן!', 'יוֹפִי!', 'נֶהֱדָר!', 'אַלּוּף הָעוֹלָם!', 'וָואוּ!'];
 // Album pages, 18 stickers each, unlocked in this order. The first two pages
@@ -829,6 +857,8 @@ const SAY_AS = {
   'דֹּב': 'דוב', 'פִּינְגְּוִין': 'פינגווין', 'תַּרְנְגֹלֶת': 'תרנגולת', 'בַּרְוָז': 'ברווז', 'טַוָּס': 'טווס', 'תֻּכִּי': 'תוכי',
   'קִיוִי': 'קיווי', 'עַגְבָנִיָּה': 'עגבנייה', 'סֻכָּרִיָּה': 'סוכרייה', 'חֻלְצָה': 'חולצה', 'מִכְנָסַיִם': 'מכנסיים',
   'אֹהֶל': 'אוהל', 'מֹחַ': 'מוח', 'קֻבִּיָּה': 'קובייה', 'דֶּלֶת': 'דֶּלֶת',
+  'אֹרֶז': 'אורז', 'נַקְנִיקִיָּה': 'נקניקייה', 'סֻפְגָּנִיָּה': 'סופגנייה', 'עִתּוֹן': 'עיתון', 'קֻפְסָה': 'קופסה',
+  'מַגָּפַיִם': 'מגפיים', 'חַמָּנִיָּה': 'חמנייה', 'אִי': 'אִי',
   // colors and shapes
   'וָרוֹד': 'וורוד', 'אֵיפֹה הַצֶּבַע הַוָּרוֹד?': 'איפה הצבע הוורוד?', 'מָה בְּצֶבַע וָרוֹד?': 'מה בצבע וורוד?',
   'עִגּוּל': 'עיגול', 'רִבּוּעַ': 'ריבוע', 'מְשֻׁלָּשׁ': 'משולש', 'מְעֻיָּן': 'מעוין',
@@ -1330,7 +1360,7 @@ const WORD_BY_EMOJI = Object.fromEntries(WORDS.map(w => [w.e, w.w]));
 // syllables = pieces that carry a vowel (a shva, a silent letter or a final letter adds none)
 const syllableCount = w => w.chunks.filter(c => vowelClass(c)).length;
 // words where a shva in the middle is spoken (tar-ne-gol), so the count above would be off
-const SYLLABLE_SKIP = ['תַּרְנְגוֹל', 'דֻּבְדְּבָן', 'תַּרְנְגֹלֶת', 'חֲצוֹצְרָה'];
+const SYLLABLE_SKIP = ['תַּרְנְגוֹל', 'דֻּבְדְּבָן', 'תַּרְנְגֹלֶת', 'חֲצוֹצְרָה', 'עַכְבְּרוֹשׁ'];
 const between = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
 // number buttons: the answer plus near misses (answer ± step, 2*step, 3*step)
 function numChoices(ans, n, step, lo, hi) {
@@ -1618,6 +1648,7 @@ const MAKERS = {
       const b = document.createElement('button');
       b.className = 'block mcard';
       b.innerHTML = `<span class="back">?</span><span class="front ${c.kind}">${c.face}</span>`;
+      if (c.kind === 'word') b.style.setProperty('--n', Math.max(3, (c.face.match(/[\u05D0-\u05EA]/g) || []).length));
       b.onclick = () => {
         if (S.locked || open.length === 2 || b.classList.contains('up')) return;
         b.classList.add('up'); sfx('pop');
