@@ -60,6 +60,10 @@ Every game has the same 5 adaptive levels, stars, stickers, trophies and parents
 | ה׳ | synonyms, roots, idioms (ניבים) | multiplication, + − to 100,000, adding fractions, decimals, area and missing side | translation, sentences, past tense, spelling |
 | ו׳ | idioms, synonyms, roots | percent, order of operations, multiplying fractions, decimals, geometry | past tense, sentences, translation, spelling |
 
+Word lists for these grades: 92 singular/plural pairs, 83 opposites, 80 synonyms, 93 words with their roots,
+45 idioms, 77 English past-tense verbs and 51 English sentences. A word appears in only one opposite or synonym pair,
+so a question never has two right answers.
+
 The older grades read plain spelling (no nikud), as they do at school. Wrong answers are built from typical
 mistakes: the wrong order of operations, area instead of perimeter, a forgotten carry, swapped clock hands,
 "goed" instead of "went", or other three-letter runs from the same word when looking for a root.
