@@ -47,9 +47,9 @@ Each round has 8 questions, and every correct answer earns a star.
 
 Saves from before this change keep every sticker already earned.
 
-## Grades 2–6 (כִּתּוֹת נוֹסָפוֹת)
+## Grades 2–9 (כִּתּוֹת נוֹסָפוֹת)
 
-Five more players on the home screen, each with games for that grade, grouped into Hebrew, math and English.
+Eight more players on the home screen, each with games for that grade, grouped into Hebrew, math and English.
 Every game has the same 5 adaptive levels, stars, stickers, trophies and parents' page.
 
 | Grade | Hebrew | Math | English |
@@ -59,10 +59,16 @@ Every game has the same 5 adaptive levels, stars, stickers, trophies and parents
 | ד׳ | synonyms, opposites, roots, memory | 2-digit × 1-digit, division with remainder, + − to 10,000, comparing and equal fractions, perimeter and area | Hebrew↔English, spelling, sentences |
 | ה׳ | synonyms, roots, idioms (ניבים) | multiplication, + − to 100,000, adding fractions, decimals, area and missing side | translation, sentences, past tense, spelling |
 | ו׳ | idioms, synonyms, roots | percent, order of operations, multiplying fractions, decimals, geometry | past tense, sentences, translation, spelling |
+| ז׳ | binyanim (active ones first), connectives (מילות קישור), synonyms, roots | negative numbers, equations, powers and square roots, ratio and percent problems, angles | vocabulary, grammar (am/is/are, do/does, prepositions), past tense |
+| ח׳ | all 7 binyanim, verb tenses, idioms, connectives | equations with brackets and x on both sides, linear functions, Pythagoras, circle (answers in π), probability, percent change | vocabulary, irregular verbs (V1–V2–V3), comparatives, grammar |
+| ט׳ | passive binyanim (פועל, הופעל, נפעל), idioms, connectives, synonyms | harder equations, quadratic equations (expand, x² = k, factor), slope from two points, Pythagoras, two coins / two dice probability, power rules | vocabulary both ways, irregular verbs, present perfect / past continuous / conditionals, superlatives |
 
 Word lists for these grades: 92 singular/plural pairs, 83 opposites, 80 synonyms, 93 words with their roots,
 45 idioms, 77 English past-tense verbs and 51 English sentences. A word appears in only one opposite or synonym pair,
 so a question never has two right answers.
+Grades 7–9 add 96 verbs sorted by binyan, 36 verb forms by tense, 26 connective sentences, 53 irregular English verbs,
+32 adjectives with comparative and superlative, 38 grammar sentences and 83 harder English words.
+Figures (triangles, angles, circles) are drawn on screen and labelled.
 
 The older grades read plain spelling (no nikud), as they do at school. Wrong answers are built from typical
 mistakes: the wrong order of operations, area instead of perimeter, a forgotten carry, swapped clock hands,

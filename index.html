@@ -223,8 +223,13 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 
 /* grades 2-6 */
 .more-grades h3{margin:4px 0 8px;text-align:center;font-size:20px;color:var(--ink-soft)}
-.grades{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-@media (max-width:520px){.grades{grid-template-columns:repeat(3,1fr)}}
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+/* grades 7-9 */
+.choice.ltr{direction:ltr;unicode-bidi:isolate}
+.choice.deg{font-size:clamp(28px,8vw,46px)}
+.bigword.problem{font-size:clamp(22px,5.8vw,34px);line-height:1.5;text-align:center;text-wrap:balance;max-width:100%;padding:6px 14px}
+.bag{font-family:var(--emoji);font-size:clamp(26px,7vw,40px);letter-spacing:2px;text-align:center;max-width:300px;line-height:1.25;
+  background:#F4EDE0;border:3px solid var(--ink);border-radius:20px 20px 46px 46px;padding:10px 12px}
 .grade-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;background:#E3F5FC;border-radius:16px;box-shadow:0 4px 0 var(--ink)}
 .grade-btn .face{font-family:var(--emoji);font-size:34px;line-height:1.1}
 .grade-btn b{font-size:17px}
@@ -881,6 +886,139 @@ function pairGame(pairs, prompt, sayPrefix, kind = 'word') {
   return { prompt, say: [sayPrefix, t.w], after: [t.w, t.e], item: t.w };
 }
 
+/* ---------- content for grades 7-9 (junior high) ---------- */
+const BINYAN_NAMES = { kal: 'פעל (קל)', nifal: 'נפעל', piel: 'פיעל', pual: 'פועל', hifil: 'הפעיל', hufal: 'הופעל', hitpael: 'התפעל' };
+// verbs in past tense, he-form, plain spelling
+const BINYANIM = {
+  kal: ['כתב', 'אכל', 'שמר', 'למד', 'הלך', 'ישב', 'סגר', 'פתח', 'רקד', 'שתה', 'זרק', 'שבר', 'מכר', 'שמע', 'רץ', 'קרא'],
+  nifal: ['נכתב', 'נגמר', 'נשמר', 'נסגר', 'נפגש', 'נשבר', 'נמכר', 'נרשם', 'נכנס', 'נזכר', 'נלחם', 'נבהל', 'נרדם', 'נעלם'],
+  piel: ['דיבר', 'סיפר', 'לימד', 'שיחק', 'ביקש', 'טייל', 'ניקה', 'קיבל', 'תיקן', 'שילם', 'חיפש', 'בישל', 'סידר', 'גידל'],
+  // pual with nikud: without it most of these read like the present tense of פעל
+  pual: ['דֻּבַּר', 'סֻפַּר', 'לֻמַּד', 'נֻקָּה', 'תֻּקַּן', 'שֻׁלַּם', 'בֻּשַּׁל', 'סֻדַּר', 'גֻּדַּל', 'צֻלַּם', 'סֻכַּם', 'אֻרְגַּן'],
+  hifil: ['הלביש', 'הכתיב', 'הסביר', 'הדליק', 'הזמין', 'הרגיש', 'הגדיל', 'הקטין', 'השמיע', 'הכניס', 'החליט', 'הצליח', 'הפסיק', 'הרשים'],
+  hufal: ['הולבש', 'הוכתב', 'הוסבר', 'הודלק', 'הוזמן', 'הוגדל', 'הוקטן', 'הושמע', 'הוכנס', 'הוחלט', 'הופסק', 'הורשם'],
+  hitpael: ['התלבש', 'התרחץ', 'התקלח', 'התכתב', 'התנהג', 'התרגל', 'התקדם', 'התרגש', 'התבייש', 'התאמן', 'התכונן', 'התפלא', 'הסתדר', 'הצטער']
+};
+// verb forms and their tense
+const TENSES = [
+  ['כתבתי', 'עבר'], ['כתבנו', 'עבר'], ['למדה', 'עבר'], ['שמרתם', 'עבר'], ['רקדנו', 'עבר'], ['דיברתי', 'עבר'], ['שיחקו', 'עבר'],
+  ['התלבשה', 'עבר'], ['סגרת', 'עבר'], ['הסברנו', 'עבר'],
+  ['כותב', 'הווה'], ['כותבת', 'הווה'], ['לומדים', 'הווה'], ['שומרות', 'הווה'], ['רוקדת', 'הווה'], ['מדבר', 'הווה'], ['משחקים', 'הווה'],
+  ['מתלבשת', 'הווה'], ['סוגר', 'הווה'], ['מסבירה', 'הווה'],
+  ['אכתוב', 'עתיד'], ['נכתוב', 'עתיד'], ['ילמדו', 'עתיד'], ['תשמור', 'עתיד'], ['ארקוד', 'עתיד'], ['ידבר', 'עתיד'], ['נשחק', 'עתיד'],
+  ['יתלבשו', 'עתיד'], ['יסגרו', 'עתיד'], ['נסביר', 'עתיד'],
+  ['כתבו!', 'ציווי'], ['למדי!', 'ציווי'], ['שמרו!', 'ציווי'], ['דבר!', 'ציווי'], ['שחקו!', 'ציווי'], ['התלבשי!', 'ציווי']
+];
+// sentences with a missing connecting word: [sentence, answer, wrong options]
+const CONNECTIVES = [
+  ['רציתי לצאת לשחק, ___ ירד גשם חזק.', 'אבל', ['לכן', 'כי', 'אם']],
+  ['לא הלכתי לבית הספר ___ הייתי חולה.', 'כי', ['אבל', 'לכן', 'או']],
+  ['למדתי הרבה למבחן, ___ קיבלתי ציון גבוה.', 'לכן', ['אבל', 'כי', 'או']],
+  ['___ ירד גשם, ניקח מטרייה.', 'אם', ['אבל', 'לכן', 'או']],
+  ['אפשר לשתות מיץ ___ מים.', 'או', ['לכן', 'כי', 'אבל']],
+  ['___ שהיה קר, יצאנו לטייל.', 'למרות', ['בגלל', 'אם', 'לכן']],
+  ['___ הגשם, המשחק בוטל.', 'בגלל', ['למרות', 'אם', 'או']],
+  ['אני אוהבת תפוחים ___ בננות.', 'וגם', ['לכן', 'כי', 'אם']],
+  ['הכלב נבח בקול, ___ התינוק התעורר.', 'ולכן', ['אבל', 'או', 'אם']],
+  ['היא רצה מהר, ___ הפסידה במרוץ.', 'אך', ['לכן', 'כי', 'או']],
+  ['___ שנסיים את שיעורי הבית, נשחק בחוץ.', 'אחרי', ['למרות', 'או', 'אבל']],
+  ['הסרט היה ארוך, ___ מעניין מאוד.', 'אבל', ['כי', 'לכן', 'אם']],
+  ['המפתח נשכח בבית, ___ לא הצלחנו להיכנס.', 'לכן', ['אבל', 'אם', 'או']],
+  ['___ שהמשחק היה קשה, ניצחנו.', 'למרות', ['בגלל', 'כי', 'אם']],
+  ['אפשר לנגן בגיטרה ___ בפסנתר.', 'או', ['לכן', 'כי', 'אבל']],
+  ['הפרחים נבלו ___ לא השקינו אותם.', 'כי', ['אבל', 'או', 'אם']],
+  ['___ יהיה מזג אוויר טוב, נצא לפיקניק.', 'אם', ['אבל', 'לכן', 'או']],
+  ['הוא התאמן כל יום, ___ השתפר מאוד.', 'ולכן', ['אבל', 'או', 'אם']],
+  ['היא אוהבת לקרוא, ___ אחיה מעדיף לשחק במחשב.', 'ואילו', ['לכן', 'כי', 'אם']],
+  ['בטיול ראינו ציפורים, ___ ראינו צבאים.', 'ובנוסף', ['אבל', 'לכן', 'אם']],
+  ['___ שהתעוררתי מאוחר, הגעתי בזמן.', 'למרות', ['בגלל', 'כי', 'אם']],
+  ['המים היו קרים, ___ לא נכנסנו לבריכה.', 'לכן', ['אבל', 'אם', 'או']],
+  ['שמחתי מאוד ___ קיבלתי מתנה.', 'כי', ['אבל', 'או', 'אם']],
+  ['___ השמש שקעה, חזרנו הביתה.', 'כאשר', ['למרות', 'או', 'אבל']],
+  ['התלמידים התכוננו היטב, ___ המבחן היה קל להם.', 'לכן', ['אבל', 'אם', 'או']],
+  ['הוא רצה לבוא, ___ לא הייתה לו הסעה.', 'אך', ['לכן', 'כי', 'אם']]
+];
+// English: [base, past, past participle]
+const EN_IRREG = [
+  ['go', 'went', 'gone'], ['eat', 'ate', 'eaten'], ['see', 'saw', 'seen'], ['write', 'wrote', 'written'], ['take', 'took', 'taken'],
+  ['give', 'gave', 'given'], ['drink', 'drank', 'drunk'], ['swim', 'swam', 'swum'], ['sing', 'sang', 'sung'], ['begin', 'began', 'begun'],
+  ['break', 'broke', 'broken'], ['choose', 'chose', 'chosen'], ['drive', 'drove', 'driven'], ['fall', 'fell', 'fallen'], ['fly', 'flew', 'flown'],
+  ['forget', 'forgot', 'forgotten'], ['grow', 'grew', 'grown'], ['know', 'knew', 'known'], ['ride', 'rode', 'ridden'], ['speak', 'spoke', 'spoken'],
+  ['steal', 'stole', 'stolen'], ['throw', 'threw', 'thrown'], ['wake', 'woke', 'woken'], ['wear', 'wore', 'worn'], ['do', 'did', 'done'],
+  ['come', 'came', 'come'], ['run', 'ran', 'run'], ['become', 'became', 'become'], ['buy', 'bought', 'bought'], ['bring', 'brought', 'brought'],
+  ['think', 'thought', 'thought'], ['teach', 'taught', 'taught'], ['catch', 'caught', 'caught'], ['find', 'found', 'found'], ['make', 'made', 'made'],
+  ['build', 'built', 'built'], ['send', 'sent', 'sent'], ['sleep', 'slept', 'slept'], ['leave', 'left', 'left'], ['lose', 'lost', 'lost'],
+  ['hear', 'heard', 'heard'], ['feel', 'felt', 'felt'], ['keep', 'kept', 'kept'], ['meet', 'met', 'met'], ['stand', 'stood', 'stood'],
+  ['understand', 'understood', 'understood'], ['sell', 'sold', 'sold'], ['tell', 'told', 'told'], ['pay', 'paid', 'paid'], ['hide', 'hid', 'hidden'],
+  ['bite', 'bit', 'bitten'], ['shake', 'shook', 'shaken'], ['draw', 'drew', 'drawn']
+];
+// English adjectives: [adjective, comparative, superlative]
+const EN_COMPARE = [
+  ['big', 'bigger', 'biggest'], ['small', 'smaller', 'smallest'], ['tall', 'taller', 'tallest'], ['fast', 'faster', 'fastest'],
+  ['slow', 'slower', 'slowest'], ['hot', 'hotter', 'hottest'], ['cold', 'colder', 'coldest'], ['happy', 'happier', 'happiest'],
+  ['easy', 'easier', 'easiest'], ['funny', 'funnier', 'funniest'], ['good', 'better', 'best'], ['bad', 'worse', 'worst'],
+  ['far', 'farther', 'farthest'], ['beautiful', 'more beautiful', 'most beautiful'], ['interesting', 'more interesting', 'most interesting'],
+  ['expensive', 'more expensive', 'most expensive'], ['dangerous', 'more dangerous', 'most dangerous'], ['old', 'older', 'oldest'],
+  ['young', 'younger', 'youngest'], ['long', 'longer', 'longest'], ['short', 'shorter', 'shortest'], ['strong', 'stronger', 'strongest'],
+  ['heavy', 'heavier', 'heaviest'], ['thin', 'thinner', 'thinnest'], ['wide', 'wider', 'widest'], ['nice', 'nicer', 'nicest'],
+  ['large', 'larger', 'largest'], ['busy', 'busier', 'busiest'], ['important', 'more important', 'most important'],
+  ['careful', 'more careful', 'most careful'], ['famous', 'more famous', 'most famous'], ['wet', 'wetter', 'wettest']
+];
+// English grammar: [sentence, answer, wrong options, level 1-3]
+const EN_GRAMMAR = [
+  ['I ___ a student.', 'am', ['is', 'are', 'be'], 1], ['They ___ friends.', 'are', ['is', 'am', 'be'], 1],
+  ['It ___ cold outside.', 'is', ['are', 'am', 'be'], 1], ['There ___ three cats in the garden.', 'are', ['is', 'am', 'be'], 1],
+  ['I have ___ apple.', 'an', ['a', 'two'], 1], ['This is ___ book.', 'a', ['an', 'two'], 1],
+  ['___ is your name?', 'What', ['Who', 'Where', 'When'], 1], ['___ do you live?', 'Where', ['What', 'Who', 'How many'], 1],
+  ['Can you ___ me?', 'help', ['helps', 'helping', 'helped'], 1], ['She can ___ very well.', 'swim', ['swims', 'swimming', 'swam'], 1],
+  ['She ___ to school every day.', 'goes', ['go', 'going', 'gone'], 2], ['He ___ like pizza.', "doesn't", ["don't", "isn't", "aren't"], 2],
+  ['___ you like ice cream?', 'Do', ['Does', 'Are', 'Is'], 2], ['___ she have a dog?', 'Does', ['Do', 'Is', 'Has'], 2],
+  ['They ___ playing football now.', 'are', ['is', 'am', 'be'], 2], ['Look! The baby ___ sleeping.', 'is', ['are', 'am', 'be'], 2],
+  ['Yesterday we ___ to the beach.', 'went', ['go', 'goes', 'going'], 2], ['He ___ his keys yesterday.', 'lost', ['lose', 'loses', 'losing'], 2],
+  ['How ___ apples are there?', 'many', ['much', 'any'], 2], ['How ___ water do you drink?', 'much', ['many', 'lot'], 2],
+  ['My birthday is ___ May.', 'in', ['on', 'at'], 2], ["The movie starts ___ 8 o'clock.", 'at', ['in', 'on'], 2],
+  ['I was born ___ Monday.', 'on', ['in', 'at'], 2], ['This bag is ___ than that one.', 'bigger', ['big', 'biggest', 'more big'], 2],
+  ['He is the ___ boy in the class.', 'tallest', ['taller', 'tall', 'most tall'], 2], ["I don't have ___ money.", 'any', ['a', 'many'], 2],
+  ['He has ___ his homework.', 'done', ['did', 'do', 'doing'], 3], ['I ___ TV when you called.', 'was watching', ['am watching', 'watch', 'watches'], 3],
+  ['She ___ in Tel Aviv since 2020.', 'has lived', ['lives', 'is live', 'live'], 3], ['If it rains, we ___ at home.', 'will stay', ['stayed', 'stays', 'staying'], 3],
+  ['We ___ never been to London.', 'have', ['has', 'are', 'did'], 3], ['The children ___ in the park right now.', 'are playing', ['is playing', 'plays', 'playing'], 3],
+  ['The letter ___ written yesterday.', 'was', ['is', 'were', 'has'], 3], ['This is the girl ___ won the race.', 'who', ['which', 'where', 'what'], 3],
+  ['I am looking forward to ___ you.', 'seeing', ['see', 'saw', 'seen'], 3], ['If I ___ rich, I would buy a boat.', 'were', ['am', 'will be', 'be'], 3],
+  ['He ___ already finished his work.', 'has', ['have', 'is', 'did'], 3], ['By the time we arrived, the movie ___ started.', 'had', ['has', 'have', 'was'], 3]
+];
+// English vocabulary without pictures: [english, hebrew]
+const EN_VOCAB = [
+  ['important', 'חשוב'], ['dangerous', 'מסוכן'], ['difficult', 'קשה'], ['believe', 'להאמין'], ['remember', 'לזכור'], ['forget', 'לשכוח'],
+  ['decide', 'להחליט'], ['explain', 'להסביר'], ['improve', 'לשפר'], ['protect', 'להגן'], ['describe', 'לתאר'], ['compare', 'להשוות'],
+  ['choose', 'לבחור'], ['collect', 'לאסוף'], ['discover', 'לגלות'], ['invent', 'להמציא'], ['prepare', 'להכין'], ['arrive', 'להגיע'],
+  ['answer', 'לענות'], ['build', 'לבנות'], ['change', 'לשנות'], ['continue', 'להמשיך'], ['happen', 'לקרות'], ['hope', 'לקוות'],
+  ['agree', 'להסכים'], ['argue', 'להתווכח'], ['enjoy', 'ליהנות'], ['succeed', 'להצליח'], ['win', 'לנצח'], ['travel', 'לנסוע'],
+  ['knowledge', 'ידע'], ['freedom', 'חופש'], ['health', 'בריאות'], ['environment', 'סביבה'], ['government', 'ממשלה'], ['science', 'מדע'],
+  ['language', 'שפה'], ['country', 'מדינה'], ['village', 'כפר'], ['weather', 'מזג אוויר'], ['vacation', 'חופשה'],
+  ['journey', 'מסע'], ['forest', 'יער'], ['ocean', 'אוקיינוס'], ['neighbor', 'שכן'], ['friendship', 'חברות'], ['question', 'שאלה'],
+  ['problem', 'בעיה'], ['idea', 'רעיון'], ['opinion', 'דעה'], ['decision', 'החלטה'], ['experience', 'ניסיון'], ['success', 'הצלחה'],
+  ['mistake', 'טעות'], ['future', 'עתיד'], ['past', 'עבר'], ['century', 'מאה שנה'], ['minute', 'דקה'], ['angry', 'כועס'],
+  ['tired', 'עייף'], ['hungry', 'רעב'], ['thirsty', 'צמא'], ['brave', 'אמיץ'], ['polite', 'מנומס'], ['lazy', 'עצלן'],
+  ['curious', 'סקרן'], ['famous', 'מפורסם'], ['strange', 'מוזר'], ['quiet', 'שקט'], ['empty', 'ריק'], ['cheap', 'זול'],
+  ['expensive', 'יקר'], ['ancient', 'עתיק'], ['possible', 'אפשרי'], ['different', 'שונה'], ['similar', 'דומה'], ['safe', 'בטוח'],
+  ['history', 'היסטוריה'], ['library', 'ספרייה'], ['hospital', 'בית חולים'], ['airport', 'שדה תעופה'], ['museum', 'מוזיאון'], ['beach', 'חוף ים']
+];
+const PY_TRIPLES = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17], [12, 16, 20], [7, 24, 25], [15, 20, 25], [20, 21, 29], [10, 24, 26]];
+const fmtNum = n => n < 0 ? '−' + (-n) : String(n);
+const sgn = n => n < 0 ? `(${fmtNum(n)})` : String(n); // negative numbers in brackets inside an expression
+// numbers that may be negative: the answer plus likely mistakes
+function numOptsS(ans, cands, n, fmt = fmtNum, kind = 'num') {
+  const set = new Set();
+  for (const x of shuffle(cands)) if (x !== ans && Number.isFinite(x)) set.add(x);
+  let d = 1;
+  while (set.size < n - 1) { set.add(ans + d); if (set.size < n - 1) set.add(ans - d); d++; }
+  choices([{ label: fmt(ans), ok: true }, ...[...set].slice(0, n - 1).map(x => ({ label: fmt(x) }))], kind);
+}
+// "3x + 5" style terms
+const term = (c, v) => c === 1 ? v : c === -1 ? '−' + v : fmtNum(c) + v;
+const plusTerm = (c, v = '') => c === 0 ? '' : c < 0 ? ` − ${v ? term(-c, v) : -c}` : ` + ${v ? term(c, v) : c}`;
+const sup = n => String(n).split('').map(d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]).join('');
+
 const PATTERN_ITEMS = ['🍎', '🍌', '🍇', '🍓', '🐶', '🐱', '🐸', '⭐', '🎈', '🌸', '🚗', '⚽'];
 const SHADOW_GROUPS = [
   ['🐟','🐴','🐱','🐶','🐘','🦁','🐒','🐢','🐍','🦋','🐝','🐓','🐷','🐰','🐭','🐸','🐜','🐫','🦓','🕊️','🐊','🦔','🦉','🐳','🐙','🕷️','🐌','🐬','🐞','🦛','🦘','🐑','🐄','🐺','🦊','🐻','🐯','🐧','🐔','🐥','🦆','🐐','🦈','🦇','🦎','🦍','🦏','🐿️','🦟','🦀','🦚','🦜','🦅','🦕','🐉','🦢','🦩','🦨','🦝','🐨','🐼','🦌','🐀','🦑','🦞'],
@@ -985,7 +1123,14 @@ const PLAYERS = {
   k5: { name: 'כִּתָּה ה׳', say: 'כִּתָּה הֵא', face: '🦁', topics: true,
     games: ['synonyms', 'roots', 'idioms', 'mult', 'bigArith', 'fractions', 'decimals', 'geometry', 'enTranslate', 'enSentences', 'enPast', 'enSpell'] },
   k6: { name: 'כִּתָּה ו׳', say: 'כִּתָּה וָו', face: '🦅', topics: true,
-    games: ['idioms', 'synonyms', 'roots', 'percent', 'orderOps', 'fractions', 'decimals', 'geometry', 'enPast', 'enSentences', 'enTranslate', 'enSpell'] }
+    games: ['idioms', 'synonyms', 'roots', 'percent', 'orderOps', 'fractions', 'decimals', 'geometry', 'enPast', 'enSentences', 'enTranslate', 'enSpell'] },
+  // grades 7-9 (junior high)
+  k7: { name: 'כִּתָּה ז׳', say: 'כִּתָּה זַיִן', face: '🐺', topics: true,
+    games: ['binyan', 'connectives', 'synonyms', 'roots', 'negatives', 'equations', 'powers', 'ratio', 'angles', 'enVocab', 'enGrammar', 'enPast'] },
+  k8: { name: 'כִּתָּה ח׳', say: 'כִּתָּה חֵית', face: '🦈', topics: true,
+    games: ['binyan', 'tense', 'idioms', 'connectives', 'equations', 'linear', 'pythagoras', 'circle', 'probability', 'ratio', 'enVocab', 'enParticiple', 'enCompare', 'enGrammar'] },
+  k9: { name: 'כִּתָּה ט׳', say: 'כִּתָּה טֵית', face: '🐉', topics: true,
+    games: ['binyan', 'idioms', 'connectives', 'synonyms', 'equations', 'quadratic', 'linear', 'pythagoras', 'probability', 'powers', 'enVocab', 'enParticiple', 'enGrammar', 'enCompare'] }
 };
 const PLAYER_IDS = Object.keys(PLAYERS);
 // Level settings per grade, used instead of LV for that grade's games (5 entries = levels 1-5)
@@ -1054,6 +1199,52 @@ const LVP = {
     enSentences: { options: [4, 4, 4, 4, 4], maxLevel: [3, 3, 3, 3, 3], sameSubject: [1, 1, 1, 1, 1], silent: [1, 1, 1, 1, 1] },
     enTranslate: { options: [4, 4, 4, 4, 4], easy: [0, 0, 0, 0, 0], toEnglish: [1, 1, 1, 1, 1] },
     enSpell: { lens: [[5, 6], [6, 7], [6, 9], [7, 12], [8, 12]], decoys: [1, 2, 2, 3, 3] }
+  },
+  k7: {
+    binyan: { options: [3, 3, 4, 4, 4], binyanim: [['kal', 'piel', 'hifil'], ['kal', 'piel', 'hifil', 'hitpael'], ['kal', 'nifal', 'piel', 'hifil', 'hitpael'], ['kal', 'nifal', 'piel', 'hifil', 'hitpael'], ['kal', 'nifal', 'piel', 'pual', 'hifil', 'hufal', 'hitpael']] },
+    connectives: { options: [3, 3, 4, 4, 4] },
+    synonyms: { options: [4, 4, 4, 4, 4], pairLevel: [3, 3, 3, 3, 3] },
+    roots: { options: [4, 4, 4, 4, 4], pairLevel: [3, 3, 3, 3, 3] },
+    negatives: { options: [3, 4, 4, 4, 4], max: [10, 10, 20, 20, 30], ops: [['+'], ['+', '-'], ['+', '-'], ['×', ':'], ['+', '-', '×', ':']] },
+    equations: { options: [3, 3, 4, 4, 4], neg: [0, 0, 0, 1, 1], forms: [['x+a=b'], ['x+a=b', 'ax=b'], ['ax=b', 'ax+b=c'], ['ax+b=c'], ['ax+b=c', 'a(x+b)=c', 'x/a+b=c']] },
+    powers: { options: [3, 3, 4, 4, 4], max: [10, 12, 15, 15, 20], modes: [['sq'], ['sq', 'sqrt'], ['sq', 'sqrt', 'cube'], ['sqrt', 'cube', 'pow2', 'zero'], ['sq', 'sqrt', 'cube', 'pow2', 'rules']] },
+    ratio: { options: [3, 3, 4, 4, 4], modes: [['scale'], ['scale', 'proportion'], ['proportion', 'share'], ['share', 'pctOf'], ['scale', 'proportion', 'share', 'pctOf']] },
+    angles: { options: [3, 3, 4, 4, 4], modes: [['straight'], ['straight', 'vertical'], ['triangle'], ['triangle', 'isosceles', 'vertical'], ['triangle', 'isosceles', 'quad', 'straight', 'vertical']] },
+    enVocab: { options: [3, 3, 4, 4, 4], toEnglish: [0, 0, 0, 1, 1] },
+    enGrammar: { options: [3, 3, 3, 4, 4], minLevel: [1, 1, 1, 1, 2], maxLevel: [1, 1, 2, 2, 2] },
+    enPast: { options: [4, 4, 4, 4, 4], irregular: [1, 1, 1, 1, 1] }
+  },
+  k8: {
+    binyan: { options: [4, 4, 4, 4, 4], binyanim: [['kal', 'nifal', 'piel', 'hifil', 'hitpael'], ['kal', 'nifal', 'piel', 'pual', 'hifil', 'hitpael'], ['kal', 'nifal', 'piel', 'pual', 'hifil', 'hufal', 'hitpael'], ['nifal', 'piel', 'pual', 'hifil', 'hufal', 'hitpael'], ['pual', 'hufal', 'nifal', 'hitpael', 'piel', 'hifil']] },
+    tense: { imperative: [0, 0, 1, 1, 1] },
+    idioms: { options: [4, 4, 4, 4, 4] },
+    connectives: { options: [4, 4, 4, 4, 4] },
+    equations: { options: [4, 4, 4, 4, 4], neg: [0, 1, 1, 1, 1], forms: [['ax+b=c'], ['ax+b=c', 'a(x+b)=c'], ['a(x+b)=c', 'x/a+b=c'], ['ax+b=cx+d'], ['a(x+b)=c', 'x/a+b=c', 'ax+b=cx+d']] },
+    linear: { options: [3, 4, 4, 4, 4], modes: [['eval'], ['eval', 'slope'], ['slope', 'intercept'], ['eval', 'slope', 'intercept'], ['eval', 'slope', 'intercept', 'zero']] },
+    pythagoras: { options: [3, 3, 4, 4, 4], triples: [PY_TRIPLES.slice(0, 2), PY_TRIPLES.slice(0, 4), PY_TRIPLES.slice(0, 6), PY_TRIPLES, PY_TRIPLES], leg: [0, 0, 0.3, 0.5, 0.5] },
+    circle: { options: [3, 3, 4, 4, 4], max: [5, 8, 10, 10, 12], diameter: [0, 0, 0, 1, 1], modes: [['circ'], ['area'], ['circ', 'area'], ['circ', 'area'], ['circ', 'area']] },
+    probability: { options: [3, 3, 4, 4, 4], colors: [2, 2, 3, 3, 4], modes: [['bag'], ['bag', 'die'], ['die'], ['bag', 'die'], ['bag', 'die']] },
+    ratio: { options: [4, 4, 4, 4, 4], modes: [['proportion', 'share'], ['pctOf', 'pctUp'], ['pctUp', 'pctDown'], ['pctOf', 'pctUp', 'pctDown'], ['share', 'pctOf', 'pctUp', 'pctDown']] },
+    enVocab: { options: [4, 4, 4, 4, 4], toEnglish: [0, 1, 1, 1, 1] },
+    enParticiple: { options: [3, 3, 4, 4, 4], both: [0, 0, 0, 1, 1] },
+    enCompare: { options: [3, 3, 4, 4, 4], superlative: [0, 0, 1, 1, 1] },
+    enGrammar: { options: [3, 4, 4, 4, 4], minLevel: [1, 2, 2, 2, 2], maxLevel: [2, 2, 2, 3, 3] }
+  },
+  k9: {
+    binyan: { options: [4, 4, 4, 4, 4], binyanim: [['kal', 'nifal', 'piel', 'pual', 'hifil', 'hufal', 'hitpael'], ['kal', 'nifal', 'piel', 'pual', 'hifil', 'hufal', 'hitpael'], ['nifal', 'piel', 'pual', 'hifil', 'hufal', 'hitpael'], ['pual', 'hufal', 'nifal', 'hitpael', 'piel', 'hifil'], ['pual', 'hufal', 'nifal', 'hitpael']] },
+    idioms: { options: [4, 4, 4, 4, 4] },
+    connectives: { options: [4, 4, 4, 4, 4] },
+    synonyms: { options: [4, 4, 4, 4, 4], pairLevel: [3, 3, 3, 3, 3] },
+    equations: { options: [4, 4, 4, 4, 4], neg: [1, 1, 1, 1, 1], forms: [['ax+b=c', 'a(x+b)=c'], ['ax+b=cx+d'], ['ax+b=cx+d', 'x/a+b=c'], ['a(x+b)=c', 'ax+b=cx+d', 'x/a+b=c'], ['ax+b=cx+d']] },
+    quadratic: { options: [3, 3, 4, 4, 4], modes: [['expand'], ['expand', 'square'], ['square', 'product'], ['product', 'factor'], ['square', 'product', 'factor']] },
+    linear: { options: [4, 4, 4, 4, 4], modes: [['slope', 'intercept'], ['eval', 'intercept', 'zero'], ['points'], ['points', 'zero'], ['eval', 'slope', 'intercept', 'zero', 'points']] },
+    pythagoras: { options: [4, 4, 4, 4, 4], triples: [PY_TRIPLES.slice(0, 4), PY_TRIPLES, PY_TRIPLES, PY_TRIPLES, PY_TRIPLES], leg: [0.3, 0.5, 0.5, 0.6, 0.6] },
+    probability: { options: [3, 4, 4, 4, 4], colors: [3, 3, 3, 4, 4], modes: [['bag', 'die'], ['die', 'two'], ['two'], ['bag', 'two'], ['bag', 'die', 'two']] },
+    powers: { options: [4, 4, 4, 4, 4], max: [15, 20, 20, 20, 20], modes: [['sq', 'sqrt', 'cube'], ['pow2', 'zero', 'rules'], ['rules'], ['rules', 'sqrt', 'pow2'], ['rules', 'cube', 'pow2', 'zero']] },
+    enVocab: { options: [4, 4, 4, 4, 4], toEnglish: [1, 1, 1, 1, 1] },
+    enParticiple: { options: [4, 4, 4, 4, 4], both: [0, 1, 1, 1, 1] },
+    enGrammar: { options: [4, 4, 4, 4, 4], minLevel: [2, 2, 3, 3, 3], maxLevel: [2, 3, 3, 3, 3] },
+    enCompare: { options: [4, 4, 4, 4, 4], superlative: [1, 1, 1, 1, 1] }
   }
 };
 
@@ -1099,6 +1290,23 @@ const GAMES = {
   enTranslate: { name: 'תִּרְגּוּם',              icon: 'A→א', bg: 'var(--berry)', sm: true, section: 'en', topic: 'en' },
   enSpell:     { name: 'Spelling',              icon: 'a_c', bg: 'var(--sea)', sm: true, section: 'en', topic: 'en' },
   enPast:      { name: 'Past tense',            icon: 'went', bg: 'var(--plum)', sm: true, section: 'en', topic: 'en' },
+  negatives:   { name: 'מִסְפָּרִים מְכֻוָּנִים',    icon: '−3', bg: 'var(--sea)', topic: 'math' },
+  equations:   { name: 'מַשְׁוָאוֹת',             icon: 'x=?', bg: 'var(--plum)', sm: true, topic: 'math' },
+  powers:      { name: 'חֲזָקוֹת וְשָׁרָשִׁים',      icon: 'x²', bg: 'var(--berry)', topic: 'math' },
+  ratio:       { name: 'יַחַס וְאֲחוּזִים',         icon: '2:3', bg: 'var(--sun)', sm: true, topic: 'math' },
+  angles:      { name: 'זָוִיּוֹת',               icon: '∠', bg: 'var(--grass-deep)', topic: 'math' },
+  linear:      { name: 'פוּנְקְצִיָּה קַוִּית',     icon: 'y=x', bg: 'var(--sky-hi)', sm: true, topic: 'math' },
+  pythagoras:  { name: 'פִיתָגוֹרַס',             icon: '◺', bg: 'var(--sun)', topic: 'math' },
+  circle:      { name: 'מַעְגָּל וְעִגּוּל',        icon: 'π', bg: 'var(--sea)', topic: 'math' },
+  probability: { name: 'הִסְתַּבְּרוּת',           icon: '🎲', bg: 'var(--berry)', emo: true, topic: 'math' },
+  quadratic:   { name: 'מַשְׁוָאָה רִבּוּעִית',      icon: 'x²=', bg: 'var(--plum)', sm: true, topic: 'math' },
+  binyan:      { name: 'בִּנְיָנִים',              icon: 'פעל', bg: 'var(--grass-deep)', sm: true, topic: 'he' },
+  tense:       { name: 'זְמַנֵּי הַפֹּעַל',         icon: '⏳', bg: 'var(--sky-hi)', emo: true, topic: 'he' },
+  connectives: { name: 'מִלּוֹת קִשּׁוּר',          icon: 'כי?', bg: 'var(--sun)', sm: true, topic: 'he' },
+  enVocab:     { name: 'Vocabulary',            icon: 'A→א', bg: 'var(--grass-deep)', sm: true, section: 'en', topic: 'en' },
+  enGrammar:   { name: 'Grammar',               icon: 'is/are', bg: 'var(--berry)', sm: true, section: 'en', topic: 'en' },
+  enParticiple:{ name: 'Irregular verbs',       icon: 'V3', bg: 'var(--plum)', sm: true, section: 'en', topic: 'en' },
+  enCompare:   { name: 'Comparatives',          icon: 'big+', bg: 'var(--sea)', sm: true, section: 'en', topic: 'en' },
   enSentences: { name: 'English sentences',     icon: '📖', bg: 'var(--sky-hi)', emo: true, section: 'en', topic: 'en' },
   enFirst:     { name: 'First letter',          icon: 'b🐻', bg: 'var(--grass-deep)', sm: true, section: 'en', topic: 'en' }
 };
@@ -1216,6 +1424,7 @@ const SAY_AS = {
   // first-grade games
   'תּוֹר כִּתָּה אָלֶף': 'תור כיתה אָלֶף',
   'כִּתָּה בֵּית': 'כיתה בֵּית', 'כִּתָּה גִּימֶל': 'כיתה גימל', 'כִּתָּה דָּלֶת': 'כיתה דָּלֶת', 'כִּתָּה הֵא': 'כיתה הֵא', 'כִּתָּה וָו': 'כיתה וָו',
+  'כִּתָּה זַיִן': 'כיתה זַיִן', 'כִּתָּה חֵית': 'כיתה חֵית', 'כִּתָּה טֵית': 'כיתה טֵית',
   'מָה הַמִּלָּה הַנִּרְדֶּפֶת שֶׁל': 'מה המילה הנרדפת של', 'מָה הַשֹּׁרֶשׁ שֶׁל': 'מה השורש של', 'מָה הַפֵּרוּשׁ שֶׁל': 'מה הפירוש של',
   'מָה הַהֶקֵּף?': 'מה ההיקף?', 'הַהֶקֵּף הוּא': 'ההיקף הוא', 'מָה אֹרֶךְ הַצַּלָּע?': 'מה אורך הצלע?', 'וְשָׁאַרִית': 'ושארית', 'כַּמָּה הֲבָרוֹת יֵשׁ בַּמִּלָּה': 'כמה הברות יש במילה', 'אֵיזוֹ אוֹת חֲסֵרָה בַּמִּלָּה': 'איזו אות חסרה במילה',
   'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?': 'איזו תמונה מתאימה למשפט?', 'שָׁוֶה לְ': 'שווה ל',
@@ -2580,8 +2789,391 @@ const MAKERS = {
     others = others.concat(sample(EN_SENTENCES.filter(x => x.text !== t.w && !others.includes(x) && x.pic !== t.e), L('options') - 1 - others.length));
     choices([{ label: t.e, ok: true }, ...others.map(x => ({ label: x.pic }))], 'emo');
     return { prompt: 'קוֹרְאִים בְּאַנְגְּלִית: אֵיזוֹ תְּמוּנָה?', say: L('silent') ? 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?' : { en: t.w }, after: [{ en: t.w }], item: t.w, english: true };
+  },
+
+  /* ---------- grades 7-9: math ---------- */
+  negatives() {
+    const op = rand(L('ops')), max = L('max');
+    const r = (lo, hi) => between(lo, hi) * (Math.random() < 0.5 ? -1 : 1);
+    let a, b, ans, wrong;
+    if (op === '×' || op === ':') {
+      b = r(2, 9); const c = r(1, Math.min(max, 12));
+      if (op === '×') { a = c; ans = a * b; } else { a = c * b; ans = c; }
+      if (a > 0 && b > 0) b = -b, ans = -ans;
+      wrong = [-ans, ans + b, ans - b];
+    } else {
+      a = r(1, max); b = r(1, max);
+      if (a > 0 && b > 0) a = -a;
+      ans = op === '+' ? a + b : a - b;
+      wrong = [-ans, op === '+' ? a - b : a + b, -a - b, -a + b];
+    }
+    showEq(`${fmtNum(a)} ${op === '-' ? '−' : op} ${sgn(b)} = ?`);
+    numOptsS(ans, wrong.concat([ans + 1, ans - 1, ans + 10]), L('options'), fmtNum, 'num ltr');
+    return { prompt: 'כַּמָּה זֶה? שָׂמִים לֵב לַסִּימָן', say: 'כַּמָּה זֶה?', item: `${a} ${op} ${b}` };
+  },
+
+  equations() {
+    const form = rand(L('forms')), neg = L('neg');
+    const nz = (lo, hi) => between(lo, hi) * (neg && Math.random() < 0.4 ? -1 : 1);
+    let x = nz(1, 12), text, wrong;
+    if (form === 'x+a=b') {
+      const a = between(-15, 15) || 7, b = x + a;
+      text = `x${plusTerm(a)} = ${fmtNum(b)}`; wrong = [b + a, -x, b];
+    } else if (form === 'ax=b') {
+      const a = between(2, 9) * (neg && Math.random() < 0.3 ? -1 : 1), b = a * x;
+      text = `${term(a, 'x')} = ${fmtNum(b)}`; wrong = [b - a, b + a, -x, b];
+    } else if (form === 'ax+b=c') {
+      const a = between(2, 9), b = between(-20, 20) || 5, c = a * x + b;
+      text = `${term(a, 'x')}${plusTerm(b)} = ${fmtNum(c)}`; wrong = [(c + b) / a, c - b, -x, x + 1];
+    } else if (form === 'a(x+b)=c') {
+      const a = between(2, 6), b = between(-9, 9) || 3, c = a * (x + b);
+      text = `${a}(x${plusTerm(b)}) = ${fmtNum(c)}`; wrong = [c / a + b, (c - b) / a, -x, x + b];
+    } else if (form === 'x/a+b=c') {
+      const a = between(2, 6); x = a * nz(1, 6);
+      const b = between(-9, 9) || 4, c = x / a + b;
+      text = `x : ${a}${plusTerm(b)} = ${fmtNum(c)}`; wrong = [(c - b) / a, a * (c + b), x + a, -x];
+    } else { // ax + b = cx + d
+      let a = between(2, 9), c = between(1, 8); if (a === c) a++;
+      const b = between(-12, 12), d = a * x + b - c * x;
+      text = `${term(a, 'x')}${plusTerm(b)} = ${term(c, 'x')}${plusTerm(d)}`;
+      wrong = [(d - b) / (a + c), -x, x + 1, (d + b) / (a - c)];
+    }
+    showEq(text, 'cmp');
+    numOptsS(x, wrong.filter(Number.isInteger), L('options'), fmtNum, 'num ltr');
+    return { prompt: 'מָה הָעֵרֶךְ שֶׁל x?', say: 'מָה הָעֵרֶךְ שֶׁל אִיקְס?', item: text };
+  },
+
+  powers() {
+    const mode = rand(L('modes')), max = L('max');
+    if (mode === 'rules') {
+      const a = between(2, 9), m = between(2, 9), n = between(2, m), kind = rand(['×', ':', '()']);
+      const ans = kind === '×' ? m + n : kind === ':' ? m - n : m * n;
+      if (kind === ':' && ans === 0) return MAKERS.powers();
+      showEq(kind === '()' ? `(${a}${sup(m)})${sup(n)} = ?` : `${a}${sup(m)} ${kind} ${a}${sup(n)} = ?`, 'cmp');
+      const cands = [m + n, m * n, m - n, ans + 1, ans - 1].filter(k => k > 0 && k !== ans);
+      choices([{ label: a + sup(ans), ok: true }, ...[...new Set(cands)].slice(0, L('options') - 1).map(k => ({ label: a + sup(k) }))], 'num ltr');
+      return { prompt: 'אֵיזוֹ חֶזְקָה שָׁוָה?', say: 'אֵיזוֹ חֶזְקָה שָׁוָה?', item: `${a}^${m} ${kind} ${a}^${n}` };
+    }
+    let text, ans, wrong;
+    if (mode === 'sq') { const n = between(2, max); text = `${n}² = ?`; ans = n * n; wrong = [2 * n, n * n + n, (n + 1) * (n + 1), (n - 1) * (n - 1)]; }
+    else if (mode === 'cube') { const n = between(2, Math.min(max, 6)); text = `${n}³ = ?`; ans = n ** 3; wrong = [3 * n, n * n, (n + 1) ** 3, n ** 3 + n]; }
+    else if (mode === 'sqrt') { const n = between(2, max); text = `√${n * n} = ?`; ans = n; wrong = [n + 1, n - 1, n * n / 2, 2 * n]; }
+    else if (mode === 'pow2') { const n = between(2, Math.min(max, 10)); text = `2${sup(n)} = ?`; ans = 2 ** n; wrong = [2 * n, 2 ** (n + 1), 2 ** (n - 1), n * n]; }
+    else { const a = between(2, 30); text = `${a}⁰ = ?`; ans = 1; wrong = [0, a, 10]; }
+    showEq(text);
+    numOpts(ans, wrong.filter(Number.isInteger), L('options'));
+    return { prompt: 'כַּמָּה זֶה?', say: 'כַּמָּה זֶה?', item: text.replace(' = ?', '') };
+  },
+
+  ratio() {
+    const mode = rand(L('modes'));
+    let text, ans, wrong, unit = '';
+    if (mode === 'scale') {
+      const [thing, price, cost] = rand([['מַחְבָּרוֹת', '₪', 'עוֹלוֹת'], ['כַּדּוּרִים', '₪', 'עוֹלִים'], ['סְפָרִים', '₪', 'עוֹלִים'], ['עוּגוֹת', 'בֵּיצִים'], ['שׁוּרוֹת', 'דַּקּוֹת']]);
+      const u = between(2, 12), a = between(2, 6); let b; do { b = between(2, 10); } while (b === a);
+      text = price === 'בֵּיצִים' ? `לְ־${a} ${thing} צָרִיךְ ${a * u} ${price}. כַּמָּה ${price} צָרִיךְ לְ־${b} ${thing}?`
+        : price === 'דַּקּוֹת' ? `${a} ${thing} כּוֹתְבִים בְּ־${a * u} ${price}. כַּמָּה ${price} לְ־${b} ${thing}?`
+        : `${a} ${thing} ${cost} ${a * u} ${price}. כַּמָּה ${cost} ${b} ${thing}?`;
+      ans = b * u; wrong = [a * u + (b - a), a * u * b, ans + u, ans - u];
+    } else if (mode === 'proportion') {
+      const a = between(1, 9), b = between(2, 9), k = between(2, 8);
+      if (a === b) return MAKERS.ratio();
+      showEq(`${a} : ${b} = x : ${b * k}`, 'cmp');
+      ans = a * k; wrong = [b * k - b + a, a * b, b * k / a, ans + k];
+      numOpts(ans, wrong.filter(Number.isInteger), L('options'));
+      return { prompt: 'מָה הָעֵרֶךְ שֶׁל x?', say: 'מָה הָעֵרֶךְ שֶׁל אִיקְס?', item: `${a}:${b}=x:${b * k}` };
+    } else if (mode === 'share') {
+      const a = between(1, 5), b = between(2, 7), k = between(2, 9);
+      if (a === b) return MAKERS.ratio();
+      text = `מְחַלְּקִים ${(a + b) * k} סֻכָּרִיּוֹת בֵּין דָּנָה לְיוֹסִי בַּיַּחַס ${a} : ${b}. כַּמָּה מְקַבֶּלֶת דָּנָה?`;
+      ans = a * k; wrong = [b * k, k, (a + b) * k / 2, a * k + a];
+    } else {
+      const p = rand([10, 20, 25, 50, 5, 15, 30, 40, 75]), step = 100 / gcd(p, 100);
+      const base = step * between(1, Math.max(1, Math.floor(400 / step))), d = p * base / 100;
+      unit = '₪';
+      if (mode === 'pctUp') { text = `מְחִיר שֶׁל ${base} ₪ עָלָה בְּ־${p}%. מָה הַמְּחִיר הֶחָדָשׁ?`; ans = base + d; wrong = [base + p, d, base - d, base + 2 * d]; }
+      else if (mode === 'pctDown') { text = `מְחִיר שֶׁל ${base} ₪ יָרַד בְּ־${p}%. מָה הַמְּחִיר הֶחָדָשׁ?`; ans = base - d; wrong = [base - p, d, base + d, base - 2 * d]; }
+      else {
+        const part = p * base / 100; unit = '%';
+        text = `${part} מִתּוֹךְ ${base} הֵם כַּמָּה אֲחוּזִים?`; ans = p; wrong = [100 - p, part, p * 2, p / 2];
+      }
+    }
+    const q = document.createElement('div'); q.className = 'bigword problem'; q.textContent = text;
+    $('#stage').appendChild(q);
+    numOptsS(ans, wrong.filter(x => Number.isInteger(x) && x > 0), L('options'), x => unit === '%' ? x + '%' : unit ? x + ' ' + unit : String(x), 'num deg');
+    return { prompt: 'פּוֹתְרִים:', say: text, item: plainHe(text) };
+  },
+
+  angles() {
+    const mode = rand(L('modes')), deg = x => x + '°';
+    const lab = (x, y, t, big) => `<text x="${x}" y="${y}" text-anchor="middle" font-size="${big ? 20 : 17}" font-weight="800" fill="${t === '?' ? '#F0567A' : '#1F2A44'}">${t}</text>`;
+    let svg, ans, wrong, item;
+    if (mode === 'triangle' || mode === 'isosceles') {
+      let A, B, C;
+      if (mode === 'triangle') { do { A = between(3, 9) * 10 - between(0, 1) * 5; B = between(3, 9) * 10; } while (A + B > 160); C = 180 - A - B; }
+      else { C = between(2, 14) * 10; A = B = (180 - C) / 2; }
+      const ask = mode === 'isosceles' ? 'A' : rand(['A', 'B', 'C']);
+      const show = k => k === ask ? '?' : deg({ A, B, C }[k]);
+      ans = { A, B, C }[ask];
+      const known = [A, B, C].filter((_, i) => 'ABC'[i] !== ask);
+      wrong = [360 - known[0] - known[1], 180 - known[0], 90 - known[1], ans + 10, ans - 10];
+      const pts = mode === 'isosceles' ? [[40, 160], [260, 160], [150, 30]] : [[30, 160], [270, 160], [110, 30]];
+      svg = `<polygon points="${pts.map(p => p.join(',')).join(' ')}" fill="#FFF1C7" stroke="#1F2A44" stroke-width="3" stroke-linejoin="round"/>`
+        + lab(pts[0][0] + 34, 150, show('A')) + lab(pts[1][0] - 34, 150, mode === 'isosceles' ? '' : show('B')) + lab(pts[2][0], 66, show('C'));
+      if (mode === 'isosceles') svg += `<g stroke="#1F2A44" stroke-width="3"><line x1="88" y1="90" x2="100" y2="98"/><line x1="212" y1="90" x2="200" y2="98"/></g>`;
+      item = mode === 'isosceles' ? `שווה שוקיים ${C}°` : `משולש ${known.join(', ')}`;
+    } else if (mode === 'quad') {
+      let a, b, c; do { a = between(6, 13) * 10; b = between(6, 13) * 10; c = between(6, 13) * 10; } while (360 - a - b - c < 40 || 360 - a - b - c > 160);
+      ans = 360 - a - b - c; wrong = [180 - a - b > 0 ? 180 - a - b : 200 - a, 270 - a - b - c > 0 ? 270 - a - b - c : ans + 30, ans + 10, ans - 10];
+      const pts = [[30, 160], [270, 160], [240, 40], [70, 25]];
+      svg = `<polygon points="${pts.map(p => p.join(',')).join(' ')}" fill="#E3F5FC" stroke="#1F2A44" stroke-width="3" stroke-linejoin="round"/>`
+        + lab(62, 150, deg(a)) + lab(238, 150, deg(b)) + lab(224, 66, deg(c)) + lab(86, 54, '?');
+      item = `מרובע ${a}, ${b}, ${c}`;
+    } else if (mode === 'polygon') {
+      const n = between(5, 10), names = { 5: 'מְחֻמָּשׁ', 6: 'מְשֻׁשֶּׁה', 7: 'מְשֻׁבָּע', 8: 'מְתֻמָּן', 9: 'מְתֻשָּׁע', 10: 'מְעֻשָּׂר' };
+      ans = (n - 2) * 180; wrong = [n * 180, (n - 1) * 180, 360, (n - 3) * 180];
+      const q = document.createElement('div'); q.className = 'bigword problem'; q.textContent = `מָה סְכוּם הַזָּוִיּוֹת בְּ${names[n]} (${n} צְלָעוֹת)?`;
+      $('#stage').appendChild(q);
+      numOptsS(ans, wrong, L('options'), deg, 'num deg');
+      return { prompt: 'סְכוּם זָוִיּוֹת בְּמְצֻלָּע', say: 'מָה סְכוּם הַזָּוִיּוֹת?', item: `מצולע ${n}` };
+    } else { // straight line or two crossing lines
+      const x = between(3, 15) * 10 - between(0, 1) * 5, rad = d => d * Math.PI / 180;
+      const P = (r, d) => [150 + r * Math.cos(rad(d)), 100 - r * Math.sin(rad(d))].map(v => v.toFixed(1)).join(',');
+      const cross = mode === 'vertical';
+      const askOpp = cross && Math.random() < 0.5;
+      svg = `<g stroke="#1F2A44" stroke-width="3.5" stroke-linecap="round"><line x1="20" y1="100" x2="280" y2="100"/>`
+        + (cross ? `<line x1="${P(88, x + 180).split(',')[0]}" y1="${P(88, x + 180).split(',')[1]}" x2="${P(88, x).split(',')[0]}" y2="${P(88, x).split(',')[1]}"/>`
+          : `<line x1="150" y1="100" x2="${P(85, x).split(',')[0]}" y2="${P(85, x).split(',')[1]}"/>`) + `</g>`;
+      const at = (d, t) => { const [px, py] = P(55, d).split(',').map(Number); return lab(px, py + 6, t); };
+      svg += at(x / 2, deg(x));
+      if (askOpp) { svg += at(180 + x / 2, '?'); ans = x; wrong = [180 - x, 90 - x > 0 ? 90 - x : x + 90, 360 - x]; }
+      else { svg += at((x + 180) / 2, '?'); ans = 180 - x; wrong = [x, 360 - x, 90 - x > 0 ? 90 - x : ans + 20]; }
+      item = cross ? `זוויות קודקודיות ${x}°` : `זוויות צמודות ${x}°`;
+    }
+    const fig = document.createElement('div');
+    fig.innerHTML = `<svg class="rect-fig" viewBox="0 0 300 190" role="img" aria-label="זוויות" direction="ltr">${svg}</svg>`;
+    $('#stage').appendChild(fig.firstChild);
+    numOptsS(ans, wrong.filter(w => w > 0 && w < 360), L('options'), deg, 'num deg');
+    return { prompt: 'כַּמָּה מַעֲלוֹת בַּזָּוִית שֶׁמְּסֻמֶּנֶת בְּסִימַן שְׁאֵלָה?', say: 'כַּמָּה מַעֲלוֹת יֵשׁ בַּזָּוִית?', item };
+  },
+
+  pythagoras() {
+    const [a, b, c] = rand(L('triples')), askLeg = Math.random() < L('leg');
+    const [l1, l2] = Math.random() < 0.5 ? [a, b] : [b, a];
+    const s = Math.min(200 / l1, 130 / l2), x0 = 70, y0 = 160, w = l1 * s, h = l2 * s;
+    const lab = (x, y, t) => `<text x="${x}" y="${y}" text-anchor="middle" font-size="17" font-weight="800" fill="${t === '?' ? '#F0567A' : '#1F2A44'}">${t}</text>`;
+    const fig = document.createElement('div');
+    fig.innerHTML = `<svg class="rect-fig" viewBox="0 0 300 190" role="img" aria-label="משולש ישר זווית">
+      <polygon points="${x0},${y0} ${x0 + w},${y0} ${x0},${y0 - h}" fill="#FFF1C7" stroke="#1F2A44" stroke-width="3" stroke-linejoin="round"/>
+      <polyline points="${x0},${y0 - 14} ${x0 + 14},${y0 - 14} ${x0 + 14},${y0}" fill="none" stroke="#1F2A44" stroke-width="2"/>
+      ${lab(x0 + w / 2, y0 + 22, l1)}${lab(x0 - 22, y0 - h / 2 + 6, askLeg ? '?' : l2)}${lab(x0 + w / 2 + 22 * h / Math.hypot(w, h), y0 - h / 2 - 22 * w / Math.hypot(w, h) + 6, askLeg ? c : '?')}</svg>`;
+    $('#stage').appendChild(fig.firstChild);
+    const ans = askLeg ? l2 : c;
+    const wrong = askLeg ? [c - l1, c + l1, Math.round(Math.sqrt(c * c + l1 * l1)), ans + 1, ans - 1] : [l1 + l2, l1 * l1 + l2 * l2, ans + 1, ans - 1, ans + 2];
+    numOpts(ans, wrong, L('options'));
+    return { prompt: askLeg ? 'מָה אֹרֶךְ הַנִּצָּב הַחָסֵר?' : 'מָה אֹרֶךְ הַיֶּתֶר?', say: askLeg ? 'מָה אֹרֶךְ הַנִּצָּב?' : 'מָה אֹרֶךְ הַיֶּתֶר?', item: `${l1}, ${askLeg ? c : l2}` };
+  },
+
+  circle() {
+    const mode = rand(L('modes')), r = between(2, L('max')), useD = L('diameter') && Math.random() < 0.5;
+    const area = mode === 'area';
+    const ans = area ? r * r : 2 * r;
+    const wrong = area ? [2 * r, r, 4 * r * r, r * r * 2, r * r + r] : [r * r, r, 4 * r, r + 2, 2 * r + 2, 3 * r];
+    const fig = document.createElement('div');
+    fig.innerHTML = `<svg class="rect-fig" viewBox="0 0 300 190" role="img" aria-label="מעגל">
+      <circle cx="150" cy="95" r="80" fill="#E3F5FC" stroke="#1F2A44" stroke-width="3"/>
+      <circle cx="150" cy="95" r="4" fill="#1F2A44"/>
+      <line x1="${useD ? 70 : 150}" y1="95" x2="230" y2="95" stroke="#F0567A" stroke-width="3.5"/>
+      <text x="${useD ? 150 : 190}" y="86" text-anchor="middle" font-size="18" font-weight="800" fill="#1F2A44">${useD ? 'd' : 'r'} = ${useD ? 2 * r : r}</text></svg>`;
+    $('#stage').appendChild(fig.firstChild);
+    const lbl = k => (k === 1 ? '' : k) + 'π';
+    const opts = [...new Set(wrong.filter(k => k !== ans && k > 0))].slice(0, L('options') - 1);
+    choices([{ label: lbl(ans), ok: true }, ...opts.map(k => ({ label: lbl(k) }))], 'num ltr');
+    return area
+      ? { prompt: 'מָה הַשֶּׁטַח שֶׁל הָעִגּוּל? (S = πr²)', say: 'מָה הַשֶּׁטַח שֶׁל הָעִגּוּל?', item: `שטח עיגול r=${r}` }
+      : { prompt: 'מָה הֶקֵּף הַמַּעְגָּל? (P = 2πr)', say: 'מָה הֶקֵּף הַמַּעְגָּל?', item: `היקף מעגל r=${r}` };
+  },
+
+  linear() {
+    const mode = rand(L('modes'));
+    let m = between(-5, 5) || 2, b = between(-9, 9);
+    if (mode === 'points') {
+      const x1 = between(-4, 3), dx = between(1, 4), y1 = between(-6, 6), y2 = y1 + m * dx;
+      showEq(`(${x1}, ${y1})  (${x1 + dx}, ${y2})`, 'cmp');
+      numOptsS(m, [-m, m + 1, m - 1, dx, y2 - y1].filter(v => Number.isInteger(v)), L('options'), fmtNum, 'num ltr');
+      return { prompt: 'מָה הַשִּׁפּוּעַ שֶׁל הַיָּשָׁר שֶׁעוֹבֵר בִּשְׁתֵּי הַנְּקֻדּוֹת?', say: 'מָה הַשִּׁפּוּעַ שֶׁל הַיָּשָׁר?', item: `(${x1},${y1}) (${x1 + dx},${y2})` };
+    }
+    if (mode === 'zero') { const z = between(-6, 6); b = -m * z; }
+    const eq = `y = ${term(m, 'x')}${plusTerm(b)}`;
+    showEq(eq, 'cmp');
+    let ans, wrong, prompt, say;
+    if (mode === 'eval') {
+      const x = between(-4, 5); ans = m * x + b; wrong = [m + x + b, m * x - b, -ans, m * (x + b)];
+      const q = document.createElement('div'); q.className = 'hint'; q.dir = 'ltr'; q.textContent = `x = ${fmtNum(x)}  →  y = ?`;
+      $('#stage').appendChild(q);
+      prompt = 'מָה הָעֵרֶךְ שֶׁל y?'; say = 'מָה הָעֵרֶךְ שֶׁל וַי?';
+    } else if (mode === 'slope') { ans = m; wrong = [b, -m, m + 1, m - 1]; prompt = 'מָה הַשִּׁפּוּעַ שֶׁל הַיָּשָׁר?'; say = prompt; }
+    else if (mode === 'intercept') { ans = b; wrong = [m, -b, b + 1, b - 1]; prompt = 'בְּאֵיזוֹ נְקֻדָּה הַיָּשָׁר חוֹתֵךְ אֶת צִיר y? (y = ?)'; say = 'אֵיפֹה הַיָּשָׁר חוֹתֵךְ אֶת צִיר וַי?'; }
+    else { ans = -b / m; wrong = [b / m, -b, b, ans + 1].filter(Number.isInteger); prompt = 'בְּאֵיזוֹ נְקֻדָּה הַיָּשָׁר חוֹתֵךְ אֶת צִיר x? (x = ?)'; say = 'אֵיפֹה הַיָּשָׁר חוֹתֵךְ אֶת צִיר אִיקְס?'; }
+    numOptsS(ans, wrong, L('options'), fmtNum, 'num ltr');
+    return { prompt, say, item: eq };
+  },
+
+  probability() {
+    const mode = rand(L('modes'));
+    let a, n, text, wrong;
+    if (mode === 'bag') {
+      const cols = shuffle([['🔴', 'אָדֹם'], ['🔵', 'כָּחֹל'], ['🟢', 'יָרֹק'], ['🟡', 'צָהֹב']]).slice(0, L('colors'));
+      const counts = cols.map(() => between(1, 6)); n = counts.reduce((x, y) => x + y);
+      a = counts[0];
+      const bag = document.createElement('div'); bag.className = 'bag';
+      bag.textContent = shuffle(cols.flatMap(([e], i) => Array(counts[i]).fill(e))).join('');
+      $('#stage').appendChild(bag);
+      text = `מוֹצִיאִים כַּדּוּר אֶחָד בְּלִי לְהִסְתַּכֵּל. מָה הַסִּכּוּי שֶׁהוּא ${cols[0][1]}?`;
+      wrong = [[a, n - a], [n - a, n], [1, n], [counts[1], n], [a, n + 1], [1, cols.length]];
+    } else if (mode === 'die') {
+      const [ev, k] = rand([['מִסְפָּר זוּגִי', 3], ['מִסְפָּר אִי־זוּגִי', 3], ['מִסְפָּר גָּדוֹל מִ־4', 2], ['הַמִּסְפָּר 6', 1], ['מִסְפָּר קָטָן מִ־3', 2],
+        ['מִסְפָּר שֶׁמִּתְחַלֵּק בְּ־3', 2], ['מִסְפָּר גָּדוֹל מִ־1', 5], ['מִסְפָּר קָטָן מִ־5', 4]]);
+      a = k; n = 6; text = `מְגַלְגְּלִים קֻבִּיָּה 🎲. מָה הַסִּכּוּי לְקַבֵּל ${ev}?`;
+      wrong = [[1, k], [6 - k, 6], [1, 6], [k, 12], [k + 1, 6]];
+    } else {
+      const [ev, k, m] = rand([['שְׁנֵי הַמַּטְבְּעוֹת יֵצְאוּ "עֵץ"', 1, 4], ['לְפָחוֹת מַטְבֵּעַ אֶחָד יֵצֵא "עֵץ"', 3, 4], ['יֵצֵא "עֵץ" אֶחָד וּ"פָּלִי" אֶחָד', 2, 4],
+        ['סְכוּם הַקֻּבִּיּוֹת יִהְיֶה 7', 6, 36], ['סְכוּם הַקֻּבִּיּוֹת יִהְיֶה 12', 1, 36], ['בִּשְׁתֵּי הַקֻּבִּיּוֹת יֵצֵא אוֹתוֹ מִסְפָּר', 6, 36], ['סְכוּם הַקֻּבִּיּוֹת יִהְיֶה 2', 1, 36]]);
+      a = k; n = m;
+      text = m === 4 ? `זוֹרְקִים שְׁנֵי מַטְבְּעוֹת 🪙🪙. מָה הַסִּכּוּי שֶׁ${ev}?` : `מְגַלְגְּלִים שְׁתֵּי קֻבִּיּוֹת 🎲🎲. מָה הַסִּכּוּי שֶׁ${ev}?`;
+      wrong = m === 4 ? [[1, 2], [1, 3], [2, 3], [3, 4], [1, 4]] : [[1, 12], [1, 11], [7, 36], [1, 6], [2, 36], [1, 36]];
+    }
+    const red = ([x, y]) => { const g = gcd(x, y); return [x / g, y / g]; };
+    const ansF = red([a, n]);
+    const others = uniqueFracs(wrong.filter(([x, y]) => x > 0 && x <= y).map(red), ansF).slice(0, L('options') - 1);
+    const q = document.createElement('div'); q.className = 'bigword problem'; q.textContent = text;
+    $('#stage').appendChild(q);
+    choices([{ html: fracHTML(...ansF), ok: true }, ...others.map(f => ({ html: fracHTML(...f) }))], 'frac');
+    return { prompt: 'מָה הַסִּכּוּי?', say: text.replace(/[🎲🪙]/gu, ''), item: plainHe(text).replace(/[🎲🪙]/gu, '') };
+  },
+
+  quadratic() {
+    const mode = rand(L('modes'));
+    const r = () => between(1, 7) * (Math.random() < 0.5 ? -1 : 1);
+    let r1 = r(), r2 = r(), text;
+    const sol = (x, y) => x === y ? `x = ${fmtNum(x)}` : `x = ${fmtNum(Math.min(x, y))}, x = ${fmtNum(Math.max(x, y))}`;
+    const poly = (p, q) => `x²${plusTerm(p, 'x')}${plusTerm(q)}`;
+    if (mode === 'expand') {
+      const a = r(), b = r();
+      showEq(`(x${plusTerm(a)})(x${plusTerm(b)}) = ?`, 'cmp');
+      const ans = poly(a + b, a * b);
+      const wrong = [poly(a * b, a + b), poly(a + b, a + b), `x²${plusTerm(a * b)}`, poly(-(a + b), a * b), poly(a + b, -a * b)];
+      choices([{ label: ans, ok: true }, ...[...new Set(wrong)].filter(w => w !== ans).slice(0, L('options') - 1).map(w => ({ label: w }))], 'expr ltr');
+      return { prompt: 'פּוֹתְחִים סוֹגְרַיִם: מָה יוֹצֵא?', say: 'פּוֹתְחִים סוֹגְרַיִם. מָה יוֹצֵא?', item: `(x+${a})(x+${b})` };
+    }
+    let ans, wrong;
+    if (mode === 'square') {
+      const n = between(2, 12), k = n * n;
+      text = `x² = ${k}`; ans = `x = ±${n}`;
+      wrong = [`x = ${n}`, `x = ±${k}`, `x = ±${n + 1}`, `x = ±${2 * n}`, `x = −${n}`];
+    } else {
+      if (r1 === r2) r2 = r1 + 2;
+      text = mode === 'product' ? `(x${plusTerm(-r1)})(x${plusTerm(-r2)}) = 0` : `${poly(-(r1 + r2), r1 * r2)} = 0`;
+      ans = sol(r1, r2);
+      wrong = [sol(-r1, -r2), sol(r1, -r2), sol(-r1, r2), sol(r1 + 1, r2 - 1), sol(r1 * r2, r1 + r2)];
+    }
+    showEq(text, 'cmp');
+    choices([{ label: ans, ok: true }, ...[...new Set(wrong)].filter(w => w !== ans).slice(0, L('options') - 1).map(w => ({ label: w }))], 'expr ltr');
+    return { prompt: 'מָה הַפִּתְרוֹנוֹת שֶׁל הַמַּשְׁוָאָה?', say: 'מָה הַפִּתְרוֹנוֹת שֶׁל הַמַּשְׁוָאָה?', item: text };
+  },
+
+  /* ---------- grades 7-9: Hebrew language ---------- */
+  binyan() {
+    const names = L('binyanim');
+    const pool = names.flatMap(k => BINYANIM[k].map(v => ({ w: v, e: k })));
+    const t = pickWord(pool);
+    const big = document.createElement('div'); big.className = 'bigword small'; big.textContent = t.w;
+    $('#stage').appendChild(big);
+    let others = sample(names.filter(k => k !== t.e), L('options') - 1);
+    if (others.length < L('options') - 1) others = others.concat(sample(Object.keys(BINYAN_NAMES).filter(k => k !== t.e && !others.includes(k)), L('options') - 1 - others.length));
+    choices([{ label: BINYAN_NAMES[t.e], ok: true }, ...others.map(k => ({ label: BINYAN_NAMES[k] }))], 'word');
+    return { prompt: 'בְּאֵיזֶה בִּנְיָן הַפֹּעַל?', say: 'בְּאֵיזֶה בִּנְיָן הַפֹּעַל?', after: [BINYAN_NAMES[t.e]], item: plainHe(t.w) };
+  },
+
+  tense() {
+    const all = ['עבר', 'הווה', 'עתיד', 'ציווי'], names = L('imperative') ? all : all.slice(0, 3);
+    const t = pickWord(TENSES.filter(x => names.includes(x[1])).map(([w, e]) => ({ w, e })));
+    const big = document.createElement('div'); big.className = 'bigword small'; big.textContent = t.w;
+    $('#stage').appendChild(big);
+    choices(names.map(x => ({ label: x, ok: x === t.e })), 'word');
+    return { prompt: 'בְּאֵיזֶה זְמַן הַפֹּעַל?', say: 'בְּאֵיזֶה זְמַן הַפֹּעַל?', after: [t.e], item: t.w };
+  },
+
+  connectives() {
+    const t = pickWord(CONNECTIVES.map(([w, e, wrong]) => ({ w, e, wrong })));
+    const big = document.createElement('div'); big.className = 'bigword sentence'; big.textContent = t.w;
+    $('#stage').appendChild(big);
+    choices([{ label: t.e, ok: true }, ...t.wrong.slice(0, L('options') - 1).map(x => ({ label: x }))], 'word');
+    return { prompt: 'אֵיזוֹ מִלַּת קִשּׁוּר מַתְאִימָה?', say: 'אֵיזוֹ מִלַּת קִשּׁוּר מַתְאִימָה?', after: [t.w.replace('___', t.e)], item: t.w };
+  },
+
+  /* ---------- grades 7-9: English ---------- */
+  enVocab() {
+    const t = pickWord(EN_VOCAB.map(([en, he]) => ({ w: en, e: he })));
+    const others = sample(EN_VOCAB.filter(([en]) => en !== t.w), L('options') - 1);
+    const big = document.createElement('button'); big.className = 'bigword ' + (L('toEnglish') ? 'small' : 'english');
+    if (L('toEnglish') && Math.random() < 0.6) {
+      big.textContent = t.e; $('#stage').appendChild(big);
+      choices([{ label: t.w, ok: true }, ...others.map(([en]) => ({ label: en }))], 'latin word');
+      return { prompt: 'אֵיךְ אוֹמְרִים בְּאַנְגְּלִית?', say: ['אֵיךְ אוֹמְרִים בְּאַנְגְּלִית', t.e], after: [{ en: t.w }, t.e], item: t.w, english: true };
+    }
+    big.className = 'bigword english'; big.textContent = t.w; big.onclick = () => speak({ en: t.w });
+    $('#stage').appendChild(big);
+    choices([{ label: t.e, ok: true }, ...others.map(([, he]) => ({ label: he }))], 'word');
+    return { prompt: 'מָה הַתַּרְגּוּם לְעִבְרִית?', say: { en: t.w }, after: [{ en: t.w }, t.e], item: t.w, english: true };
+  },
+
+  enParticiple() {
+    const t = pickWord(EN_IRREG.map(([v, p, pp]) => ({ w: v, e: pp, past: p })));
+    const both = L('both') && Math.random() < 0.6;
+    const big = document.createElement('button'); big.className = 'bigword english small';
+    big.textContent = both ? `${t.w} – ? – ?` : `${t.w} – ${t.past} – ?`; big.onclick = () => speak({ en: t.w });
+    $('#stage').appendChild(big);
+    const ed = t.w.endsWith('e') ? t.w + 'd' : t.w + 'ed';
+    let ans, wrong;
+    if (both) {
+      ans = `${t.past} – ${t.e}`;
+      const other = rand(EN_IRREG.filter(x => x[0] !== t.w));
+      wrong = [`${ed} – ${ed}`, `${t.e} – ${t.past}`, `${t.past} – ${t.past}`, `${t.past} – ${ed}`, `${t.w} – ${t.e}`, `${other[1]} – ${other[2]}`];
+    } else {
+      ans = t.e;
+      wrong = [ed, t.w + 'en', t.past, t.w + 'ing', ...sample(EN_IRREG.filter(x => x[0] !== t.w).map(x => x[2]), 2)];
+    }
+    const opts = [...new Set(wrong)].filter(w => w !== ans).slice(0, L('options') - 1);
+    choices([{ label: ans, ok: true }, ...opts.map(w => ({ label: w }))], 'latin word');
+    return { prompt: both ? 'מָה צוּרוֹת הֶעָבָר וְהַ־Past Participle?' : 'מָה צוּרַת הַ־Past Participle (V3)?', say: ['מָה הַצּוּרָה הַשְּׁלִישִׁית שֶׁל', { en: t.w }], after: [{ en: `${t.w}, ${t.past}, ${t.e}` }], item: t.w, english: true };
+  },
+
+  enCompare() {
+    const t = pickWord(EN_COMPARE.map(([a, c, s]) => ({ w: a, e: c, sup: s })));
+    const sup = L('superlative') && Math.random() < 0.5;
+    const ans = sup ? t.sup : t.e;
+    const big = document.createElement('button'); big.className = 'bigword english small';
+    big.textContent = sup ? `${t.w} → ${t.e} → ?` : `${t.w} → ?`; big.onclick = () => speak({ en: t.w });
+    $('#stage').appendChild(big);
+    const base = t.w.endsWith('e') ? t.w.slice(0, -1) : t.w;
+    const wrong = sup ? [base + 'est', 'most ' + t.w, t.e, 'more ' + t.w]
+      : [base + 'er', 'more ' + t.w, t.sup, t.w + 'est', 'most ' + t.w];
+    const opts = [...new Set(wrong)].filter(w => w !== ans).slice(0, L('options') - 1);
+    choices([{ label: ans, ok: true }, ...opts.map(w => ({ label: w }))], 'latin word');
+    return { prompt: sup ? 'מָה צוּרַת הַהַפְלָגָה (הֲכִי)?' : 'מָה צוּרַת הַהַשְׁוָאָה (יוֹתֵר)?', say: sup ? 'מָה צוּרַת הַהַפְלָגָה?' : 'מָה צוּרַת הַהַשְׁוָאָה?', after: [{ en: `${t.w}, ${t.e}, ${t.sup}` }], item: t.w, english: true };
+  },
+
+  enGrammar() {
+    const pool = EN_GRAMMAR.filter(x => x[3] >= L('minLevel') && x[3] <= L('maxLevel'));
+    const t = pickWord(pool.map(([w, e, wrong]) => ({ w, e, wrong })));
+    const big = document.createElement('div'); big.className = 'bigword sentence english'; big.textContent = t.w;
+    $('#stage').appendChild(big);
+    choices([{ label: t.e, ok: true }, ...t.wrong.slice(0, L('options') - 1).map(x => ({ label: x }))], 'latin word');
+    return { prompt: 'מָה חָסֵר בַּמִּשְׁפָּט?', say: 'מָה חָסֵר בַּמִּשְׁפָּט?', after: [{ en: t.w.replace('___', t.e) }], item: t.w, english: true };
   }
 };
+
 
 
 
