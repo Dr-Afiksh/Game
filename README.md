@@ -47,6 +47,24 @@ Each round has 8 questions, and every correct answer earns a star.
 
 Saves from before this change keep every sticker already earned.
 
+## Grades 2–6 (כִּתּוֹת נוֹסָפוֹת)
+
+Five more players on the home screen, each with games for that grade, grouped into Hebrew, math and English.
+Every game has the same 5 adaptive levels, stars, stickers, trophies and parents' page.
+
+| Grade | Hebrew | Math | English |
+|---|---|---|---|
+| ב׳ | reading without nikud, singular/plural, opposites, sentences, memory | + − to 100, first times tables (2, 5, 10), clock (hour, half, quarter), skip counting to 1000 | words, ABC |
+| ג׳ | reading without nikud, plural, opposites, roots (שורש), memory | full times table, division, + − to 1000, clock to 5 minutes, fractions with pies | words, first letter, spelling |
+| ד׳ | synonyms, opposites, roots, memory | 2-digit × 1-digit, division with remainder, + − to 10,000, comparing and equal fractions, perimeter and area | Hebrew↔English, spelling, sentences |
+| ה׳ | synonyms, roots, idioms (ניבים) | multiplication, + − to 100,000, adding fractions, decimals, area and missing side | translation, sentences, past tense, spelling |
+| ו׳ | idioms, synonyms, roots | percent, order of operations, multiplying fractions, decimals, geometry | past tense, sentences, translation, spelling |
+
+The older grades read plain spelling (no nikud), as they do at school. Wrong answers are built from typical
+mistakes: the wrong order of operations, area instead of perimeter, a forgotten carry, swapped clock hands,
+"goed" instead of "went", or other three-letter runs from the same word when looking for a root.
+The play-together mode stays for the two youngest.
+
 ## Playing together (מְשַׂחֲקִים יַחַד)
 
 A cooperative mode for both kids on one device, from the button on the home screen.

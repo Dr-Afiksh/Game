@@ -221,6 +221,29 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 .bigword.english{letter-spacing:1px}
 .listen{font-family:var(--emoji);font-size:64px;padding:10px 28px;border-radius:28px}
 
+/* grades 2-6 */
+.more-grades h3{margin:4px 0 8px;text-align:center;font-size:20px;color:var(--ink-soft)}
+.grades{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media (max-width:520px){.grades{grid-template-columns:repeat(3,1fr)}}
+.grade-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;background:#E3F5FC;border-radius:16px;box-shadow:0 4px 0 var(--ink)}
+.grade-btn .face{font-family:var(--emoji);font-size:34px;line-height:1.1}
+.grade-btn b{font-size:17px}
+.grade-btn small{font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.ptabs{flex-wrap:wrap}
+.ptab{font-size:16px;padding:6px 12px}
+.choice.expr{font-size:clamp(22px,5.6vw,32px);min-height:84px}
+.choice.phrase{font-size:clamp(17px,4.4vw,22px);font-weight:700;min-height:70px;line-height:1.35;padding:8px 12px}
+.choice.frac{font-size:clamp(32px,8vw,48px)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1.05;vertical-align:middle;font-variant-numeric:tabular-nums}
+.frac b{border-bottom:.08em solid currentColor;padding:0 .18em;font-weight:900}
+.frac i{font-style:normal;font-weight:900}
+.fraceq{display:flex;align-items:center;justify-content:center;gap:.25em;font-size:clamp(34px,9vw,60px)}
+.fraceq .op{font-size:.8em}
+svg.pie,svg.clock{width:min(58vw,230px);height:auto}
+svg.rect-fig{width:min(92vw,380px);height:auto}
+.slots.english{direction:ltr}
+.tile.latin{font-family:"Andika","Noto Sans Hebrew",Arial,sans-serif}
+
 /* memory */
 /* the board fills the free space under the question; rows share the height evenly */
 .memory{flex:1;display:grid;gap:10px;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(72px,1fr);
@@ -348,6 +371,10 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
         <span class="face">🦉</span><span class="pname">כִּתָּה א׳</span><span class="pstars"></span>
       </button>
     </div>
+    <div class="more-grades">
+      <h3>כִּתּוֹת נוֹסָפוֹת</h3>
+      <div class="grades" id="gradesRow"></div>
+    </div>
     <button class="block together-btn" id="togetherBtn"><span class="faces">🐣🤝🦉</span><span>מְשַׂחֲקִים יַחַד</span></button>
     <div class="home-foot">
       <button class="block pill" id="soundBtn"></button>
@@ -418,9 +445,8 @@ button.pic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
       <button class="block icon-btn" id="parentBack" aria-label="חזרה">🏠</button>
       <div class="grow who">לוח הורים</div>
     </div>
-    <div class="ptabs" role="tablist">
-      <button class="block ptab" id="ptab-gan" role="tab">🐣 גן</button>
-      <button class="block ptab" id="ptab-kita" role="tab">🦉 כיתה א׳</button>
+    <div class="ptabs" role="tablist" id="ptabs">
+
     </div>
     <div id="parentBody" class="pbody"></div>
     <div class="ptip" id="ptip" hidden></div>
@@ -633,6 +659,154 @@ const EN_COLORS = { red: 'red', blue: 'blue', yellow: 'yellow', green: 'green', 
 const EN_NUMS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
   'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
 const EN_PRAISE = ['Great job!', 'Well done!', 'Super!', 'Excellent!', 'Yes!'];
+/* ---------- content for grades 2-6 (plain spelling, the way older kids read) ---------- */
+// singular -> plural; only words where the "wrong ending" guesses are not real words themselves
+const PLURALS = [
+  ['ילד', 'ילדים'], ['ילדה', 'ילדות'], ['כלב', 'כלבים'], ['חתול', 'חתולים'], ['ספר', 'ספרים'], ['שולחן', 'שולחנות'],
+  ['כיסא', 'כיסאות'], ['חלון', 'חלונות'], ['דלת', 'דלתות'], ['בית', 'בתים'], ['עיר', 'ערים'], ['איש', 'אנשים'],
+  ['אישה', 'נשים'], ['לילה', 'לילות'], ['מילה', 'מילים'], ['אבא', 'אבות'], ['אמא', 'אמהות'], ['עץ', 'עצים'],
+  ['פרח', 'פרחים'], ['ציפור', 'ציפורים'], ['תפוח', 'תפוחים'], ['כוס', 'כוסות'], ['ביצה', 'ביצים'], ['מכונית', 'מכוניות'],
+  ['כוכב', 'כוכבים'], ['חבר', 'חברים'], ['חברה', 'חברות'], ['תלמיד', 'תלמידים'], ['קיר', 'קירות'], ['לב', 'לבבות'],
+  ['חלום', 'חלומות'], ['כדור', 'כדורים'], ['מפתח', 'מפתחות'], ['עוגה', 'עוגות'], ['תמונה', 'תמונות'], ['ראש', 'ראשים'],
+  ['אבן', 'אבנים'], ['שדה', 'שדות'], ['מקום', 'מקומות'], ['ארון', 'ארונות'], ['סוס', 'סוסים'], ['דג', 'דגים'],
+  ['פרה', 'פרות'], ['נמלה', 'נמלים'], ['יונה', 'יונים'], ['שעה', 'שעות'], ['מכתב', 'מכתבים'], ['רחוב', 'רחובות'],
+  ['שולחן', 'שולחנות'], ['ארץ', 'ארצות'], ['שיר', 'שירים'], ['משחק', 'משחקים'], ['גינה', 'גינות'], ['סבתא', 'סבתות']
+].filter((x, i, a) => a.findIndex(y => y[0] === x[0]) === i);
+const OPPOSITES = [ // [word, opposite, level 1-3]
+  ['גדול', 'קטן', 1], ['חם', 'קר', 1], ['גבוה', 'נמוך', 1], ['ארוך', 'קצר', 1], ['מהיר', 'איטי', 1], ['שמח', 'עצוב', 1],
+  ['יום', 'לילה', 1], ['למעלה', 'למטה', 1], ['פתוח', 'סגור', 1], ['רטוב', 'יבש', 1], ['כבד', 'קל', 1], ['חזק', 'חלש', 1],
+  ['רחוק', 'קרוב', 1], ['חדש', 'ישן', 1], ['נקי', 'מלוכלך', 1], ['מלא', 'ריק', 1], ['שחור', 'לבן', 1], ['אור', 'חושך', 1],
+  ['בוקר', 'ערב', 2], ['ראשון', 'אחרון', 2], ['קדימה', 'אחורה', 2], ['ימין', 'שמאל', 2], ['בפנים', 'בחוץ', 2], ['רך', 'קשה', 2],
+  ['עשיר', 'עני', 2], ['רועש', 'שקט', 2], ['צעיר', 'זקן', 2], ['מתוק', 'מר', 2], ['רחב', 'צר', 2], ['עמוק', 'רדוד', 2],
+  ['אמת', 'שקר', 2], ['הרבה', 'מעט', 2], ['לפני', 'אחרי', 2], ['מוקדם', 'מאוחר', 2], ['זול', 'יקר', 2], ['ישר', 'עקום', 2],
+  ['נכנס', 'יצא', 3], ['עלה', 'ירד', 3], ['פתח', 'סגר', 3], ['צחק', 'בכה', 3], ['התחיל', 'סיים', 3], ['שאל', 'ענה', 3],
+  ['נתן', 'לקח', 3], ['קנה', 'מכר', 3], ['זכר', 'שכח', 3], ['ניצח', 'הפסיד', 3], ['מעניין', 'משעמם', 3], ['אמיץ', 'פחדן', 3]
+];
+const SYNONYMS = [ // [word, synonym, level 1-3]
+  ['יפה', 'נאה', 1], ['שמח', 'עליז', 1], ['קטן', 'זעיר', 1], ['גדול', 'ענק', 1], ['מהיר', 'זריז', 1], ['חבר', 'ידיד', 1],
+  ['אוכל', 'מזון', 1], ['מתנה', 'שי', 1], ['מכונית', 'רכב', 1], ['הרבה', 'המון', 1], ['מעט', 'קצת', 1], ['אמר', 'הגיד', 1],
+  ['דרך', 'שביל', 2], ['בגד', 'לבוש', 2], ['עייף', 'תשוש', 2], ['כועס', 'זועם', 2], ['קל', 'פשוט', 2], ['קשה', 'מסובך', 2],
+  ['גבוה', 'רם', 2], ['ישן', 'עתיק', 2], ['חכם', 'נבון', 2], ['דיבר', 'שוחח', 2], ['צעק', 'זעק', 2], ['סיים', 'גמר', 2],
+  ['עזר', 'סייע', 3], ['מיד', 'תיכף', 3], ['אולי', 'ייתכן', 3], ['זמן', 'עת', 3], ['שקט', 'שליו', 3], ['פחד', 'חשש', 3],
+  ['חלש', 'רפה', 3], ['הביט', 'התבונן', 3], ['אמיץ', 'נועז', 3], ['עצוב', 'נוגה', 3], ['נכון', 'מדויק', 3], ['חזק', 'איתן', 3]
+];
+const ROOTS = [ // [word, root letters, level 1-3]
+  ['מכתב', 'כתב', 1], ['כתיבה', 'כתב', 1], ['מספר', 'ספר', 1], ['ספרייה', 'ספר', 1], ['תלמיד', 'למד', 1], ['משחק', 'שחק', 1],
+  ['שחקן', 'שחק', 1], ['שומר', 'שמר', 1], ['שמירה', 'שמר', 1], ['מחשב', 'חשב', 1], ['חשבון', 'חשב', 1], ['זיכרון', 'זכר', 1],
+  ['מגדל', 'גדל', 2], ['גדול', 'גדל', 2], ['רופא', 'רפא', 2], ['מרפאה', 'רפא', 2], ['מטבח', 'טבח', 2], ['כביסה', 'כבס', 2],
+  ['מכבסה', 'כבס', 2], ['נהיגה', 'נהג', 2], ['מאכל', 'אכל', 2], ['כניסה', 'כנס', 2], ['מכנסיים', 'כנס', 2], ['מפתח', 'פתח', 2],
+  ['פתיחה', 'פתח', 2], ['מסגרת', 'סגר', 2], ['לבוש', 'לבש', 2], ['מלבוש', 'לבש', 2], ['משטרה', 'שטר', 3], ['שוטר', 'שטר', 3],
+  ['מבחן', 'בחן', 3], ['בחינה', 'בחן', 3], ['רכבת', 'רכב', 3], ['רוכב', 'רכב', 3], ['מקלחת', 'קלח', 3], ['מחברת', 'חבר', 3],
+  ['חיבור', 'חבר', 3], ['משלוח', 'שלח', 3], ['שליח', 'שלח', 3], ['משקפיים', 'שקף', 3], ['שקוף', 'שקף', 3], ['ציור', 'ציר', 3],
+  ['מזמרה', 'זמר', 3], ['זמרת', 'זמר', 3], ['מסעדה', 'סעד', 3], ['מדבר', 'דבר', 3], ['דיבור', 'דבר', 3], ['מלמד', 'למד', 3]
+];
+const IDIOMS = [ // [idiom, meaning]
+  ['פרפרים בבטן', 'התרגשות לפני משהו חשוב'],
+  ['על קצה הלשון', 'כמעט נזכרים במשהו'],
+  ['לשבור את הראש', 'לחשוב הרבה כדי לפתור בעיה'],
+  ['עם הראש בעננים', 'חולמים ולא שמים לב למה שקורה'],
+  ['לפתוח דף חדש', 'להתחיל מחדש'],
+  ['בשתי ידיים', 'ברצון רב'],
+  ['יד ביד', 'ביחד, בשיתוף פעולה'],
+  ['מכל הלב', 'בכנות ובאהבה'],
+  ['על קצה המזלג', 'בקצרה, רק מעט'],
+  ['בין הפטיש לסדן', 'במצב קשה בין שתי אפשרויות רעות'],
+  ['לקחת ללב', 'להיפגע ממשהו או להתייחס אליו ברצינות'],
+  ['לטמון את הראש בחול', 'להתעלם מבעיה'],
+  ['לעשות מזבוב פיל', 'להגזים ולהפוך דבר קטן לגדול'],
+  ['האסימון נפל', 'סוף סוף הבינו'],
+  ['כמו חתול וכלב', 'רבים כל הזמן'],
+  ['שותק כמו דג', 'לא אומר אף מילה'],
+  ['מתחת לאף', 'קרוב מאוד ולא שמים לב'],
+  ['ללכת על ביצים', 'להיזהר מאוד'],
+  ['להוריד את הכובע', 'להעריך מאוד מישהו'],
+  ['זה לא סוף העולם', 'זה לא כל כך נורא'],
+  ['המים הגיעו עד הנפש', 'המצב קשה מאוד'],
+  ['לשתות בצמא', 'להקשיב בהתלהבות רבה'],
+  ['לפתוח את העיניים', 'להתחיל להבין מה קורה'],
+  ['לבנות על מישהו', 'לסמוך על מישהו'],
+  ['לא לראות ממטר', 'להיות עייפים או כועסים מאוד']
+];
+const EN_PAST = [ // [verb, past, regular?]
+  ['walk', 'walked', 1], ['play', 'played', 1], ['jump', 'jumped', 1], ['cook', 'cooked', 1], ['open', 'opened', 1],
+  ['clean', 'cleaned', 1], ['help', 'helped', 1], ['watch', 'watched', 1], ['talk', 'talked', 1], ['look', 'looked', 1],
+  ['go', 'went', 0], ['eat', 'ate', 0], ['see', 'saw', 0], ['run', 'ran', 0], ['swim', 'swam', 0], ['drink', 'drank', 0],
+  ['sing', 'sang', 0], ['write', 'wrote', 0], ['come', 'came', 0], ['take', 'took', 0], ['give', 'gave', 0], ['make', 'made', 0],
+  ['buy', 'bought', 0], ['think', 'thought', 0], ['sleep', 'slept', 0], ['fly', 'flew', 0], ['draw', 'drew', 0], ['sit', 'sat', 0],
+  ['have', 'had', 0], ['do', 'did', 0], ['say', 'said', 0], ['find', 'found', 0], ['tell', 'told', 0], ['get', 'got', 0]
+];
+// English versions of the picture sentences
+const EN_SENTENCES = [
+  ['The dog is sleeping.', '🐶💤', 'dog', 1], ['The dog is running.', '🐕💨', 'dog', 1], ['The cat is sleeping.', '🐱💤', 'cat', 1],
+  ['The cat drinks milk.', '🐱🥛', 'cat', 2], ['The boy is sleeping.', '👦💤', 'boy', 1], ['The boy eats an apple.', '👦🍎', 'boy', 2],
+  ['The boy plays with a ball.', '👦⚽', 'boy', 2], ['The girl reads a book.', '👧📖', 'girl', 2], ['The girl eats ice cream.', '👧🍦', 'girl', 2],
+  ['The fish swims in the sea.', '🐟🌊', 'sea', 2], ['The boat is on the sea.', '⛵🌊', 'sea', 1], ['The bird flies.', '🐦☁️', 'sky', 1],
+  ['The airplane flies in the sky.', '✈️☁️', 'sky', 2], ['It is raining.', '🌧️☔', 'weather', 1], ['The sun is shining.', '☀️😎', 'weather', 1],
+  ['There is a moon at night.', '🌙⭐', 'weather', 2], ['The snow is white.', '⛄❄️', 'weather', 1], ['The elephant is big.', '🐘', 'animal', 1],
+  ['The monkey eats a banana.', '🐒🍌', 'eat', 2], ['The rabbit eats a carrot.', '🐰🥕', 'eat', 2], ['The car is fast.', '🚗💨', 'road', 1],
+  ['The bee is on the flower.', '🐝🌸', 'flower', 2], ['The baby is crying.', '👶😢', 'baby', 1], ['The baby is laughing.', '👶😄', 'baby', 1],
+  ['I have a birthday cake.', '🎂🎉', 'party', 3], ['The dog and the cat are friends.', '🐶❤️🐱', 'dog', 3]
+].map(([text, pic, subj, level]) => ({ text, pic, subj, level }));
+
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+const plainHe = w => w.replace(/[֑-ׇ]/g, '');
+const FINAL_TO_REG = { 'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ' };
+const REG_TO_FINAL = { 'כ': 'ך', 'מ': 'ם', 'נ': 'ן', 'פ': 'ף', 'צ': 'ץ' };
+const fixFinal = w => w.slice(0, -1) + (REG_TO_FINAL[w.slice(-1)] || w.slice(-1));
+// wrong fractions that differ from the answer and from each other in value
+const uniqueFracs = (list, [an, ad]) => list.filter(([x, y], i) => y > 0 && x * ad !== an * y &&
+  list.findIndex(([x2, y2]) => x2 * y === x * y2) === i);
+const showRoot = r => r.split('').join('-');
+const fracHTML = (a, b) => `<span class="frac" dir="ltr"><b>${a}</b><i>${b}</i></span>`;
+// pick n-1 wrong numbers from a list of likely mistakes, topped up with near numbers
+function numOpts(ans, cands, n, kind = 'num') {
+  const set = new Set();
+  for (const x of shuffle(cands)) if (x >= 0 && x !== ans && Number.isFinite(x)) set.add(x);
+  let d = 1;
+  while (set.size < n - 1) { if (ans + d !== ans) set.add(ans + d); if (set.size < n - 1 && ans - d >= 0) set.add(ans - d); d++; }
+  choices([{ label: String(ans), ok: true }, ...[...set].slice(0, n - 1).map(x => ({ label: String(x) }))], kind);
+}
+function showEq(text, cls = '') {
+  const eq = document.createElement('div'); eq.className = 'bigword equation ' + cls; eq.dir = 'ltr'; eq.textContent = text;
+  $('#stage').appendChild(eq);
+  return eq;
+}
+function pieSVG(k, n) {
+  let paths = '';
+  for (let i = 0; i < n; i++) {
+    const a0 = (i / n) * 2 * Math.PI - Math.PI / 2, a1 = ((i + 1) / n) * 2 * Math.PI - Math.PI / 2;
+    const p = (a) => `${50 + 44 * Math.cos(a)} ${50 + 44 * Math.sin(a)}`;
+    paths += n === 1 ? `<circle cx="50" cy="50" r="44" fill="${i < k ? '#FFC93C' : '#FFFDF7'}"/>`
+      : `<path d="M50 50L${p(a0)}A44 44 0 0 1 ${p(a1)}Z" fill="${i < k ? '#FFC93C' : '#FFFDF7'}"/>`;
+  }
+  return `<svg class="pie" viewBox="0 0 100 100" aria-hidden="true"><g stroke="#1F2A44" stroke-width="2.5" stroke-linejoin="round">${paths}</g></svg>`;
+}
+function clockSVG(h, m) {
+  let ticks = '';
+  for (let i = 1; i <= 12; i++) {
+    const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
+    ticks += `<text x="${50 + 36 * Math.cos(a)}" y="${50 + 36 * Math.sin(a) + 4}" text-anchor="middle" font-size="11" font-weight="700" fill="#1F2A44">${i}</text>`;
+  }
+  const ha = ((h % 12) + m / 60) * 30, ma = m * 6;
+  return `<svg class="clock" viewBox="0 0 100 100" role="img" aria-label="שעון"><circle cx="50" cy="50" r="46" fill="#FFFDF7" stroke="#1F2A44" stroke-width="3"/>${ticks}
+    <line x1="50" y1="50" x2="50" y2="27" stroke="#1F2A44" stroke-width="5" stroke-linecap="round" transform="rotate(${ha} 50 50)"/>
+    <line x1="50" y1="50" x2="50" y2="15" stroke="#F0567A" stroke-width="3" stroke-linecap="round" transform="rotate(${ma} 50 50)"/>
+    <circle cx="50" cy="50" r="3.5" fill="#1F2A44"/></svg>`;
+}
+const timeStr = (h, m) => `${h}:${String(m).padStart(2, '0')}`;
+const fmtDec = v => String(+(v / 100).toFixed(2)); // hundredths -> "0.45"
+// a word-pair game (opposites, synonyms, plurals, idioms): show one side, pick the other
+function pairGame(pairs, prompt, sayPrefix, kind = 'word') {
+  const lvlCap = L('pairLevel') || 3;
+  const pool = pairs.filter(x => (x[2] || 1) <= lvlCap);
+  const t = pickWord(pool.map(x => ({ w: x[0], e: x[1] })));
+  const big = document.createElement('div'); big.className = 'bigword small'; big.textContent = t.w;
+  $('#stage').appendChild(big);
+  const others = sample(pairs.filter(x => x[1] !== t.e && x[0] !== t.e), L('options') - 1).map(x => x[1]);
+  choices([{ label: t.e, ok: true }, ...others.map(x => ({ label: x }))], kind);
+  return { prompt, say: [sayPrefix, t.w], after: [t.w, t.e], item: t.w };
+}
+
 const PATTERN_ITEMS = ['🍎', '🍌', '🍇', '🍓', '🐶', '🐱', '🐸', '⭐', '🎈', '🌸', '🚗', '⚽'];
 const SHADOW_GROUPS = [
   ['🐟','🐴','🐱','🐶','🐘','🦁','🐒','🐢','🐍','🦋','🐝','🐓','🐷','🐰','🐭','🐸','🐜','🐫','🦓','🕊️','🐊','🦔','🦉','🐳','🐙','🕷️','🐌','🐬','🐞','🦛','🦘','🐑','🐄','🐺','🦊','🐻','🐯','🐧','🐔','🐥','🦆','🐐','🦈','🦇','🦎','🦍','🦏','🐿️','🦟','🦀','🦚','🦜','🦅','🦕','🐉','🦢','🦩','🦨','🦝','🐨','🐼','🦌','🐀','🦑','🦞'],
@@ -726,8 +900,89 @@ const LV = {
 
 const PLAYERS = {
   gan:  { name: 'גַּן', say: 'גַּן', turn: 'תּוֹר הַגַּן', face: '🐣', games: ['letters', 'count', 'firstLetter', 'compare', 'picAdd', 'memory', 'colors', 'shapes', 'pattern', 'shadow'] },
-  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', turn: 'תּוֹר כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq', 'memory', 'syllables', 'missing', 'sentences', 'numCompare', 'enWords', 'abc', 'enColorsNumbers', 'enFirst'] }
+  kita: { name: 'כִּתָּה א׳', say: 'כִּתָּה אָלֶף', turn: 'תּוֹר כִּתָּה אָלֶף', face: '🦉', games: ['sound', 'read', 'pick', 'build', 'arith', 'seq', 'memory', 'syllables', 'missing', 'sentences', 'numCompare', 'enWords', 'abc', 'enColorsNumbers', 'enFirst'] },
+  // grades 2-6: Hebrew language, math and English, matched to the Israeli curriculum
+  k2: { name: 'כִּתָּה ב׳', say: 'כִּתָּה בֵּית', face: '🦊', topics: true,
+    games: ['readPlain', 'plural', 'opposites', 'sentences', 'memory', 'bigArith', 'mult', 'time', 'seq', 'enWords', 'abc'] },
+  k3: { name: 'כִּתָּה ג׳', say: 'כִּתָּה גִּימֶל', face: '🐯', topics: true,
+    games: ['readPlain', 'plural', 'opposites', 'roots', 'memory', 'mult', 'div', 'bigArith', 'time', 'fractions', 'enWords', 'enFirst', 'enSpell'] },
+  k4: { name: 'כִּתָּה ד׳', say: 'כִּתָּה דָּלֶת', face: '🐬', topics: true,
+    games: ['synonyms', 'opposites', 'roots', 'memory', 'mult', 'div', 'bigArith', 'fractions', 'geometry', 'enTranslate', 'enSpell', 'enSentences'] },
+  k5: { name: 'כִּתָּה ה׳', say: 'כִּתָּה הֵא', face: '🦁', topics: true,
+    games: ['synonyms', 'roots', 'idioms', 'mult', 'bigArith', 'fractions', 'decimals', 'geometry', 'enTranslate', 'enSentences', 'enPast', 'enSpell'] },
+  k6: { name: 'כִּתָּה ו׳', say: 'כִּתָּה וָו', face: '🦅', topics: true,
+    games: ['idioms', 'synonyms', 'roots', 'percent', 'orderOps', 'fractions', 'decimals', 'geometry', 'enPast', 'enSentences', 'enTranslate', 'enSpell'] }
 };
+const PLAYER_IDS = Object.keys(PLAYERS);
+// Level settings per grade, used instead of LV for that grade's games (5 entries = levels 1-5)
+const T2_10 = [2, 3, 4, 5, 6, 7, 8, 9, 10], EVERY5 = Array.from({ length: 12 }, (_, i) => i * 5);
+const LVP = {
+  k2: {
+    readPlain: { options: [3, 3, 4, 4, 4], lens: [[2, 3], [3, 4], [4, 5], [5, 6], [6, 99]] },
+    plural: { options: [3, 3, 3, 4, 4] },
+    opposites: { options: [3, 3, 4, 4, 4], pairLevel: [1, 1, 2, 2, 3] },
+    bigArith: { options: [3, 3, 4, 4, 4], max: [20, 50, 100, 100, 100], ops: [['+'], ['+', '-'], ['+'], ['-'], ['+', '-']] },
+    mult: { options: [3, 3, 4, 4, 4], tables: [[2], [2, 10], [2, 5, 10], [2, 3, 4, 5, 10], [2, 3, 4, 5, 10]], bMax: [5, 10, 10, 10, 10], missing: [0, 0, 0, 0, 1] },
+    time: { options: [3, 3, 4, 4, 4], minutes: [[0], [0, 30], [0, 30], [0, 15, 30, 45], [0, 15, 30, 45]] },
+    seq: { options: [3, 3, 4, 4, 4], step: [2, 5, 10, -10, 100], max: [50, 100, 200, 200, 1000] }
+  },
+  k3: {
+    readPlain: { options: [4, 4, 4, 4, 4], lens: [[3, 4], [4, 5], [5, 6], [5, 99], [6, 99]] },
+    plural: { options: [3, 4, 4, 4, 4] },
+    opposites: { options: [3, 4, 4, 4, 4], pairLevel: [1, 2, 2, 3, 3] },
+    roots: { options: [3, 3, 3, 4, 4], pairLevel: [1, 1, 2, 2, 3] },
+    memory: { plain: [1, 1, 1, 1, 1] },
+    mult: { options: [3, 4, 4, 4, 4], tables: [[2, 3, 4, 5], [2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 7, 8], T2_10, T2_10], bMax: [10, 10, 10, 10, 10], missing: [0, 0, 0, 1, 1] },
+    div: { options: [3, 3, 4, 4, 4], bMax: [5, 5, 10, 10, 10], qMax: [5, 10, 10, 10, 10], remainder: [0, 0, 0, 0, 0] },
+    bigArith: { options: [3, 4, 4, 4, 4], max: [100, 200, 500, 1000, 1000], ops: [['+', '-'], ['+', '-'], ['+'], ['-'], ['+', '-']] },
+    time: { options: [3, 4, 4, 4, 4], minutes: [[0, 30], [0, 15, 30, 45], [0, 15, 30, 45], EVERY5, EVERY5] },
+    fractions: { options: [3, 3, 3, 4, 4], nMax: [4, 4, 6, 8, 8], modes: [['name'], ['name'], ['name'], ['name', 'compare'], ['name', 'compare']] },
+    enSpell: { lens: [[3, 3], [3, 4], [4, 4], [4, 5], [5, 6]], decoys: [0, 0, 1, 1, 2] }
+  },
+  k4: {
+    synonyms: { options: [3, 3, 4, 4, 4], pairLevel: [1, 1, 2, 2, 3] },
+    opposites: { options: [4, 4, 4, 4, 4], pairLevel: [2, 2, 3, 3, 3] },
+    roots: { options: [3, 4, 4, 4, 4], pairLevel: [1, 2, 2, 3, 3] },
+    memory: { plain: [1, 1, 1, 1, 1] },
+    mult: { options: [4, 4, 4, 4, 4], twoDigit: [0, 1, 1, 1, 1], tables: [T2_10, T2_10, T2_10, T2_10, T2_10], bMax: [10, 10, 10, 10, 10], aMax: [20, 30, 50, 99, 99], missing: [1, 0, 0, 0, 0] },
+    div: { options: [3, 4, 4, 4, 4], bMax: [10, 10, 10, 10, 10], qMax: [10, 10, 12, 15, 20], remainder: [0, 0, 1, 1, 1] },
+    bigArith: { options: [4, 4, 4, 4, 4], max: [1000, 5000, 10000, 10000, 10000], ops: [['+'], ['-'], ['+', '-'], ['+', '-'], ['+', '-']] },
+    fractions: { options: [3, 3, 4, 4, 4], nMax: [6, 8, 8, 10, 10], modes: [['name'], ['name', 'compare'], ['compare'], ['equiv'], ['compare', 'equiv']] },
+    geometry: { options: [3, 3, 4, 4, 4], max: [6, 8, 10, 12, 12], modes: [['perimeter'], ['perimeter', 'area'], ['area'], ['perimeter', 'area'], ['perimeter', 'area', 'side']], squares: [0, 0, 1, 1, 1] },
+    enTranslate: { options: [3, 3, 4, 4, 4], easy: [1, 1, 0, 0, 0], toEnglish: [0, 0, 0, 1, 1] },
+    enSpell: { lens: [[3, 4], [4, 4], [4, 5], [5, 6], [6, 9]], decoys: [0, 1, 1, 2, 2] },
+    enSentences: { options: [3, 3, 3, 4, 4], maxLevel: [1, 2, 2, 3, 3], sameSubject: [0, 0, 1, 1, 1], silent: [0, 0, 0, 1, 1] }
+  },
+  k5: {
+    synonyms: { options: [4, 4, 4, 4, 4], pairLevel: [2, 2, 3, 3, 3] },
+    roots: { options: [4, 4, 4, 4, 4], pairLevel: [2, 3, 3, 3, 3] },
+    idioms: { options: [3, 3, 4, 4, 4] },
+    mult: { options: [4, 4, 4, 4, 4], twoDigit: [1, 1, 1, 1, 1], tables: [T2_10, T2_10, T2_10, T2_10, T2_10], bMax: [10, 10, 10, 10, 10], aMax: [50, 99, 99, 99, 99], missing: [0, 0, 0, 0, 0] },
+    bigArith: { options: [4, 4, 4, 4, 4], max: [10000, 50000, 100000, 100000, 100000], ops: [['+', '-'], ['+', '-'], ['+', '-'], ['+', '-'], ['+', '-']] },
+    fractions: { options: [3, 4, 4, 4, 4], nMax: [8, 10, 10, 12, 12], modes: [['compare', 'equiv'], ['equiv', 'add'], ['add'], ['add', 'compare'], ['add', 'mul']] },
+    decimals: { options: [3, 3, 4, 4, 4], whole: [0, 0, 1, 2, 5], modes: [['compare'], ['compare', 'add'], ['add'], ['add', 'sub'], ['compare', 'add', 'sub']] },
+    geometry: { options: [4, 4, 4, 4, 4], max: [10, 12, 15, 20, 20], modes: [['perimeter', 'area'], ['area'], ['area', 'side'], ['perimeter', 'area', 'side'], ['perimeter', 'area', 'side']], squares: [1, 1, 1, 1, 1] },
+    enTranslate: { options: [4, 4, 4, 4, 4], easy: [0, 0, 0, 0, 0], toEnglish: [0, 1, 1, 1, 1] },
+    enSentences: { options: [3, 4, 4, 4, 4], maxLevel: [2, 2, 3, 3, 3], sameSubject: [1, 1, 1, 1, 1], silent: [0, 1, 1, 1, 1] },
+    enPast: { options: [3, 3, 4, 4, 4], irregular: [0, 0, 1, 1, 1] },
+    enSpell: { lens: [[4, 5], [5, 6], [5, 7], [6, 9], [7, 12]], decoys: [1, 1, 2, 2, 3] }
+  },
+  k6: {
+    idioms: { options: [4, 4, 4, 4, 4] },
+    synonyms: { options: [4, 4, 4, 4, 4], pairLevel: [3, 3, 3, 3, 3] },
+    roots: { options: [4, 4, 4, 4, 4], pairLevel: [3, 3, 3, 3, 3] },
+    percent: { options: [3, 3, 4, 4, 4], ps: [[50, 10], [50, 25, 10], [25, 20, 75], [20, 30, 40, 60], [5, 15, 35, 45, 12]], baseMax: [100, 200, 400, 500, 1000] },
+    orderOps: { options: [3, 3, 4, 4, 4], forms: [['a+b×c', 'a×b+c'], ['a-b×c', 'a+b:c'], ['(a+b)×c', 'a×(b−c)'], ['a×b+c×d', '(a+b)×c'], ['a+b×c', 'a+b:c', '(a+b)×c', 'a×(b−c)', 'a×b+c×d']] },
+    fractions: { options: [4, 4, 4, 4, 4], nMax: [10, 12, 12, 12, 12], modes: [['equiv', 'add'], ['add'], ['mul'], ['mul', 'add'], ['mul', 'compare']] },
+    decimals: { options: [4, 4, 4, 4, 4], whole: [1, 2, 5, 9, 9], modes: [['compare', 'add'], ['add', 'sub'], ['sub'], ['compare', 'add', 'sub'], ['compare', 'add', 'sub']] },
+    geometry: { options: [4, 4, 4, 4, 4], max: [12, 15, 20, 25, 30], modes: [['perimeter', 'area'], ['area', 'side'], ['perimeter', 'area', 'side'], ['perimeter', 'area', 'side'], ['perimeter', 'area', 'side']], squares: [1, 1, 1, 1, 1] },
+    enPast: { options: [4, 4, 4, 4, 4], irregular: [1, 1, 1, 1, 1] },
+    enSentences: { options: [4, 4, 4, 4, 4], maxLevel: [3, 3, 3, 3, 3], sameSubject: [1, 1, 1, 1, 1], silent: [1, 1, 1, 1, 1] },
+    enTranslate: { options: [4, 4, 4, 4, 4], easy: [0, 0, 0, 0, 0], toEnglish: [1, 1, 1, 1, 1] },
+    enSpell: { lens: [[5, 6], [6, 7], [6, 9], [7, 12], [8, 12]], decoys: [1, 2, 2, 3, 3] }
+  }
+};
+
 const GAMES = {
   letters:     { name: 'אֵיפֹה הָאוֹת?',      icon: 'א',   bg: 'var(--berry)' },
   count:       { name: 'כַּמָּה יֵשׁ?',        icon: '3',   bg: 'var(--sea)' },
@@ -739,27 +994,47 @@ const GAMES = {
   compare:     { name: 'אֵיפֹה יוֹתֵר?',       icon: '⚖️',  bg: 'var(--sky-hi)', emo: true },
   picAdd:      { name: 'חִבּוּר בִּתְמוּנוֹת',  icon: '1+2', bg: 'var(--grass-deep)', sm: true },
   arith:       { name: 'תַּרְגִּילִים',          icon: '3+4', bg: 'var(--plum)', sm: true },
-  seq:         { name: 'מָה חָסֵר?',          icon: '1 2 ?', bg: 'var(--sea)', sm: true },
-  memory:      { name: 'זִכָּרוֹן',             icon: '🃏',  bg: 'var(--sun)', emo: true, rounds: 3 },
+  seq:         { name: 'מָה חָסֵר?',          icon: '1 2 ?', bg: 'var(--sea)', sm: true, topic: 'math' },
+  memory:      { name: 'זִכָּרוֹן',             icon: '🃏',  bg: 'var(--sun)', emo: true, rounds: 3, topic: 'he' },
   colors:      { name: 'צְבָעִים',              icon: '🎨',  bg: 'var(--sky-hi)', emo: true },
   shapes:      { name: 'צוּרוֹת',               icon: '🔺',  bg: 'var(--sky-hi)', emo: true },
   pattern:     { name: 'מָה בָּא אַחַר כָּךְ?',     icon: '🍎🍌', bg: 'var(--grass-deep)', emo: true, sm: true },
   shadow:      { name: 'שֶׁל מִי הַצֵּל?',        icon: '👤',  bg: 'var(--plum)', emo: true },
   syllables:   { name: 'הֲבָרוֹת',              icon: '👏',  bg: 'var(--sun)', emo: true },
   missing:     { name: 'אוֹת חֲסֵרָה',           icon: 'קוֹ?', bg: 'var(--berry)', sm: true },
-  sentences:   { name: 'קוֹרְאִים מִשְׁפָּט',       icon: '📖',  bg: 'var(--sky-hi)', emo: true },
+  sentences:   { name: 'קוֹרְאִים מִשְׁפָּט',       icon: '📖',  bg: 'var(--sky-hi)', emo: true, topic: 'he' },
   numCompare:  { name: 'גָּדוֹל אוֹ קָטָן?',       icon: '7>5', bg: 'var(--grass-deep)', sm: true },
-  enWords:     { name: 'מִלִּים בְּאַנְגְּלִית',     icon: 'Hi', bg: 'var(--berry)', section: 'en' },
-  abc:         { name: 'ABC',                   icon: 'Aa', bg: 'var(--sea)', section: 'en' },
-  enColorsNumbers: { name: 'צְבָעִים וּמִסְפָּרִים', icon: '🎨5', bg: 'var(--sun)', emo: true, sm: true, section: 'en' },
-  enFirst:     { name: 'First letter',          icon: 'b🐻', bg: 'var(--grass-deep)', sm: true, section: 'en' }
+  enWords:     { name: 'מִלִּים בְּאַנְגְּלִית',     icon: 'Hi', bg: 'var(--berry)', section: 'en', topic: 'en' },
+  abc:         { name: 'ABC',                   icon: 'Aa', bg: 'var(--sea)', section: 'en', topic: 'en' },
+  enColorsNumbers: { name: 'צְבָעִים וּמִסְפָּרִים', icon: '🎨5', bg: 'var(--sun)', emo: true, sm: true, section: 'en', topic: 'en' },
+  readPlain:   { name: 'קְרִיאָה בְּלִי נִקּוּד',  icon: 'אבג', bg: 'var(--berry)', sm: true, topic: 'he' },
+  plural:      { name: 'יָחִיד וְרַבִּים',         icon: '1→2', bg: 'var(--sea)', sm: true, topic: 'he' },
+  opposites:   { name: 'הֲפָכִים',               icon: '🔁', bg: 'var(--sun)', emo: true, topic: 'he' },
+  synonyms:    { name: 'מִלִּים נִרְדָּפוֹת',      icon: '=', bg: 'var(--plum)', topic: 'he' },
+  roots:       { name: 'שֹׁרֶשׁ',                 icon: 'כ-ת-ב', bg: 'var(--grass-deep)', sm: true, topic: 'he' },
+  idioms:      { name: 'נִיבִים',                icon: '💬', bg: 'var(--sky-hi)', emo: true, topic: 'he' },
+  mult:        { name: 'לוּחַ הַכֶּפֶל',           icon: '×', bg: 'var(--plum)', topic: 'math' },
+  div:         { name: 'חִלּוּק',                icon: ':', bg: 'var(--sea)', topic: 'math' },
+  bigArith:    { name: 'חִבּוּר וְחִסּוּר',         icon: '+−', bg: 'var(--grass-deep)', topic: 'math' },
+  fractions:   { name: 'שְׁבָרִים',               icon: '½', bg: 'var(--sun)', topic: 'math' },
+  decimals:    { name: 'שְׁבָרִים עֶשְׂרוֹנִיִּים',   icon: '0.5', bg: 'var(--sea)', sm: true, topic: 'math' },
+  percent:     { name: 'אֲחוּזִים',              icon: '%', bg: 'var(--berry)', topic: 'math' },
+  orderOps:    { name: 'סֵדֶר פְּעֻלּוֹת',         icon: '( )', bg: 'var(--plum)', sm: true, topic: 'math' },
+  time:        { name: 'מָה הַשָּׁעָה?',           icon: '🕒', bg: 'var(--sky-hi)', emo: true, topic: 'math' },
+  geometry:    { name: 'הֶקֵּף וְשֶׁטַח',          icon: '▭', bg: 'var(--sun)', topic: 'math' },
+  enTranslate: { name: 'תִּרְגּוּם',              icon: 'A→א', bg: 'var(--berry)', sm: true, section: 'en', topic: 'en' },
+  enSpell:     { name: 'Spelling',              icon: 'a_c', bg: 'var(--sea)', sm: true, section: 'en', topic: 'en' },
+  enPast:      { name: 'Past tense',            icon: 'went', bg: 'var(--plum)', sm: true, section: 'en', topic: 'en' },
+  enSentences: { name: 'English sentences',     icon: '📖', bg: 'var(--sky-hi)', emo: true, section: 'en', topic: 'en' },
+  enFirst:     { name: 'First letter',          icon: 'b🐻', bg: 'var(--grass-deep)', sm: true, section: 'en', topic: 'en' }
 };
 
 /* ---------- saved progress ---------- */
 const KEY = 'eretz-haotiyot-v1';
 let DB = { gan: { stars: 0, levels: {} }, kita: { stars: 0, levels: {} }, sound: true };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.gan && s.kita) DB = Object.assign(DB, s); } catch (e) {}
-for (const p of ['gan', 'kita']) {
+for (const p of PLAYER_IDS) {
+  if (!DB[p]) DB[p] = { stars: 0, levels: {} };
   const d = DB[p];
   if (d.stickers === undefined) { // saves from before stickers got pricier: keep what was earned (old price, 5 stars each)
     d.stickers = Math.min(36, Math.floor(d.stars / 5));
@@ -865,7 +1140,10 @@ const SAY_AS = {
   'אֵיפֹה הָעִגּוּל?': 'איפה העיגול?', 'אֵיפֹה הָרִבּוּעַ?': 'איפה הריבוע?', 'אֵיפֹה הַמְּשֻׁלָּשׁ?': 'איפה המשולש?',
   'אֵיפֹה הַמְּעֻיָּן?': 'איפה המעוין?',
   // first-grade games
-  'תּוֹר כִּתָּה אָלֶף': 'תור כיתה אָלֶף', 'כַּמָּה הֲבָרוֹת יֵשׁ בַּמִּלָּה': 'כמה הברות יש במילה', 'אֵיזוֹ אוֹת חֲסֵרָה בַּמִּלָּה': 'איזו אות חסרה במילה',
+  'תּוֹר כִּתָּה אָלֶף': 'תור כיתה אָלֶף',
+  'כִּתָּה בֵּית': 'כיתה בֵּית', 'כִּתָּה גִּימֶל': 'כיתה גימל', 'כִּתָּה דָּלֶת': 'כיתה דָּלֶת', 'כִּתָּה הֵא': 'כיתה הֵא', 'כִּתָּה וָו': 'כיתה וָו',
+  'מָה הַמִּלָּה הַנִּרְדֶּפֶת שֶׁל': 'מה המילה הנרדפת של', 'מָה הַשֹּׁרֶשׁ שֶׁל': 'מה השורש של', 'מָה הַפֵּרוּשׁ שֶׁל': 'מה הפירוש של',
+  'מָה הַהֶקֵּף?': 'מה ההיקף?', 'הַהֶקֵּף הוּא': 'ההיקף הוא', 'מָה אֹרֶךְ הַצַּלָּע?': 'מה אורך הצלע?', 'וְשָׁאַרִית': 'ושארית', 'כַּמָּה הֲבָרוֹת יֵשׁ בַּמִּלָּה': 'כמה הברות יש במילה', 'אֵיזוֹ אוֹת חֲסֵרָה בַּמִּלָּה': 'איזו אות חסרה במילה',
   'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?': 'איזו תמונה מתאימה למשפט?', 'שָׁוֶה לְ': 'שווה ל',
   'הַצִּפּוֹר עָפָה.': 'הציפור עפה.', 'הַמָּטוֹס עָף בַּשָּׁמַיִם.': 'המטוס עף בשמיים.',
   'יֵשׁ לִי עוּגָה לְיוֹם הֻלֶּדֶת.': 'יש לי עוגה ליום הולדת.', 'הַתַּרְנְגוֹל קוֹרֵא קוּקוּרִיקוּ.': 'התרנגול קורא קוקוריקו.',
@@ -959,6 +1237,9 @@ function starsText(p) { return '⭐ ' + DB[p].stars; }
 
 function renderHome() {
   for (const p of ['gan', 'kita']) $('#p-' + p + ' .pstars').textContent = starsText(p);
+  $('#gradesRow').innerHTML = PLAYER_IDS.filter(p => !['gan', 'kita'].includes(p)).map(p =>
+    `<button class="block grade-btn" data-p="${p}" id="p-${p}"><span class="face">${PLAYERS[p].face}</span><b>${PLAYERS[p].name}</b><small>${starsText(p)}</small></button>`).join('');
+  for (const b of document.querySelectorAll('#gradesRow .grade-btn')) b.onclick = () => pickPlayer(b.dataset.p);
   $('#soundBtn').textContent = DB.sound ? '🔊 קוֹל פּוֹעֵל' : '🔇 בְּלִי קוֹל';
   show('home');
 }
@@ -968,13 +1249,15 @@ function renderMenu() {
   $('#menuStars').textContent = starsText(S.p);
   $('#menuNext').innerHTML = progressBar(S.p);
   const grid = $('#gamesGrid'); grid.innerHTML = '';
-  let section = '';
+  let section = null;
+  const SECTION_NAME = { he: '📖 עִבְרִית', math: '🔢 חֶשְׁבּוֹן', en: '🇬🇧 English · אַנְגְּלִית', '': '' };
   for (const g of pl.games) {
     const m = GAMES[g], lvl = Math.min(MAX_LEVEL, DB[S.p].levels[g] || 1);
-    if ((m.section || '') !== section) {
-      section = m.section || '';
+    const sec = pl.topics ? (m.topic || '') : (m.section || '');
+    if (sec !== section) {
+      section = sec;
       const h = document.createElement('h3'); h.className = 'menu-section';
-      h.textContent = section === 'en' ? '🇬🇧 English · אַנְגְּלִית' : '';
+      h.textContent = SECTION_NAME[section];
       grid.appendChild(h);
     }
     const b = document.createElement('button');
@@ -1022,8 +1305,13 @@ function renderAlbum() {
 
 /* ---------- game flow ---------- */
 function level() { return Math.min(MAX_LEVEL, DB[S.p].levels[S.g] || 1); }
-const L = key => LV[S.g][key][level() - 1];
+const L = key => {
+  const own = LVP[S.p] && LVP[S.p][S.g];
+  const t = own && key in own ? own[key] : LV[S.g] && LV[S.g][key];
+  return t ? t[level() - 1] : undefined;
+};
 function startGame(g) {
+  clearTimeout(S.nextTimer); // a pending "next question" from a game that was left early
   S.together = false; $('#team').hidden = true; $('#dots').hidden = false;
   S.g = g; S.q = 0; S.total = GAMES[g].rounds || ROUND; S.gained = 0; S.newStickers = []; S.bonuses = []; S.clean = 0; S.recent = []; S.streak = 0; S.struggle = 0;
   show('game');
@@ -1044,7 +1332,7 @@ function nextQ() {
   $('#dots').innerHTML = Array.from({ length: S.total }, (_, i) => `<i class="${i < S.q ? 'done' : i === S.q ? 'now' : ''}"></i>`).join('');
   $('#gameStars').textContent = starsText(S.p);
   renderLevel();
-  $('#stage').innerHTML = ''; $('#choices').innerHTML = ''; $('#choices').className = 'choices';
+  $('#stage').innerHTML = ''; $('#choices').innerHTML = ''; $('#choices').className = 'choices'; $('#choices').dir = '';
   S.cur = MAKERS[S.g]();
   S.qStart = Date.now();
   $('#prompt').textContent = S.cur.prompt;
@@ -1158,7 +1446,8 @@ function win() {
   speak([S.cur.english ? { en: rand(EN_PRAISE) } : rand(PRAISE)].concat(S.cur.after || []));
   if (change === 'up') setTimeout(levelUpBanner, 700);
   S.q++;
-  setTimeout(nextQ, change === 'up' ? 2800 : 2200);
+  clearTimeout(S.nextTimer);
+  S.nextTimer = setTimeout(nextQ, change === 'up' ? 2800 : 2200);
 }
 function miss(el) {
   S.firstTry = false; S.misses++;
@@ -1183,7 +1472,8 @@ function openGate() {
 }
 function renderParent(p) {
   S.parentOf = p;
-  for (const k of ['gan', 'kita']) { $('#ptab-' + k).classList.toggle('on', k === p); $('#ptab-' + k).setAttribute('aria-selected', k === p); }
+  $('#ptabs').innerHTML = PLAYER_IDS.map(k => `<button class="block ptab${k === p ? ' on' : ''}" role="tab" aria-selected="${k === p}" data-p="${k}">${PLAYERS[k].face} ${plainHe(PLAYERS[k].name).replace('כתה', 'כיתה')}</button>`).join('');
+  for (const b of document.querySelectorAll('#ptabs .ptab')) b.onclick = () => renderParent(b.dataset.p);
   const d = DB[p], st = d.stats, now = new Date();
   const lastDays = n => Array.from({ length: n }, (_, i) => { const x = new Date(now); x.setDate(x.getDate() - (n - 1 - i)); return x; });
   const days14 = lastDays(14).map(x => ({ date: x, key: dateKey(x), ...(st.days[dateKey(x)] || { q: 0, first: 0, rounds: 0, ms: 0 }) }));
@@ -1281,6 +1571,7 @@ const TOGETHER_TURNS = 10;
 const TOGETHER_BONUS = 5;
 const TOGETHER_SKIP = ['memory', 'build']; // games that do not fit a single quick turn
 function startTogether() {
+  clearTimeout(S.nextTimer);
   Object.assign(S, { together: true, q: 0, total: TOGETHER_TURNS, gained: 0, gainedBy: { gan: 0, kita: 0 },
     newStickers: [], teamStickers: [], bonuses: [], clean: 0, recent: [], streak: 0, struggle: 0, path: [] });
   $('#team').hidden = false; $('#dots').hidden = true;
@@ -1323,12 +1614,13 @@ function finishTogether() {
 /* choice buttons */
 function choices(opts, kind) {
   const box = $('#choices'), n = opts.length;
-  box.className = 'choices' + (kind === 'word' ? ' words' + (n === 4 ? ' w4' : '') : n === 4 ? ' n4' : n === 2 ? ' n2' : '');
+  const wide = /\b(word|phrase|expr)\b/.test(kind || '');
+  box.className = 'choices' + (wide ? ' words' + (n === 4 ? ' w4' : '') : n === 4 ? ' n4' : n === 2 ? ' n2' : '');
   box.innerHTML = '';
   for (const o of shuffle(opts)) {
     const b = document.createElement('button');
     b.className = 'block choice ' + (kind || '');
-    b.textContent = o.label;
+    if (o.html) b.innerHTML = o.html; else b.textContent = o.label;
     if (o.ok) b.dataset.ok = '1';
     b.onclick = () => {
       if (S.locked) return;
@@ -1634,7 +1926,7 @@ const MAKERS = {
       set = sample(WORDS, pairs).map(w => ({ a: w.e, b: w.e, kind: 'emo', say: w.w }));
     } else {
       const pool = wordPool(L('lens'));
-      set = sample(pool.length >= pairs ? pool : WORDS, pairs).map(w => ({ a: w.w, b: w.e, kind: 'word', say: w.w }));
+      set = sample(pool.length >= pairs ? pool : WORDS, pairs).map(w => ({ a: L('plain') ? plainHe(w.w) : w.w, b: w.e, kind: 'word', say: w.w }));
     }
     const cards = shuffle(set.flatMap((p, id) => [
       { id, face: p.a, kind: p.kind },
@@ -1918,8 +2210,305 @@ const MAKERS = {
     choices([{ label: show(first), ok: true }, ...others.map(x => ({ label: show(x) }))], 'latin');
     return { prompt: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?', say: ['בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה', { en: t.w }],
       after: [{ en: `${t.w} starts with ${EN_LETTER_SAY[first]}` }], item: t.w, english: true };
+  },
+
+  /* ---------- grades 2-6: math ---------- */
+  mult() {
+    let a, b;
+    if (L('twoDigit')) { a = between(11, L('aMax')); b = between(2, 9); }
+    else { a = rand(L('tables')); b = between(1, L('bMax')); if (Math.random() < 0.5) [a, b] = [b, a]; }
+    const ans = a * b, missing = L('missing') && Math.random() < 0.5;
+    showEq(missing ? `${a} × ? = ${ans}` : `${a} × ${b} = ?`);
+    if (missing) numOpts(b, [b + 1, b - 1, b + 2, b - 2, a], L('options'));
+    else numOpts(ans, [ans + a, ans - a, ans + b, ans - b, ans + 10, ans - 10, a + b], L('options'));
+    return {
+      prompt: 'כַּמָּה זֶה?', say: missing ? [numWord(a), 'כָּפוּל כַּמָּה זֶה', numWord(ans)] : [numWord(a), 'כָּפוּל', numWord(b), 'כַּמָּה זֶה?'],
+      after: [numWord(a), 'כָּפוּל', numWord(b), 'זֶה', numWord(ans)], item: `${a} × ${b}`
+    };
+  },
+
+  div() {
+    const b = between(2, L('bMax')), q = between(1, L('qMax')), r = L('remainder') ? between(1, b - 1) : 0;
+    const a = b * q + r;
+    showEq(`${a} : ${b} = ?`);
+    if (r) {
+      const label = (qq, rr) => rr ? `${qq} וְשָׁאַרִית ${rr}` : String(qq);
+      const wrong = shuffle([[q + 1, r], [q - 1, r], [q, (r + 1) % b], [q, r - 1], [q + 1, 0]])
+        .filter(([qq, rr]) => qq > 0 && rr >= 0 && rr < b && !(qq === q && rr === r))
+        .filter((x, i, arr) => arr.findIndex(y => y[0] === x[0] && y[1] === x[1]) === i).slice(0, L('options') - 1);
+      choices([{ label: label(q, r), ok: true }, ...wrong.map(([qq, rr]) => ({ label: label(qq, rr) }))], 'expr');
+    } else numOpts(q, [q + 1, q - 1, q + 2, b, a - b], L('options'));
+    return { prompt: 'כַּמָּה זֶה?', say: [numWord(a), 'חֲלֵקִי', numWord(b), 'כַּמָּה זֶה?'],
+      after: [numWord(a), 'חֲלֵקִי', numWord(b), 'זֶה', numWord(q)].concat(r ? ['וְשָׁאַרִית', numWord(r)] : []), item: `${a} : ${b}` };
+  },
+
+  bigArith() {
+    const max = L('max'), op = rand(L('ops'));
+    let a, b, ans;
+    if (op === '+') { a = between(Math.ceil(max / 10), max - Math.ceil(max / 10)); b = between(Math.ceil(max / 20), max - a); ans = a + b; }
+    else { a = between(Math.ceil(max / 5), max); b = between(Math.ceil(max / 20), a - 1); ans = a - b; }
+    showEq(`${a} ${op === '+' ? '+' : '−'} ${b} = ?`);
+    const steps = [1, 10, 100, 1000].filter(s => s * 5 <= max);
+    numOpts(ans, steps.flatMap(s => [ans + s, ans - s]), L('options'));
+    const word = op === '+' ? 'וְעוֹד' : 'פָּחוֹת';
+    return { prompt: 'כַּמָּה זֶה?', say: [numWord(a), word, numWord(b), 'כַּמָּה זֶה?'], after: [numWord(a), word, numWord(b), 'זֶה', numWord(ans)], item: `${a} ${op} ${b}` };
+  },
+
+  fractions() {
+    const mode = rand(L('modes')), nMax = L('nMax');
+    if (mode === 'name') {
+      const n = between(2, nMax), k = between(1, n - 1);
+      const pie = document.createElement('div'); pie.innerHTML = pieSVG(k, n); $('#stage').appendChild(pie.firstChild);
+      const cands = [[n - k, n], [k, n + 1], [k, n - 1], [n, k], [k + 1, n]].filter(([a, b]) => b > 1 && a > 0 && a <= b && !(a === k && b === n) && a * n !== k * b);
+      const opts = [{ html: fracHTML(k, n), ok: true }, ...cands.filter((x, i, arr) => arr.findIndex(y => y[0] === x[0] && y[1] === x[1]) === i)
+        .slice(0, L('options') - 1).map(([a, b]) => ({ html: fracHTML(a, b) }))];
+      choices(opts, 'frac');
+      return { prompt: 'אֵיזֶה חֵלֶק צָבוּעַ?', say: 'אֵיזֶה חֵלֶק צָבוּעַ?', item: `${k}/${n}` };
+    }
+    if (mode === 'compare') {
+      let a, b, c, d;
+      const kind = rand(['sameDen', 'sameNum', 'any']);
+      if (kind === 'sameDen') { b = d = between(3, nMax); a = between(1, b - 1); c = between(1, b - 1); }
+      else if (kind === 'sameNum') { a = c = between(1, 3); b = between(a + 1, nMax); d = between(a + 1, nMax); }
+      else { b = between(2, nMax); d = between(2, nMax); a = between(1, b - 1); c = between(1, d - 1); }
+      const sign = a * d > c * b ? '>' : a * d < c * b ? '<' : '=';
+      const eq = showEq(''); eq.innerHTML = `${fracHTML(a, b)} <span class="op">◯</span> ${fracHTML(c, d)}`; eq.classList.add('fraceq');
+      choices(['>', '<', '='].map(x => ({ label: x, ok: x === sign })), 'sign');
+      return { prompt: 'אֵיזֶה סִימָן מַתְאִים?', say: 'אֵיזֶה סִימָן מַתְאִים?', item: `${a}/${b} ◯ ${c}/${d}` };
+    }
+    if (mode === 'equiv') {
+      const b = between(2, 6), a = between(1, b - 1), m = between(2, 4);
+      const eq = showEq(''); eq.innerHTML = `${fracHTML(a, b)} <span class="op">=</span> ${fracHTML('?', b * m)}`; eq.classList.add('fraceq');
+      numOpts(a * m, [a * m + 1, a * m - 1, a + m, a, b * m - a], L('options'));
+      return { prompt: 'מָה חָסֵר?', say: 'אֵיזֶה מִסְפָּר חָסֵר?', item: `${a}/${b} = ?/${b * m}` };
+    }
+    if (mode === 'add') {
+      const n = between(3, nMax), a = between(1, n - 2), b = between(1, n - 1 - a);
+      const eq = showEq(''); eq.innerHTML = `${fracHTML(a, n)} <span class="op">+</span> ${fracHTML(b, n)} <span class="op">=</span> ?`; eq.classList.add('fraceq');
+      const wrong = [[a + b, n + n], [a + b + 1, n], [a + b - 1, n], [a * b, n]].filter(([x, y]) => x > 0 && !(x === a + b && y === n));
+      choices([{ html: fracHTML(a + b, n), ok: true }, ...uniqueFracs(wrong, [a + b, n]).slice(0, L('options') - 1).map(([x, y]) => ({ html: fracHTML(x, y) }))], 'frac');
+      return { prompt: 'כַּמָּה זֶה?', say: 'כַּמָּה זֶה?', item: `${a}/${n} + ${b}/${n}` };
+    }
+    // mul
+    const b = between(2, 6), d = between(2, 6), a = between(1, b - 1), c = between(1, d - 1);
+    const eq = showEq(''); eq.innerHTML = `${fracHTML(a, b)} <span class="op">×</span> ${fracHTML(c, d)} <span class="op">=</span> ?`; eq.classList.add('fraceq');
+    const wrong = [[a + c, b + d], [a * c, b + d], [a * d, b * c], [a + c, b * d]].filter(([x, y]) => x * b * d !== a * c * y && x <= y * 3);
+    choices([{ html: fracHTML(a * c, b * d), ok: true }, ...uniqueFracs(wrong, [a * c, b * d]).slice(0, L('options') - 1).map(([x, y]) => ({ html: fracHTML(x, y) }))], 'frac');
+    return { prompt: 'כַּמָּה זֶה?', say: 'כַּמָּה זֶה?', item: `${a}/${b} × ${c}/${d}` };
+  },
+
+  decimals() {
+    const mode = rand(L('modes'));
+    if (mode === 'compare') {
+      // tricky pairs like 0.5 and 0.45: a longer number is not always bigger
+      const part = () => Math.random() < 0.5 ? between(1, 9) * 10 : between(1, 99); // 0.1-0.9 or 0.01-0.99
+      const a = part(), b = part();
+      const A = a + 100 * between(0, L('whole')), B = b + 100 * between(0, L('whole'));
+      const sign = A > B ? '>' : A < B ? '<' : '=';
+      showEq(`${fmtDec(A)}  ◯  ${fmtDec(B)}`, 'cmp');
+      choices(['>', '<', '='].map(x => ({ label: x, ok: x === sign })), 'sign');
+      return { prompt: 'אֵיזֶה סִימָן מַתְאִים?', say: 'אֵיזֶה סִימָן מַתְאִים?', item: `${fmtDec(A)} ◯ ${fmtDec(B)}` };
+    }
+    const A = between(1, 100 * L('whole') + 99), B = between(1, 100 * L('whole') + 99);
+    const op = mode === 'sub' ? '−' : '+';
+    const [x, y] = op === '−' && B > A ? [B, A] : [A, B];
+    const ans = op === '+' ? x + y : x - y;
+    showEq(`${fmtDec(x)} ${op} ${fmtDec(y)} = ?`, 'cmp');
+    const wrong = [ans + 10, ans - 10, ans + 1, ans - 1, ans + 100, ans - 100, ans + 9].filter(v => v >= 0 && v !== ans);
+    choices([{ label: fmtDec(ans), ok: true }, ...sample(wrong, L('options') - 1).map(v => ({ label: fmtDec(v) }))], 'num');
+    return { prompt: 'כַּמָּה זֶה?', say: 'כַּמָּה זֶה?', item: `${fmtDec(x)} ${op} ${fmtDec(y)}` };
+  },
+
+  percent() {
+    const p = rand(L('ps'));
+    const unit = 100 / gcd(p, 100), base = unit * between(1, Math.max(1, Math.floor(L('baseMax') / unit)));
+    const ans = p * base / 100;
+    const q = document.createElement('div'); q.className = 'bigword small'; q.textContent = `${p}% מִתּוֹךְ ${base}`;
+    $('#stage').appendChild(q);
+    numOpts(ans, [base - ans, ans * 2, Math.round(ans / 2), p, ans + base / 10, ans - base / 10].map(Math.round), L('options'));
+    return { prompt: 'כַּמָּה זֶה?', say: [`${p} אָחוּז מִתּוֹךְ`, numWord(base)], after: [`${p} אָחוּז מִתּוֹךְ`, numWord(base), 'זֶה', numWord(ans)], item: `${p}% × ${base}` };
+  },
+
+  orderOps() {
+    const form = rand(L('forms'));
+    let text, ans, wrong;
+    const n = () => between(2, 9);
+    if (form === 'a+b×c') { const [a, b, c] = [n(), n(), n()]; text = `${a} + ${b} × ${c}`; ans = a + b * c; wrong = (a + b) * c; }
+    else if (form === 'a×b+c') { const [a, b, c] = [n(), n(), n()]; text = `${a} × ${b} + ${c}`; ans = a * b + c; wrong = a * (b + c); }
+    else if (form === 'a-b×c') { const [b, c] = [n(), n()], a = b * c + between(1, 20); text = `${a} − ${b} × ${c}`; ans = a - b * c; wrong = (a - b) * c; }
+    else if (form === 'a+b:c') { const [c, q, a] = [n(), n(), n()], b = c * q; text = `${a} + ${b} : ${c}`; ans = a + q; wrong = (a + b) / c; }
+    else if (form === '(a+b)×c') { const [a, b, c] = [n(), n(), n()]; text = `(${a} + ${b}) × ${c}`; ans = (a + b) * c; wrong = a + b * c; }
+    else if (form === 'a×(b−c)') { const a = n(), c = n(), b = c + n(); text = `${a} × (${b} − ${c})`; ans = a * (b - c); wrong = a * b - c; }
+    else { const [a, b, c, d] = [n(), n(), n(), n()]; text = `${a} × ${b} + ${c} × ${d}`; ans = a * b + c * d; wrong = (a * b + c) * d; }
+    showEq(`${text} = ?`, 'cmp');
+    numOpts(ans, [wrong, ans + 1, ans - 1, ans + 10].filter(Number.isInteger), L('options'));
+    return { prompt: 'כַּמָּה זֶה? זוֹכְרִים: כֶּפֶל וְחִלּוּק לִפְנֵי חִבּוּר וְחִסּוּר', say: 'כַּמָּה זֶה?', item: text };
+  },
+
+  time() {
+    const mins = L('minutes');
+    const h = between(1, 12), m = rand(mins === 'any' ? Array.from({ length: 60 }, (_, i) => i) : mins);
+    const wrap = document.createElement('div'); wrap.innerHTML = clockSVG(h, m); $('#stage').appendChild(wrap.firstChild);
+    const swapH = Math.max(1, Math.round(m / 5)) || 12, swapM = (h % 12) * 5;
+    const cands = [[swapH, swapM], [h % 12 + 1, m], [h === 1 ? 12 : h - 1, m], [h, (m + 30) % 60], [h, (m + 15) % 60], [h, (m + 45) % 60]]
+      .filter(([a, b]) => !(a === h && b === m)).map(([a, b]) => timeStr(a, b));
+    const opts = [...new Set(cands)].slice(0, L('options') - 1);
+    choices([{ label: timeStr(h, m), ok: true }, ...opts.map(x => ({ label: x }))], 'num');
+    return { prompt: 'מָה הַשָּׁעָה?', say: 'מָה הַשָּׁעָה?', after: timeStr(h, m), item: timeStr(h, m) };
+  },
+
+  geometry() {
+    const mode = rand(L('modes')), max = L('max');
+    const square = L('squares') && Math.random() < 0.3;
+    const a = between(2, max), b = square ? a : between(2, max);
+    const P = 2 * (a + b), A = a * b;
+    const W = 220, H = 150, s = Math.min((W - 40) / Math.max(a, b), (H - 40) / Math.max(a, b));
+    const w = a * s, hh = b * s, x0 = (W - w) / 2, y0 = (H - hh) / 2;
+    const askSide = mode === 'side';
+    const fig = document.createElement('div');
+    fig.innerHTML = `<svg class="rect-fig" viewBox="0 0 ${W} ${H}" role="img" aria-label="מלבן"><rect x="${x0}" y="${y0}" width="${w}" height="${hh}" fill="#FFF1C7" stroke="#1F2A44" stroke-width="3"/>
+      <text x="${W / 2}" y="${y0 - 6}" text-anchor="middle" font-size="14" font-weight="700" fill="#1F2A44">${a} ס״מ</text>
+      <text x="${x0 + w + 6}" y="${H / 2 + 5}" direction="rtl" text-anchor="end" font-size="14" font-weight="700" fill="#1F2A44">${askSide ? '?' : b} ס״מ</text></svg>`;
+    $('#stage').appendChild(fig.firstChild);
+    if (askSide) { // area given, find the missing side
+      const q = document.createElement('div'); q.className = 'hint'; q.textContent = `הַשֶּׁטַח: ${A} סמ״ר`;
+      $('#stage').appendChild(q);
+      numOpts(b, [b + 1, b - 1, A - a, a], L('options'));
+      return { prompt: 'מָה אֹרֶךְ הַצַּלָּע?', say: 'מָה אֹרֶךְ הַצַּלָּע?', item: `שטח ${A}, צלע ${a}` };
+    }
+    const ans = mode === 'area' ? A : P;
+    numOpts(ans, [mode === 'area' ? P : A, a + b, ans + 2, ans - 2], L('options'));
+    return mode === 'area'
+      ? { prompt: 'מָה הַשֶּׁטַח? (בְּסָמ״ר)', say: 'מָה הַשֶּׁטַח?', after: ['הַשֶּׁטַח הוּא', numWord(A)], item: `שטח ${a}×${b}` }
+      : { prompt: 'מָה הַהֶקֵּף? (בְּס״מ)', say: 'מָה הַהֶקֵּף?', after: ['הַהֶקֵּף הוּא', numWord(P)], item: `היקף ${a}×${b}` };
+  },
+
+  /* ---------- grades 2-6: Hebrew language ---------- */
+  readPlain() {
+    const w = pickWord(wordPool(L('lens')));
+    const big = document.createElement('div'); big.className = 'bigword'; big.textContent = plainHe(w.w);
+    $('#stage').appendChild(big);
+    const others = sample(WORDS.filter(x => x.e !== w.e), L('options') - 1);
+    choices([{ label: w.e, ok: true }, ...others.map(x => ({ label: x.e }))], 'emo');
+    return { prompt: 'קוֹרְאִים בְּלִי נִקּוּד: אֵיזוֹ תְּמוּנָה?', say: 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?', after: w.w, item: plainHe(w.w) };
+  },
+
+  plural() {
+    const t = pickWord(PLURALS.map(([w, e]) => ({ w, e }))), one = t.w, many = t.e;
+    const big = document.createElement('div'); big.className = 'bigword small'; big.textContent = one;
+    $('#stage').appendChild(big);
+    let stem = one.replace(/[הא]$/, '');
+    stem = stem.slice(0, -1) + (FINAL_TO_REG[stem.slice(-1)] || stem.slice(-1));
+    const guesses = [stem + 'ים', stem + 'ות', one + 'ים', one + 'ות'].filter(x => x !== many);
+    const opts = [...new Set(guesses)].slice(0, L('options') - 1);
+    if (opts.length < L('options') - 1) opts.push(...sample(PLURALS.filter(x => x[1] !== many).map(x => x[1]), L('options') - 1 - opts.length));
+    choices([{ label: many, ok: true }, ...opts.map(x => ({ label: x }))], 'word');
+    return { prompt: 'מָה הַצּוּרָה בְּרַבִּים?', say: ['מָה הָרַבִּים שֶׁל', one], after: [one, many], item: one };
+  },
+
+  opposites() { return pairGame(OPPOSITES, 'מָה הַהֵפֶךְ?', 'מָה הַהֵפֶךְ שֶׁל'); },
+  synonyms() { return pairGame(SYNONYMS, 'מָה הַמִּלָּה הַנִּרְדֶּפֶת? (אוֹתוֹ פֵּרוּשׁ)', 'מָה הַמִּלָּה הַנִּרְדֶּפֶת שֶׁל'); },
+
+  roots() {
+    const pool = ROOTS.filter(x => x[2] <= (L('pairLevel') || 3));
+    const t = pickWord(pool.map(([w, r]) => ({ w, e: r })));
+    const big = document.createElement('div'); big.className = 'bigword small'; big.textContent = t.w;
+    $('#stage').appendChild(big);
+    // wrong answers: other three-letter runs from the same word, then other roots
+    const letters = t.w.split('').map(c => FINAL_TO_REG[c] || c);
+    const runs = [];
+    for (let i = 0; i + 3 <= letters.length; i++) runs.push(letters.slice(i, i + 3).join(''));
+    let others = [...new Set(runs)].filter(r => r !== t.e);
+    others = shuffle(others).slice(0, L('options') - 1);
+    if (others.length < L('options') - 1) others.push(...sample([...new Set(ROOTS.map(x => x[1]))].filter(r => r !== t.e && !others.includes(r)), L('options') - 1 - others.length));
+    choices([{ label: showRoot(t.e), ok: true }, ...others.map(r => ({ label: showRoot(r) }))], 'word');
+    return { prompt: 'מָה הַשֹּׁרֶשׁ?', say: ['מָה הַשֹּׁרֶשׁ שֶׁל', t.w], after: [t.w], item: t.w };
+  },
+
+  idioms() {
+    const t = pickWord(IDIOMS.map(([w, e]) => ({ w, e })));
+    const big = document.createElement('div'); big.className = 'bigword sentence'; big.textContent = `״${t.w}״`;
+    $('#stage').appendChild(big);
+    const others = sample(IDIOMS.filter(x => x[0] !== t.w), L('options') - 1).map(x => x[1]);
+    choices([{ label: t.e, ok: true }, ...others.map(x => ({ label: x }))], 'phrase');
+    return { prompt: 'מָה הַפֵּרוּשׁ?', say: ['מָה הַפֵּרוּשׁ שֶׁל', t.w], after: [t.w, t.e], item: t.w };
+  },
+
+  /* ---------- grades 2-6: English ---------- */
+  enTranslate() {
+    const pool = L('easy') ? EN_WORDS.slice(0, EN_EASY) : EN_WORDS;
+    const t = pickWord(pool.map(([en, e]) => ({ w: en, e })));
+    const he = plainHe(WORD_BY_EMOJI[t.e]);
+    const others = sample(pool.filter(([en]) => en !== t.w), L('options') - 1);
+    const big = document.createElement('button'); big.className = 'bigword ' + (L('toEnglish') ? 'small' : 'english');
+    if (L('toEnglish')) { // Hebrew shown, pick the English word
+      big.textContent = he;
+      $('#stage').appendChild(big);
+      choices([{ label: t.w, ok: true }, ...others.map(([en]) => ({ label: en }))], 'latin word');
+      return { prompt: 'אֵיךְ אוֹמְרִים בְּאַנְגְּלִית?', say: ['אֵיךְ אוֹמְרִים בְּאַנְגְּלִית', he], after: [{ en: t.w }, he], item: t.w, english: true };
+    }
+    big.textContent = t.w; big.onclick = () => speak({ en: t.w });
+    $('#stage').appendChild(big);
+    choices([{ label: he, ok: true }, ...others.map(([, e]) => ({ label: plainHe(WORD_BY_EMOJI[e]) }))], 'word');
+    return { prompt: 'מָה הַתַּרְגּוּם לְעִבְרִית?', say: { en: t.w }, after: [{ en: t.w }, he], item: t.w, english: true };
+  },
+
+  enSpell() {
+    const [lo, hi] = L('lens');
+    const pool = EN_WORDS.filter(([en]) => /^[a-z]+$/.test(en) && en.length >= lo && en.length <= hi);
+    const t = pickWord(pool.map(([en, e]) => ({ w: en, e })));
+    const pic = document.createElement('button'); pic.className = 'pic'; pic.textContent = t.e; pic.onclick = () => speak({ en: t.w });
+    $('#stage').appendChild(pic);
+    const letters = t.w.split('');
+    const slots = document.createElement('div'); slots.className = 'slots english' + (letters.length > 5 ? ' many' : ''); slots.dir = 'ltr';
+    const slotEls = letters.map(() => { const s = document.createElement('div'); s.className = 'slot'; slots.appendChild(s); return s; });
+    $('#stage').appendChild(slots);
+    const decoys = sample('abcdefghijklmnopqrstuvwxyz'.split('').filter(c => !letters.includes(c)), L('decoys'));
+    let order; do { order = shuffle(letters.concat(decoys)); } while (order.join('') === t.w && letters.length > 1);
+    const box = $('#choices'); box.className = 'tiles' + (order.length > 6 ? ' many' : ''); box.dir = 'ltr'; box.innerHTML = '';
+    let pos = 0;
+    const tiles = order.map(c => {
+      const b = document.createElement('button'); b.className = 'block tile latin'; b.textContent = c;
+      b.onclick = () => {
+        if (S.locked) return;
+        if (c === letters[pos]) {
+          b.classList.add('used'); b.classList.remove('glow');
+          slotEls[pos].textContent = c; slotEls[pos].classList.add('full'); pos++; sfx('pop');
+          if (pos === letters.length) { box.dir = ''; win(); }
+        } else {
+          miss(b);
+          if (S.misses >= 2) { const g = tiles.find(x => !x.classList.contains('used') && x.textContent === letters[pos]); g && g.classList.add('glow'); }
+        }
+      };
+      box.appendChild(b); return b;
+    });
+    return { prompt: 'אֵיךְ כּוֹתְבִים בְּאַנְגְּלִית?', say: { en: `Spell ${t.w}` }, after: [{ en: t.w }, WORD_BY_EMOJI[t.e]], item: t.w, english: true };
+  },
+
+  enPast() {
+    const pool = EN_PAST.filter(x => L('irregular') ? true : x[2] === 1);
+    const t = pickWord(pool.map(([v, p]) => ({ w: v, e: p })));
+    const big = document.createElement('button'); big.className = 'bigword english'; big.textContent = t.w; big.onclick = () => speak({ en: t.w });
+    $('#stage').appendChild(big);
+    const naive = t.w.endsWith('e') ? t.w + 'd' : t.w + 'ed';
+    const wrong = [naive, t.w + 's', t.w + 'ing', ...sample(EN_PAST.filter(x => x[0] !== t.w).map(x => x[1]), 2)].filter(x => x !== t.e);
+    choices([{ label: t.e, ok: true }, ...[...new Set(wrong)].slice(0, L('options') - 1).map(x => ({ label: x }))], 'latin word');
+    return { prompt: 'מָה הַצּוּרָה בְּעָבָר?', say: ['מָה הָעָבָר שֶׁל', { en: t.w }], after: [{ en: `${t.w}, ${t.e}` }], item: t.w, english: true };
+  },
+
+  enSentences() {
+    const pool = EN_SENTENCES.filter(x => x.level <= L('maxLevel'));
+    const t = pickWord(pool.map(x => ({ w: x.text, e: x.pic, subj: x.subj })));
+    const big = document.createElement('button'); big.className = 'bigword sentence english'; big.textContent = t.w; big.onclick = () => speak({ en: t.w });
+    $('#stage').appendChild(big);
+    let others = [];
+    if (L('sameSubject')) others = sample(EN_SENTENCES.filter(x => x.subj === t.subj && x.text !== t.w), L('options') - 1);
+    others = others.concat(sample(EN_SENTENCES.filter(x => x.text !== t.w && !others.includes(x) && x.pic !== t.e), L('options') - 1 - others.length));
+    choices([{ label: t.e, ok: true }, ...others.map(x => ({ label: x.pic }))], 'emo');
+    return { prompt: 'קוֹרְאִים בְּאַנְגְּלִית: אֵיזוֹ תְּמוּנָה?', say: L('silent') ? 'אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּשְׁפָּט?' : { en: t.w }, after: [{ en: t.w }], item: t.w, english: true };
   }
 };
+
 
 
 
@@ -1949,19 +2538,21 @@ window.allPhrases = () => {
     'אֵיזֶה סִימָן מַתְאִים?', 'גָּדוֹל מִן', 'קָטָן מִן', 'שָׁוֶה לְ',
     ...Object.values(PLAYERS).map(p => p.turn), 'בְּיַחַד הִצְלַחְתֶּם!',
     'אֵיפֹה הָאוֹת', 'אֵיפֹה הָאוֹת?', 'אֵיפֹה הָאוֹת הַקְּטַנָּה?', 'מַקְשִׁיבִים וּבוֹחֲרִים', 'קוֹרְאִים בְּאַנְגְּלִית: אֵיזוֹ תְּמוּנָה?',
-    'וְעוֹד', 'פָּחוֹת', 'זֶה', 'כַּמָּה זֶה?', 'וְעוֹד כַּמָּה זֶה', 'הָיוּ', 'לָקַחְנוּ', 'נִשְׁאֲרוּ'
-  ])];
+    'וְעוֹד', 'פָּחוֹת', 'זֶה', 'כַּמָּה זֶה?', 'וְעוֹד כַּמָּה זֶה', 'הָיוּ', 'לָקַחְנוּ', 'נִשְׁאֲרוּ',
+    'כָּפוּל', 'כָּפוּל כַּמָּה זֶה', 'חֲלֵקִי', 'וְשָׁאַרִית', 'מָה הַשָּׁעָה?', 'מָה הַהֶקֵּף?', 'מָה הַשֶּׁטַח?', 'הַהֶקֵּף הוּא', 'הַשֶּׁטַח הוּא',
+    'מָה אֹרֶךְ הַצַּלָּע?', 'אֵיזֶה חֵלֶק צָבוּעַ?', 'מָה הַהֵפֶךְ שֶׁל', 'מָה הַמִּלָּה הַנִּרְדֶּפֶת שֶׁל', 'מָה הָרַבִּים שֶׁל', 'מָה הַשֹּׁרֶשׁ שֶׁל',
+    'מָה הַפֵּרוּשׁ שֶׁל', 'אֵיךְ אוֹמְרִים בְּאַנְגְּלִית', 'מָה הָעָבָר שֶׁל'
+  ].filter(x => typeof x === 'string'))];
 };
 
 /* ---------- wiring ---------- */
-for (const p of ['gan', 'kita']) $('#p-' + p).onclick = () => {
-  S.p = p; sfx('pop'); speak(PLAYERS[p].say); renderMenu();
-};
+function pickPlayer(p) { S.p = p; sfx('pop'); speak(PLAYERS[p].say); renderMenu(); }
+for (const p of ['gan', 'kita']) $('#p-' + p).onclick = () => pickPlayer(p);
 $('#soundBtn').onclick = () => { DB.sound = !DB.sound; save(); if (!DB.sound) stopVoice(); renderHome(); };
 $('#menuBack').onclick = renderHome;
 $('#albumBtn').onclick = renderAlbum;
 $('#albumBack').onclick = renderMenu;
-$('#gameBack').onclick = () => { stopVoice(); S.together ? renderHome() : renderMenu(); };
+$('#gameBack').onclick = () => { clearTimeout(S.nextTimer); stopVoice(); S.together ? renderHome() : renderMenu(); };
 $('#sayAgain').onclick = () => S.cur && speak(S.cur.say);
 $('#againBtn').onclick = () => S.together ? startTogether() : startGame(S.g);
 $('#toMenuBtn').onclick = () => S.together ? renderHome() : renderMenu();
@@ -1974,8 +2565,7 @@ $('#gateForm').addEventListener('submit', e => {
   if (Number($('#gateInput').value) === gateAnswer) { show('parentScr'); renderParent(S.parentOf || 'kita'); }
   else { const f = $('#gateForm'); f.classList.remove('wrong'); void f.offsetWidth; f.classList.add('wrong'); openGate(); }
 });
-$('#ptab-gan').onclick = () => renderParent('gan');
-$('#ptab-kita').onclick = () => renderParent('kita');
+
 renderHome();
 })();
 </script>
