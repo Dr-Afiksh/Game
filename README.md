@@ -75,6 +75,24 @@ mistakes: the wrong order of operations, area instead of perimeter, a forgotten 
 "goed" instead of "went", or other three-letter runs from the same word when looking for a root.
 The play-together mode stays for the two youngest.
 
+## Science (🔬 מַדָּע), every grade
+
+- **גַּן and א׳**: picture questions read aloud, answered by tapping a picture: senses and body, what animals eat and
+  where they live, weather and clothes, day and night, living and non-living, sink or float, seasons, magnets and
+  simple tools. 52 questions in 4 steps. The kindergarten levels start with the easiest ones and the first-grade
+  levels start further along.
+- **ב׳–ט׳**: a science and technology quiz for each grade (about 24 questions per grade), following the Israeli
+  curriculum. Topics go from plants, animals and materials in ב׳, through the water cycle, electricity and magnets,
+  the human body, the solar system, light and sound, cells and ecology, to particles and density, atoms and circuits,
+  and finally acids and bases, genetics and Newton's laws in ט׳.
+- **Animal families** (ב׳–ד׳): which family an animal belongs to (mammals, birds, fish, reptiles, amphibians,
+  insects). Higher levels add the tricky ones: whale, dolphin, bat, penguin, shark and turtle.
+- **States of matter** (ב׳–ג׳): solid, liquid or gas, with sand, salt, honey and soda bubbles at higher levels.
+- **Chemical elements** (ח׳–ט׳): symbol to name and name to symbol. Na, K, Fe, Ag, Au, Hg, Pb and Sn come in at the
+  higher levels.
+- **Physics** (ז׳–ט׳): word problems on speed, density, weight, Newton's second law, Ohm's law and kinetic
+  energy. Wrong answers come from typical mistakes, such as multiplying instead of dividing or forgetting the ½.
+
 ## Playing together (מְשַׂחֲקִים יַחַד)
 
 A cooperative mode for both kids on one device, from the button on the home screen.
