@@ -343,6 +343,31 @@ svg.rect-fig{width:min(92vw,380px);height:auto}
 .trophies .row{font-size:inherit;width:100%}
 .bonuses{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .chip{padding:6px 12px;border:2px solid var(--ink);border-radius:999px;background:var(--paper);font-weight:700;font-size:18px}
+
+/* daily goals */
+.goals{padding:12px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 0 var(--ink)}
+.goals.all{background:linear-gradient(135deg,#FFF1C7,#FFE58A)}
+.goals h3{margin:0;display:flex;align-items:center;gap:8px;font-size:22px;font-weight:900}
+.goals h3 small{font-size:16px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.goals ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.goals li{display:flex;align-items:center;gap:10px;padding:6px 10px;border:2px solid var(--ink);border-radius:14px;background:var(--paper);
+  font-size:18px;font-weight:700;text-align:start;transition:transform .08s}
+.goals li.done{background:#C9F0C4}
+.goals li.go{cursor:pointer}
+.goals li.go:active{transform:scale(.98)}
+.goals li.fresh{animation:pop .6s}
+.goals .gchk{font-family:var(--emoji);font-size:22px;flex:none}
+.goals .gico{flex:none;width:38px;height:38px;display:grid;place-items:center;border-radius:10px;border:2px solid var(--ink);
+  font-size:20px;font-weight:900;color:var(--paper);line-height:1}
+.goals .gico.emo{font-family:var(--emoji);color:var(--ink)}
+.goals .gico.sm{font-size:12px;letter-spacing:0}
+.goals .gico.plain{border-color:transparent;background:none;font-size:24px}
+.goals .gtxt{flex:1;line-height:1.25}
+.goals .gprog{flex:none;font-size:15px;padding:1px 8px;border-radius:999px;background:var(--sky-hi);border:2px solid var(--ink);font-variant-numeric:tabular-nums}
+.goals-foot{margin:0;text-align:center;font-size:16px;font-weight:700;color:var(--ink-soft)}
+.goals.all .goals-foot{color:var(--ink)}
+.done .goals{width:min(480px,100%)}
+.pgoals{margin:0;padding:0 18px 0 0;line-height:1.6}
 .newstick .row span{display:inline-grid;place-items:center;width:84px;height:84px;border-radius:18px;background:var(--paper);border:3px solid var(--ink);
   animation:reveal .7s both}
 .newstick .row span.gold{background:linear-gradient(135deg,#FFE58A,#FFC93C 60%,#F5A623);box-shadow:0 0 18px 4px #FFE58A}
@@ -397,6 +422,7 @@ svg.rect-fig{width:min(92vw,380px);height:auto}
       <div class="starcount block" id="menuStars"></div>
     </div>
     <div id="menuNext"></div>
+    <div id="menuGoals"></div>
     <h2 class="menu-title">בְּמָה מְשַׂחֲקִים?</h2>
     <div class="games" id="gamesGrid"></div>
   </section>
@@ -421,6 +447,7 @@ svg.rect-fig{width:min(92vw,380px);height:auto}
     <h2 id="doneTitle">כָּל הַכָּבוֹד!</h2>
     <div class="gain" id="doneGain"></div>
     <div class="bonuses" id="doneBonus"></div>
+    <div id="doneGoals" hidden></div>
     <div class="newstick block" id="doneStickers" hidden>
       <div id="doneStickTitle"></div>
       <div class="row" id="doneStickRow"></div>
@@ -1327,7 +1354,7 @@ const isGold = i => i % 6 === 5; // every 6th sticker is a rare golden one
 // Stars needed for sticker n (1-based): 5 for the first, then 1.5 more each
 // time, up to 30. The whole album takes roughly 2,800 stars.
 const stickerCost = n => Math.min(30, 5 + Math.floor((n - 1) * 1.5));
-const BONUS = { perfect: 3, daily: 5, levelUp: 2 };
+const BONUS = { perfect: 3, daily: 5, levelUp: 2, goals: 10 };
 // Trophies: [id, icon, name, test(d, player)] checked at the end of each round
 const TROPHIES = [
   ['round1', '🎉', 'סִבּוּב רִאשׁוֹן', d => d.rounds >= 1],
@@ -1344,6 +1371,8 @@ const TROPHIES = [
   ['level5all', '🎓', 'שָׁלָב 5 בְּכָל הַמִּשְׂחָקִים', (d, p) => PLAYERS[p].games.every(g => (d.levels[g] || 1) >= 5)],
   ['days3', '📅', '3 יָמִים בִּרְצִיפוּת', d => d.dayStreak >= 3],
   ['days7', '🔥', 'שָׁבוּעַ שָׁלֵם', d => d.dayStreak >= 7],
+  ['goals', '📋', 'כָּל מְשִׂימוֹת הַיּוֹם', d => (d.goalDays || 0) >= 1],
+  ['goals10', '🗓️', '10 יָמִים שֶׁל מְשִׂימוֹת', d => (d.goalDays || 0) >= 10],
   ['page', '📒', 'דַּף מָלֵא בָּאַלְבּוֹם', d => d.stickers >= 18],
   ['album', '👑', 'כָּל הָאַלְבּוֹם', d => d.stickers >= STICKERS.length],
   ['together', '🤝', 'שִׂחַקְנוּ יַחַד', d => d.together >= 1],
@@ -1628,6 +1657,7 @@ for (const p of PLAYER_IDS) {
   }
   d.rounds = d.rounds || 0; d.perfects = d.perfects || 0; d.played = d.played || []; d.trophies = d.trophies || [];
   d.dayStreak = d.dayStreak || 0; d.lastDay = d.lastDay || ''; d.together = d.together || 0;
+  d.goalDays = d.goalDays || 0; // days on which all three daily goals were done (d.daily holds today's goals)
   d.stats = d.stats || { games: {}, days: {}, missed: {} };
 }
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) {} };
@@ -1835,6 +1865,7 @@ function renderMenu() {
   $('#menuWho').textContent = pl.face + ' ' + pl.name;
   $('#menuStars').textContent = starsText(S.p);
   $('#menuNext').innerHTML = progressBar(S.p);
+  $('#menuGoals').innerHTML = goalsHtml(S.p); wireGoals($('#menuGoals'));
   const grid = $('#gamesGrid'); grid.innerHTML = '';
   let section = null;
   const SECTION_NAME = { he: '📖 עִבְרִית', math: '🔢 חֶשְׁבּוֹן', sci: '🔬 מַדָּע', en: '🇬🇧 English · אַנְגְּלִית', '': '' };
@@ -1901,6 +1932,7 @@ function startGame(g) {
   clearTimeout(S.nextTimer); // a pending "next question" from a game that was left early
   S.together = false; $('#team').hidden = true; $('#dots').hidden = false;
   S.g = g; S.q = 0; S.total = GAMES[g].rounds || ROUND; S.gained = 0; S.newStickers = []; S.bonuses = []; S.clean = 0; S.recent = []; S.streak = 0; S.struggle = 0;
+  S.goalsBefore = { [S.p]: goalsDoneFlags(S.p) };
   show('game');
   nextQ();
 }
@@ -1932,7 +1964,8 @@ function finish() {
   d.rounds++;
   trackRound(S.p, S.g);
   if (!d.played.includes(S.g)) d.played.push(S.g);
-  if (S.clean === S.total) { d.perfects++; addStars(BONUS.perfect); S.bonuses.push(['💯', 'סִבּוּב מֻשְׁלָם', BONUS.perfect]); }
+  if (S.clean === S.total) { d.perfects++; addStars(BONUS.perfect); S.bonuses.push(['💯', 'סִבּוּב מֻשְׁלָם', BONUS.perfect]); goalHit('perfect'); }
+  goalHit('rounds'); goalHit('game', 1, S.g); goalHit('topic', 1, GAMES[S.g].topic);
   const t = today();
   if (d.lastDay !== t) { // first round of the day
     const y = new Date(); y.setDate(y.getDate() - 1);
@@ -1941,11 +1974,14 @@ function finish() {
     d.lastDay = t;
     addStars(BONUS.daily); S.bonuses.push(['☀️', 'בּוֹנוּס יוֹמִי', BONUS.daily]);
   }
+  const allGoals = claimGoals();
   const newTrophies = TROPHIES.filter(([id, , , test]) => !d.trophies.includes(id) && test(d, S.p));
   newTrophies.forEach(([id]) => d.trophies.push(id));
   save();
 
-  $('#doneTitle').textContent = 'כָּל הַכָּבוֹד!';
+  $('#doneTitle').textContent = allGoals ? 'כָּל הַמְּשִׂימוֹת הֻשְׁלְמוּ!' : 'כָּל הַכָּבוֹד!';
+  $('#doneGoals').hidden = false;
+  $('#doneGoals').innerHTML = goalsHtml(S.p, S.goalsBefore && S.goalsBefore[S.p]); wireGoals($('#doneGoals'));
   $('#doneGain').textContent = `+${S.gained} ⭐`;
   const merged = {}; // the same bonus twice shows once, e.g. "עוֹלִים שָׁלָב ×2 +4"
   for (const [icon, name, n] of S.bonuses) (merged[name] = merged[name] || { icon, n: 0, times: 0 }), merged[name].n += n, merged[name].times++;
@@ -1961,8 +1997,8 @@ function finish() {
   $('#doneNext').innerHTML = progressBar(S.p);
   show('done');
   sfx('good'); confetti();
-  if (S.newStickers.length || newTrophies.length) setTimeout(confetti, 600);
-  speak(['כָּל הַכָּבוֹד!', S.newStickers.length && 'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!', newTrophies.length && 'וְגַם גָּבִיעַ חָדָשׁ!']);
+  if (S.newStickers.length || newTrophies.length || allGoals) setTimeout(confetti, 600);
+  speak(['כָּל הַכָּבוֹד!', allGoals && 'סִיַּמְתֶּם אֶת כָּל הַמְּשִׂימוֹת שֶׁל הַיּוֹם!', S.newStickers.length && 'קִבַּלְתֶּם מַדְבֵּקָה חֲדָשָׁה!', newTrophies.length && 'וְגַם גָּבִיעַ חָדָשׁ!']);
 }
 // Difficulty follows the child during the round: 3 clean answers in a row
 // move up a level, 2 answers in a row that needed retries move down.
@@ -1983,6 +2019,7 @@ function levelUpBanner() {
 // Add stars; every time the progress reaches the next sticker's price, it is unlocked.
 function addStars(n) {
   const d = DB[S.p];
+  goalHit('stars', n);
   for (let i = 0; i < n; i++) {
     d.stars++; S.gained++;
     if (S.together) S.gainedBy[S.p]++;
@@ -2021,11 +2058,11 @@ const byDate = (a, b) => new Date(a.replace(/-/g, '/')) - new Date(b.replace(/-/
 function win() {
   S.locked = true;
   track(S.firstTry, S.misses);
-  if (S.firstTry) S.clean++;
+  if (S.firstTry) { S.clean++; goalHit('correct'); }
   const change = S.together ? '' : adjustLevel(S.firstTry); // levels only change when playing alone
   addStars(S.cur.stars || 1);
   if (S.together) S.path.push(PLAYERS[S.p].face);
-  if (change === 'up') { addStars(BONUS.levelUp); S.bonuses.push(['⬆️', 'עוֹלִים שָׁלָב', BONUS.levelUp]); }
+  if (change === 'up') { addStars(BONUS.levelUp); S.bonuses.push(['⬆️', 'עוֹלִים שָׁלָב', BONUS.levelUp]); goalHit('levelUp'); }
   save();
   const sc = $('#gameStars'); sc.textContent = starsText(S.p);
   sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump');
@@ -2044,6 +2081,99 @@ function miss(el) {
   if (S.together && S.misses >= 2) { // time for a little help: the right answer starts to glow
     const ok = document.querySelector('#choices [data-ok]');
     if (ok) ok.classList.add('glow');
+  }
+}
+
+/* ---------- daily goals ---------- */
+// Three missions a day for each child: one about how much to play, one that
+// points at the game that needs practice most, and one about playing well.
+// They are made the first time the child's menu opens that day and finishing
+// all three earns BONUS.goals stars (once a day).
+const GOAL_TOPIC = { he: ['עִבְרִית', '📖'], math: ['חֶשְׁבּוֹן', '🔢'], sci: ['מַדָּע', '🔬'], en: ['אַנְגְּלִית', '🇬🇧'] };
+const GOAL_ICON = { rounds: '🔄', stars: '⭐', correct: '✅', perfect: '💯', levelUp: '⬆️' };
+// The game that needs practice most: first the one with the most wrong answers
+// (under 70% right on the first try, at least 8 questions), then one never
+// tried, then the one left alone the longest.
+function focusGame(p) {
+  const st = DB[p].stats.games, games = PLAYERS[p].games;
+  const acc = g => st[g].first / st[g].q;
+  const weak = games.filter(g => st[g] && st[g].q >= 8 && acc(g) < 0.7).sort((a, b) => acc(a) - acc(b));
+  if (weak.length) return weak[0];
+  const fresh = games.filter(g => !st[g] || !st[g].q);
+  if (fresh.length) return rand(fresh);
+  return games.slice().sort((a, b) => byDate(st[a].last, st[b].last))[0];
+}
+function makeGoals(p) {
+  const pl = PLAYERS[p], d = DB[p], small = p === 'gan';
+  const focus = focusGame(p);
+  const quality = [{ k: 'correct', n: small ? 8 : 12 }, { k: 'perfect', n: 1 }];
+  if (pl.games.some(g => (d.levels[g] || 1) < MAX_LEVEL)) quality.push({ k: 'levelUp', n: 1 });
+  if (pl.topics) { // a round in another subject than the focus game
+    const topics = Object.keys(GOAL_TOPIC).filter(t => t !== GAMES[focus].topic && pl.games.some(g => GAMES[g].topic === t));
+    if (topics.length) quality.push({ k: 'topic', n: 1, t: rand(topics) });
+  }
+  const goals = [rand([{ k: 'rounds', n: small ? 2 : 3 }, { k: 'stars', n: small ? 15 : 20 }]), { k: 'game', n: 1, g: focus }, rand(quality)];
+  return goals.map(g => ({ ...g, p: 0 }));
+}
+function dailyGoals(p) {
+  const d = DB[p], t = today();
+  if (!d.daily || d.daily.day !== t || !Array.isArray(d.daily.goals)) { d.daily = { day: t, goals: makeGoals(p), claimed: false }; save(); }
+  return d.daily;
+}
+const goalDone = g => g.p >= g.n;
+const goalsDoneFlags = p => dailyGoals(p).goals.map(goalDone);
+function goalText(g) {
+  switch (g.k) {
+    case 'rounds': return `לְשַׂחֵק ${g.n} סִבּוּבִים`;
+    case 'stars': return `לֶאֱסֹף ${g.n} כּוֹכָבִים`;
+    case 'correct': return `${g.n} תְּשׁוּבוֹת נְכוֹנוֹת בַּנִּסָּיוֹן הָרִאשׁוֹן`;
+    case 'perfect': return 'סִבּוּב מֻשְׁלָם אֶחָד';
+    case 'levelUp': return 'לַעֲלוֹת שָׁלָב בְּמִשְׂחָק';
+    case 'game': return `סִבּוּב אֶחָד בְּ־${GAMES[g.g].name}`;
+    case 'topic': return `סִבּוּב אֶחָד בְּ${GOAL_TOPIC[g.t][0]}`;
+  }
+  return '';
+}
+// Count progress on today's goals of one kind for the current child.
+// match: the game id for 'game' goals, the topic for 'topic' goals.
+function goalHit(k, amount = 1, match) {
+  if (!S.p) return;
+  for (const g of dailyGoals(S.p).goals) {
+    if (g.k !== k || goalDone(g)) continue;
+    if ((k === 'game' && g.g !== match) || (k === 'topic' && g.t !== match)) continue;
+    g.p = Math.min(g.n, g.p + amount);
+  }
+}
+// All three done: the bonus, once a day. Returns true the first time.
+function claimGoals() {
+  const dl = dailyGoals(S.p), d = DB[S.p];
+  if (dl.claimed || !dl.goals.every(goalDone)) return false;
+  dl.claimed = true; d.goalDays = (d.goalDays || 0) + 1;
+  addStars(BONUS.goals); S.bonuses.push(['🎯', 'כָּל מְשִׂימוֹת הַיּוֹם', BONUS.goals]);
+  return true;
+}
+// before: which goals were already done when the round started, so the ones
+// finished just now can pop.
+function goalsHtml(p, before) {
+  const dl = dailyGoals(p), done = dl.goals.filter(goalDone).length, all = done === dl.goals.length;
+  const items = dl.goals.map((g, i) => {
+    const ok = goalDone(g), fresh = before && ok && !before[i];
+    let icon;
+    if (g.k === 'game') { const m = GAMES[g.g]; icon = `<span class="gico${m.emo ? ' emo' : ''}${m.sm ? ' sm' : ''}" dir="${m.sm ? 'ltr' : 'rtl'}" style="background:${m.bg}">${m.icon}</span>`; }
+    else icon = `<span class="gico emo plain">${g.k === 'topic' ? GOAL_TOPIC[g.t][1] : GOAL_ICON[g.k]}</span>`;
+    const go = g.k === 'game' && !ok;
+    return `<li class="${ok ? 'done' : ''}${fresh ? ' fresh' : ''}${go ? ' go' : ''}"${go ? ` data-g="${g.g}" role="button" tabindex="0" aria-label="לשחק ${plainHe(GAMES[g.g].name)}"` : ''}>` +
+      `<span class="gchk">${ok ? '✅' : '⬜'}</span>${icon}<span class="gtxt">${goalText(g)}</span>` +
+      (g.n > 1 ? `<span class="gprog" dir="ltr">${g.p}/${g.n}</span>` : go ? '<span class="gprog">▶</span>' : '') + '</li>';
+  }).join('');
+  const foot = all ? `🎉 כָּל הַמְּשִׂימוֹת הֻשְׁלְמוּ! +${BONUS.goals} ⭐` : `כְּשֶׁמְּסַיְּמִים אֶת שָׁלוֹשׁ הַמְּשִׂימוֹת: +${BONUS.goals} ⭐`;
+  return `<section class="goals block${all ? ' all' : ''}"><h3>🎯 מְשִׂימוֹת הַיּוֹם <small dir="ltr">${done}/${dl.goals.length}</small></h3><ul>${items}</ul><p class="goals-foot">${foot}</p></section>`;
+}
+function wireGoals(root) {
+  for (const li of root.querySelectorAll('.goals li[data-g]')) {
+    const go = () => { sfx('pop'); startGame(li.dataset.g); };
+    li.onclick = go;
+    li.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
   }
 }
 
@@ -2076,8 +2206,10 @@ function renderParent(p) {
     ['✅', acc, 'נכון בניסיון הראשון (שבוע)'],
     ['⏱️', mins + ' דק׳', 'זמן משחק השבוע'],
     ['📅', `${active}/14`, 'ימים פעילים בשבועיים'],
-    ['🔥', d.dayStreak || 0, 'ימים ברצף']
+    ['🔥', d.dayStreak || 0, 'ימים ברצף'],
+    ['🎯', d.goalDays || 0, 'ימים שכל המשימות הושלמו']
   ];
+  const goalsList = `<ul class="pgoals">${dailyGoals(p).goals.map(g => `<li>${goalDone(g) ? '✅' : '⬜'} ${plainHe(goalText(g))}${g.n > 1 ? ` <span dir="ltr">(${g.p}/${g.n})</span>` : ''}</li>`).join('')}</ul>`;
 
   // bar chart: questions answered per day, last 14 days
   const W = 360, H = 170, padL = 26, padB = 22, padT = 10, cw = (W - padL) / 14;
@@ -2122,6 +2254,8 @@ function renderParent(p) {
     <section class="block psec"><h3>שאלות ביום · שבועיים אחרונים</h3>${chart}</section>
     <section class="block psec"><h3>לפי משחק</h3>${table}
       <p class="muted">השלב עולה ויורד לבד לפי ההצלחה. ירוק: 80% ומעלה בניסיון ראשון, צהוב: 60–79%, אדום: פחות מ־60%.</p></section>
+    <section class="block psec"><h3>משימות היום</h3>${goalsList}
+      <p class="muted">כל יום שלוש משימות חדשות: כמה לשחק, איזה משחק כדאי לתרגל (המשחק עם הכי הרבה טעויות, ואם אין כזה, משחק שעוד לא ניסו או שלא שיחקו בו הרבה זמן), ואיך לשחק. כשמסיימים את שלושתן: +${BONUS.goals} כוכבים.</p></section>
     <section class="block psec"><h3>מה היה קשה</h3>${hardHtml}</section>
     <section class="block psec"><h3>אלבום וגביעים</h3>
       <p>${d.stickers} מתוך ${STICKERS.length} מדבקות · ${d.trophies.length} מתוך ${TROPHIES.length} גביעים · ${d.rounds} סבבים לבד · ${d.together} משחקים ביחד</p></section>
@@ -2147,7 +2281,7 @@ function renderParent(p) {
   $('#resetBtn').onclick = () => { $('#resetConfirm').hidden = false; };
   $('#resetNo').onclick = () => { $('#resetConfirm').hidden = true; };
   $('#resetYes').onclick = () => {
-    DB[p] = { stars: 0, levels: {}, stickers: 0, progress: 0, rounds: 0, perfects: 0, played: [], trophies: [], dayStreak: 0, lastDay: '', together: 0, stats: { games: {}, days: {}, missed: {} } };
+    DB[p] = { stars: 0, levels: {}, stickers: 0, progress: 0, rounds: 0, perfects: 0, played: [], trophies: [], dayStreak: 0, lastDay: '', together: 0, goalDays: 0, daily: null, stats: { games: {}, days: {}, missed: {} } };
     save(); renderParent(p);
   };
 }
@@ -2160,7 +2294,8 @@ const TOGETHER_SKIP = ['memory', 'build']; // games that do not fit a single qui
 function startTogether() {
   clearTimeout(S.nextTimer);
   Object.assign(S, { together: true, q: 0, total: TOGETHER_TURNS, gained: 0, gainedBy: { gan: 0, kita: 0 },
-    newStickers: [], teamStickers: [], bonuses: [], clean: 0, recent: [], streak: 0, struggle: 0, path: [] });
+    newStickers: [], teamStickers: [], bonuses: [], clean: 0, recent: [], streak: 0, struggle: 0, path: [],
+    goalsBefore: { gan: goalsDoneFlags('gan'), kita: goalsDoneFlags('kita') } });
   $('#team').hidden = false; $('#dots').hidden = true;
   show('game');
   nextQ();
@@ -2172,20 +2307,23 @@ function renderTeam() {
   $('#team').innerHTML = `<div class="turn-tag ${S.p}">${pl.face} תּוֹר ${pl.name}</div><div class="road">${cells}<b>🎁</b></div>`;
 }
 function finishTogether() {
-  const newTrophies = [];
+  const newTrophies = [], goalChips = [];
   for (const p of ['gan', 'kita']) {
     S.p = p;
     addStars(TOGETHER_BONUS);
     const d = DB[p];
     d.together++;
     trackRound(p, null);
+    goalHit('rounds'); // a game together counts as a round for each child's daily goals
+    if (claimGoals()) goalChips.push(`<span class="chip">${PLAYERS[p].face} 🎯 כָּל מְשִׂימוֹת הַיּוֹם +${BONUS.goals} ⭐</span>`);
     TROPHIES.filter(([id, , , test]) => !d.trophies.includes(id) && test(d, p))
       .forEach(t => { d.trophies.push(t[0]); newTrophies.push([PLAYERS[p].face, t]); });
   }
   save();
   $('#doneTitle').textContent = 'בְּיַחַד הִצְלַחְתֶּם!';
   $('#doneGain').textContent = `🐣 +${S.gainedBy.gan} ⭐   🦉 +${S.gainedBy.kita} ⭐`;
-  $('#doneBonus').innerHTML = `<span class="chip">🤝 בּוֹנוּס יַחַד +${TOGETHER_BONUS} ⭐</span>`;
+  $('#doneBonus').innerHTML = `<span class="chip">🤝 בּוֹנוּס יַחַד +${TOGETHER_BONUS} ⭐</span>` + goalChips.join('');
+  $('#doneGoals').hidden = true; // each child sees their own missions in their menu
   $('#doneStickers').hidden = !S.teamStickers.length;
   $('#doneStickTitle').textContent = 'מַדְבֵּקוֹת חֲדָשׁוֹת בָּאַלְבּוֹמִים!';
   $('#doneStickRow').innerHTML = S.teamStickers.map((n, k) =>

@@ -41,9 +41,24 @@ Each round has 8 questions, and every correct answer earns a star.
   The whole album takes about 3,000 stars. Every 6th sticker is a rare golden one.
 - **Bonus stars:** +3 for a perfect round (every answer right the first time), +5 for the first round
   of the day, +2 for each level up.
-- **Trophies (16):** first round, perfect rounds, 10/50/100 rounds, 100/500/1000 stars, trying every game,
-  reaching level 5, 3 and 7 days in a row, a full album page, the whole album.
+- **Trophies (20):** first round, perfect rounds, 10/50/100 rounds, 100/500/1000 stars, trying every game,
+  reaching level 5, 3 and 7 days in a row, a full album page, the whole album, all of a day's goals once and on 10 days,
+  playing together once and 10 times.
 - A progress bar to the next sticker shows in the menu, after each round, and in the album.
+
+## Daily goals (🎯 מְשִׂימוֹת הַיּוֹם)
+
+Every day each child gets three missions, shown in their menu and again after every round:
+1. **How much:** play 2–3 rounds, or collect 15–20 stars (smaller numbers for גַּן).
+2. **What to practice:** one round of the game that needs it most. That is the game with the most wrong answers
+   (under 70% right on the first try, after at least 8 questions); if there is none, a game never tried, and
+   otherwise the game left alone for the longest time. Tapping this mission starts the game.
+3. **How well:** 8–12 first-try answers, a perfect round, going up a level, or (grades ב׳ and up) a round in a
+   different subject from the practice game.
+
+Progress fills in as the child plays, including in play-together mode. Finishing all three earns **+10 stars**
+once a day and a celebration on the round-end screen. The parents' page lists today's missions and counts the
+days on which all three were done.
 
 Saves from before this change keep every sticker already earned.
 
